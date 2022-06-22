@@ -1,0 +1,65 @@
+{
+  "nodes": {
+    "core-contracts": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1646335944,
+        "narHash": "sha256-qH1OltR5FiDH3V8hGYUTYAO8Qe/HSVDCWeLE9vasNi4=",
+        "owner": "near",
+        "repo": "core-contracts",
+        "rev": "793e0594bab4e9cf730d37cd2a493a173b0e2ed3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "near",
+        "repo": "core-contracts",
+        "type": "github"
+      }
+    },
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1655570068,
+        "narHash": "sha256-KUSd2a6KgYTHd2l3Goee/P+DrAC6n1Tau+7V68czSZU=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "6dbc77b9c0477f8a9a6a9081077bb38c6a3dbb3a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1655881508,
+        "narHash": "sha256-1UhBozyfptbyMCwT2S+r3ex+Es0H77rLBcfvVVzW08E=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "c31c583418b3965ed99ca090a78cb84071596cff",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable-small",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "core-contracts": "core-contracts",
+        "flake-parts": "flake-parts",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
