@@ -29,6 +29,7 @@
           ++ [
             # tasks and automation
             pkgs.just
+            pkgs.jq
             pkgs.nodePackages.near-cli
             self'.packages.nix-update
 
