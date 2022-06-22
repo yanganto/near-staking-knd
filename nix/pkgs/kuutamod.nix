@@ -36,11 +36,11 @@ rustPlatform.buildRustPackage ({
 }
   // lib.optionalAttrs enableLint {
   # we want python for this build
-  src = ../../src/kuutamod;
+  src = ../..;
   buildPhase = ''
     mypy .
     cargo clippy --all-targets --all-features -- -D warnings
-    if grep -R 'dbg!' .; then
+    if grep -R 'dbg!' ./src; then
       echo "use of dbg macro found in code!"
       false
     fi
