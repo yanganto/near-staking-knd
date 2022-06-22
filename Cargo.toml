@@ -1,0 +1,29 @@
+[package]
+name = "kuutamod"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json"], default-features = false }
+anyhow = "1.0"
+tokio = { version = "1", features = ["full"] }
+futures-util = "0.3"
+hyper = { version = "0.14", features = [ "server" ] }
+prometheus = "0.13"
+lazy_static = "1.4"
+nix = "0.24"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+near-primitives = "0.14"
+log = { version = "0.4", features = ["std"] }
+clap = { version = "3.2", features = ["derive", "env"] }
+
+[[bin]]
+name = "kuutamod"
+path = "src/bin/kuutamod.rs"
+
+[[bin]]
+name = "kuutamoctl"
+path = "src/bin/kuutamoctl.rs"
