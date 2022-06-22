@@ -1,0 +1,21 @@
+[formatter.nix]
+command = "nixpkgs-fmt"
+includes = ["*.nix"]
+
+[formatter.rust]
+command = "rustfmt"
+options = ["--edition", "2021"]
+includes = ["*.rs"]
+
+[formatter.python]
+command = "sh"
+options = [
+    "-eucx",
+    """
+flake8 "$@"
+black "$@"
+    """,
+    "--", # this argument is ignored by bash
+]
+includes = ["*.py"]
+excludes = []

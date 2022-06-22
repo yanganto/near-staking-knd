@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "Replace this with a neard binary"
+exit 1
