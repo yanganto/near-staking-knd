@@ -81,7 +81,9 @@ in
               chown -R neard:neard /var/lib/neard/data
             ''}
             ${lib.optionalString (cfg.generateNodeKey) ''
-              ${cfg.package}/bin/neard --home /var/lib/neard init
+              ${cfg.package}/bin/neard --home /var/lib/neard init \
+                ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} \
+                ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"}
               chown neard:neard /var/lib/neard/node_key.json /var/lib/neard/validator_key.json
             ''}
             touch /var/lib/neard/.finished
@@ -94,7 +96,7 @@ in
           ''}
         ''}"
         ];
-        ExecStart = "${cfg.package}/bin/neard --home /var/lib/neard run ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"}";
+        ExecStart = "${cfg.package}/bin/neard --home /var/lib/neard run";
         Restart = "always";
 
         User = "neard";
