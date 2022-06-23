@@ -94,7 +94,7 @@ in
           ''}
         ''}"
         ];
-        ExecStart = "${cfg.package}/bin/neard ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"} --home /var/lib/neard run";
+        ExecStart = "${cfg.package}/bin/neard --home /var/lib/neard run ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"}";
         Restart = "always";
 
         User = "neard";
