@@ -37,10 +37,17 @@ in
     };
 
     genesisFile = lib.mkOption {
-      type = lib.types.path;
+      type = lib.types.nullOr lib.types.path;
       default = ./mainnet/genesis.json;
       description = ''
         A file with all the data the network started with at genesis. This contains initial accounts, contracts, access keys, and other records which represents the initial state of the blockchain.
+      '';
+    };
+    chainId = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        NEAR chain to connect to
       '';
     };
   };
@@ -82,10 +89,12 @@ in
 
           # Update configuration
           install -D -m755 -o neard -g neard ${cfg.configFile} /var/lib/neard/config.json
-          ln -sf ${cfg.genesisFile} /var/lib/neard/genesis.json
+          ${lib.optionalString (cfg.genesisFile != null) ''
+            ln -sf ${cfg.genesisFile} /var/lib/neard/genesis.json
+          ''}
         ''}"
         ];
-        ExecStart = "${cfg.package}/bin/neard --home /var/lib/neard run";
+        ExecStart = "${cfg.package}/bin/neard ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"} --home /var/lib/neard run";
         Restart = "always";
 
         User = "neard";
