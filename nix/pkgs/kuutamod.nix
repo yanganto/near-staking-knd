@@ -36,7 +36,13 @@ rustPlatform.buildRustPackage ({
 }
   // lib.optionalAttrs enableLint {
   # we want python for this build
-  src = ../..;
+  src = runCommand "src" { } ''
+    install -D ${../../Cargo.toml} $out/Cargo.toml
+    install -D ${../../Cargo.lock} $out/Cargo.lock
+    cp -r ${../../src} $out/src
+    cp -r ${../../tests} $out/tests
+    install -D ${../../setup.cfg} $out/setup.cfg
+  '';
   buildPhase = ''
     mypy .
     cargo clippy --all-targets --all-features -- -D warnings
