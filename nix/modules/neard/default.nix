@@ -45,13 +45,7 @@ in
     };
   };
 
-  imports = [
-    ../grafana-agent
-  ];
-
   config = {
-    kuutamo.grafana-agent.scrapeTargets.neard.port = 3030;
-
     users.users.neard = {
       group = "neard";
       isSystemUser = true;

@@ -52,6 +52,16 @@ in
   ];
 
   config = {
+    services.consul = {
+      enable = true;
+      extraConfig = {
+        retry_interval = "1s";
+        # high-perf: https://www.consul.io/docs/install/performance
+        performance.raft_multiplier = 2;
+        server = true;
+      };
+    };
+
     # kuutamo.neard and kuutamod cannot be used at the same time
     kuutamo.neard.enable = false;
 
@@ -104,7 +114,7 @@ in
       };
     };
 
-    networking.firewall.allowedTCPPorts = cfg.openFirewall [
+    networking.firewall.allowedTCPPorts = lib.optionals cfg.openFirewall [
       # standard neard network port, also used in validator mode
       24567
       # neard network port when run as voter mode
