@@ -7,11 +7,11 @@
           inherit self;
           inherit (self'.devShells.default) formatters;
         };
-        kuutamod-tests = pkgs.callPackage ./kuutamod-tests.nix {
+        kuutamod-nixos-tests = pkgs.callPackage ./kuutamod-nixos-tests.nix {
           neard = self'.packages.neard;
           kuutamod = self'.packages.kuutamod;
         };
-        kuutamod-tests-unstable = self'.checks.kuutamod-tests.override {
+        kuutamod-nixos-tests-unstable = self'.checks.kuutamod-nixos-tests.override {
           neard = self'.packages.neard-unstable;
         };
         # for testing with binary releases

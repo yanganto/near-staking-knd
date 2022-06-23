@@ -1,0 +1,10 @@
+# Debug nixos test interactivly, i.e. `just debug-test single-node-neard`
+debug-test TEST:
+  nix build ../../../#checks.x86_64-linux.{{TEST}}.driver -L
+  # Now type start_all() to launch all virtual machines
+  # Type server.shell_interact() to get a shell
+  ./result/bin/nixos-test-driver -I
+
+# Run a single test locally
+run-test TEST:
+  nix build ../../../#checks.x86_64-linux.{{TEST}} -L
