@@ -1,6 +1,6 @@
 { self, ... }:
 {
-  perSystem = { ... }: {
+  flake = { ... }: {
     nixosModules = {
       neard = ./neard;
       kuutamod = ./kuutamod;
