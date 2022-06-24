@@ -65,26 +65,28 @@ in
       path = [
         pkgs.awscli2
         cfg.package
+        pkgs.util-linux
       ];
 
       serviceConfig = {
         StateDirectory = "neard";
-        TimeoutStartSec = "30min"; # downloading chain data can take some time...
+        TimeoutStartSec = "120min"; # downloading chain data can take some time...
         # this script is run as root
         ExecStartPre = [
           "+${pkgs.writeShellScript "neard-setup" ''
           set -eux -o pipefail
           # Boostrap chain data for new nodes
+
+          install -d -o neard -g neard /var/lib/neard
+
           if [[ ! -f /var/lib/neard/.finished ]]; then
-            ${lib.optionalString (cfg.s3DataBackupUrl != null) ''
-              aws s3 sync --delete ${cfg.s3DataBackupUrl} /var/lib/neard/data
-              chown -R neard:neard /var/lib/neard/data
-            ''}
             ${lib.optionalString (cfg.generateNodeKey) ''
-              ${cfg.package}/bin/neard --home /var/lib/neard init \
+              runuser -u neard -g neard -- ${cfg.package}/bin/neard --home /var/lib/neard init \
                 ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} \
                 ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"}
-              chown neard:neard /var/lib/neard/node_key.json /var/lib/neard/validator_key.json
+            ''}
+            ${lib.optionalString (cfg.s3DataBackupUrl != null) ''
+              runuser -u neard -g neard -- aws s3 sync --delete ${cfg.s3DataBackupUrl} /var/lib/neard/data
             ''}
             touch /var/lib/neard/.finished
           fi
