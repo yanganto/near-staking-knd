@@ -90,8 +90,6 @@ in
           "KUUTAMO_VALIDATOR_NODE_KEY=${cfg.validatorNodeKeyFile}"
         ];
 
-        TimeoutStartSec = "30min"; # downloading chain data can take some time...
-
         RuntimeDirectory = "kuutamod";
 
         ExecReload = "${pkgs.writeShellScript "kuutamod-schedule-reload" ''
