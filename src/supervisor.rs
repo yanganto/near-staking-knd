@@ -45,7 +45,7 @@ const CONSUL_SESSION_TTL: Duration = Duration::from_secs(30);
 const CONSUL_SESSION_RENEWAL: Duration = Duration::from_secs(10);
 const CONSUL_SESSION_RENEWAL_ERROR: Duration = Duration::from_secs(10);
 /// How much time we give neard to make it's `/status` endpoint available
-const NEARD_STARTUP_TIMEOUT: Duration = Duration::from_secs(25);
+const NEARD_STARTUP_TIMEOUT: Duration = Duration::from_secs(120);
 /// How often we try to become consul leader (validator)
 const CONSUL_ACQUIRE_LEADER_FREQUENCY: Duration = Duration::from_secs(1);
 /// How long a leader will wait when it cannot update its consul session until steps down and stop doing validation
