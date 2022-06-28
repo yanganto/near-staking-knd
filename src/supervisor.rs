@@ -479,8 +479,9 @@ impl StateMachine {
                             continous_errors += 1;
                             warn!("Cannot reach neard status api: {}", err);
                             if on_startup {
-                                // on startup we give neard ~20s to make it's status api reachable
-                                if continous_errors == 20 {
+                                // On startup we give neard ~120s to make it's status api reachable.
+                                // This is needed on testnet where the startup can take a long time.
+                                if continous_errors == 120 {
                                     return Ok(StateType::Startup)
                                 }
                             } else if continous_errors == 3 {
