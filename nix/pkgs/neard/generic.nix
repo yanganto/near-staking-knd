@@ -31,11 +31,13 @@ rustPlatform.buildRustPackage rec {
   # In our tests we probably don't need more than that...
   # However neard does not respect our store configuration in all cases.
   # Also see https://github.com/near/nearcore/issues/6857
+  #
+  # This should be fixed in https://github.com/near/nearcore/pull/6858
   patches =
-    if (version == "1.26.1") then [
-      ./0001-relax-ulimit-check-for-nix-sandbox-build.patch
-    ] else [
+    if (version == "1.27.0") then [
       ./0001-reduce-max_open_files-when-checking-version.patch
+    ] else [
+      ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch
     ];
 
   postPatch = ''
