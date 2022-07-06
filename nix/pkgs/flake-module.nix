@@ -8,8 +8,6 @@
 
       kuutamod = pkgs.callPackage ./kuutamod.nix { };
 
-      nix-update = pkgs.callPackage ./nix-update.nix { };
-
       default = self'.packages.neard;
     };
   };
