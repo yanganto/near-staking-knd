@@ -1,6 +1,21 @@
-# kuutamod
+# kuutamod                                                                                                                      
+                                                                                                                                 
+kuutamod is a distributed supervisor for neard that implements failover for
+[NEAR validators](https://near.org/validators/). NEAR is an application
+platform built on top of the NEAR protocol blockchain. Validator nodes, run by
+the community, provide computational resources to the NEAR network and collect
+monetary rewards at regular intervals, based on the volume of work (blocks and chunks
+produced). Validators who do not complete the work assigned to them receive
+fewer rewards and may be excluded from the group of validators who are allowed
+to validate for some time.
 
-kuutamod is a supervisor for neard that implements failover for [NEAR validators](https://near.org/validators/)
+Kuutamod therefore allows multiple NEAR validators to operate in an
+active-passive setup. The active validator node is started with the validator
+keys, while the other nodes are synchronised with the blockchain. In the event
+of a failure, i.e. a  neard crash, network split or hardware failure, a passive
+instance can be promoted to an active validator by restarting it with the
+validator keys. To avoid having two active validators running at the same time,
+kuutamod uses [consul](https://www.consul.io/) by acquiring a distributed lock.
 
 ## Configuration:
 
