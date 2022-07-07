@@ -9,6 +9,17 @@ in
       description = "Whether to enable Neard";
       default = true;
     };
+
+    enableSolanaKernelTuning = lib.mkOption {
+      type = lib.types.bool;
+      description = ''
+        Enable kernel optimizations from the solana validator project.
+        https://docs.solana.com/de/running-validator/validator-start#system-tuning
+        We found those to be effective to avoid bottlenecks and missing blocks
+        on near validators as well.
+      '';
+      default = false;
+    };
     package = lib.mkOption {
       type = lib.types.package;
       default = pkgs.callPackage ../../pkgs/neard/stable.nix { };
@@ -58,6 +69,19 @@ in
       isSystemUser = true;
     };
     users.groups.neard = { };
+
+    boot.kernel.sysctl = lib.mkIf (cfg.enableSolanaKernelTuning) {
+      # Increase socket buffer sizes
+      "net.core.rmem_default" = "134217728";
+      "net.core.rmem_max" = "134217728";
+      "net.core.wmem_default" = "134217728";
+      "net.core.wmem_max" = "134217728";
+
+      # Increase memory mapped files limit
+      "vm.max_map_count" = "1000000";
+      # Increase number of allowed open file descriptors
+      "fs.nr_open" = "1000000";
+    };
 
     systemd.services.neard = {
       enable = config.kuutamo.neard.enable;
@@ -144,6 +168,8 @@ in
         SystemCallArchitectures = "native";
         # blacklist some syscalls
         SystemCallFilter = [ "~@cpu-emulation @debug @keyring @mount @obsolete @privileged @setuid @ipc" ];
+      } // lib.optionalAttrs (cfg.enableSolanaKernelTuning) {
+        LimitNOFILE = "1000000";
       };
     };
   };
