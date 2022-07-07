@@ -40,10 +40,10 @@ the system could end up allowing two active validators, which could result in
 the validators beeing [kicked](https://nomicon.io/BlockchainLayer/EpochManager/Staking) or even lose
 their stake in the future.
 
-To counter that we recommend to plan at least for three nodes running consul.
-Note that third instance could be run as an arbitor node, with only consul and
-without kuutamod+neard. In this case the hardware requiments for this node
-could be reduced with the disadvantage of having one possible failover instance
-for neard less:
+To counteract this, we recommend running at least three nodes for consul.  Note
+that the third instance can be run as an arbitor node, only with consul and
+without kuutamod+neard. In this case, the hardware requirements for this node
+could be reduced, with the disadvantage that one less possible failover instance
+is available:
 
 ![arbitor](arbitor.png)
