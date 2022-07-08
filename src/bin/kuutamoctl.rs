@@ -14,6 +14,9 @@ struct Args {
     #[clap(long, default_value = "http://localhost:8500", env = "NAME")]
     consul_url: String,
 
+    #[clap(long, action, help = "output in json format")]
+    json: bool,
+
     #[clap(subcommand)]
     action: Action,
 }
@@ -21,11 +24,11 @@ struct Args {
 #[derive(clap::Subcommand)]
 enum Action {
     /// Show the current voted validator
-    ShowValidator,
+    ActiveValidator,
 }
 const ACCOUNT_ID: &str = "KUUTAMO_ACCOUNT_ID";
 
-async fn show_validator(args: &Args) -> Result<i32> {
+async fn show_active_validator(args: &Args) -> Result<i32> {
     let client = ConsulClient::new(&args.consul_url).context("Failed to create consul client")?;
 
     let account_id = std::env::var(ACCOUNT_ID).unwrap_or_else(|_| "default".to_string());
@@ -61,10 +64,14 @@ async fn show_validator(args: &Args) -> Result<i32> {
         Some(session) => session,
     };
 
-    println!(
-        "{}",
-        to_string_pretty(&session).context("Failed to serialize json")?
-    );
+    if args.json {
+        println!(
+            "{}",
+            to_string_pretty(&session).context("Failed to serialize json")?
+        );
+    } else {
+        println!("Name: {}", session.name());
+    }
 
     Ok(0)
 }
@@ -74,7 +81,7 @@ async fn show_validator(args: &Args) -> Result<i32> {
 pub async fn main() -> Result<()> {
     let args = Args::parse();
     let exit_code = match args.action {
-        Action::ShowValidator => show_validator(&args).await?,
+        Action::ActiveValidator => show_active_validator(&args).await?,
     };
     std::process::exit(exit_code);
 }

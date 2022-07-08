@@ -113,7 +113,13 @@ def test_multiple_nodes(
                 break
             time.sleep(0.1)
     proc = command.run(
-        [str(kuutamoctl), "--consul-url", consul.consul_url, "show-validator"],
+        [
+            str(kuutamoctl),
+            "--json",
+            "--consul-url",
+            consul.consul_url,
+            "active-validator",
+        ],
         stdout=subprocess.PIPE,
     )
     assert proc.stdout
