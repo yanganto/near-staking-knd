@@ -47,3 +47,8 @@ could be reduced, with the disadvantage that one less possible failover instance
 is available:
 
 ![arbitor](arbitor.png)
+
+
+## Further readings
+
+In our [failover article](FAILOVER.md) we describe the algorithm used for failover.
