@@ -21,7 +21,6 @@ use std::collections::HashMap;
 use std::fmt;
 use std::ops::Add;
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::time::{self, Duration, Instant};
 
 lazy_static! {
@@ -29,12 +28,6 @@ lazy_static! {
         "kuutamod_state",
         "In what state our supervisor statemachine is",
         &["type"],
-    )
-    .unwrap();
-    static ref CONSUL_SESSION_RENEWAL_GAUGE: IntGaugeVec = register_int_gauge_vec!(
-        "kuutamod_consul_session_renewal",
-        "In what state our supervisor statemachine is",
-        &["session_id"],
     )
     .unwrap();
 }
@@ -83,24 +76,6 @@ fn initialize_state_gauge() {
     STATE
         .with_label_values(&[&StateType::Shutdown.to_string()])
         .set(0);
-}
-
-fn update_session_renewal_gauge(session: &ConsulSession) {
-    let start = SystemTime::now();
-    let since_the_epoch = match start.duration_since(UNIX_EPOCH) {
-        Ok(v) => v,
-        Err(e) => {
-            warn!(
-                "Skip updating consul session renewal gauge, time went backwards ({})",
-                e
-            );
-            return;
-        }
-    };
-
-    CONSUL_SESSION_RENEWAL_GAUGE
-        .with_label_values(&[session.borrow().id()])
-        .set(since_the_epoch.as_millis() as i64);
 }
 
 impl fmt::Display for StateType {
@@ -226,10 +201,7 @@ impl CreateSession {
             .create_session(node_id, CONSUL_SESSION_TTL.as_secs())
             .await
         {
-            Ok(s) => {
-                update_session_renewal_gauge(&s);
-                Some(s)
-            }
+            Ok(s) => Some(s),
             Err(e) => {
                 warn!("Cannot reach consul: {}", e);
                 self.next_try = Instant::now().add(Duration::from_millis(1));
@@ -400,7 +372,6 @@ impl StateMachine {
                     return Ok(res)
                 }
                 res = time::sleep_until(next_renewal).then(|()| self.consul_client.renew_session(session.borrow())) => {
-                    update_session_renewal_gauge(session.borrow());
 
                     if let Err(err) = res {
                         if let Some(&ConsulError::SessionNotFound) = err.downcast_ref::<ConsulError>() {
@@ -491,7 +462,6 @@ impl StateMachine {
                     }
                 }
                 res = time::sleep_until(next_renewal).then(|()| self.consul_client.renew_session(session.borrow())) => {
-                    update_session_renewal_gauge(session.borrow());
 
                     if let Err(err) = res {
                         if let Some(&ConsulError::SessionNotFound) = err.downcast_ref::<ConsulError>() {
