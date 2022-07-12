@@ -1,4 +1,13 @@
-# Run Kuutamod failover setup
+# Run a Kuutamod failover setup
+
+This tutorial is splitted into two parts. First we show how to run kuutamod
+locally in a [localnet](https://docs.near.org/docs/concepts/networks#localnet).
+This allows you to understand how kuutamod works and play around with
+failover/crashing kuutamod/neard.
+
+The second part shows how to deploy validator ha setup for
+[testnet](https://docs.near.org/docs/concepts/networks#testnet) using
+[NixOS](https://nixos.org/).
 
 ## Running in localnet
 
@@ -28,15 +37,15 @@ If you have installed the nix package manager (as described [here](./build.md)),
 you can get all dependencies by running 'nix develop' from the source directory
 of kuutamod.
 
-```
+```console
 $ git clone
 $ nix develop
 ```
 
 After install the dependencies or running `nix develop`, run the hivemind command:
 
-```
-hivemind
+```console
+$ hivemind
 ```
 
 After installing the dependencies or running `nix develop`, run the command
@@ -56,14 +65,14 @@ release build.
 
 Next, start kuutamod in a new terminal window in addition to hivemind:
 
-```
-./target/debug/kuutamod --neard-home .data/near/localnet/kuutamod0/ --voter-node-key .data/near/localnet/kuutamod0/voter_node_key.json --validator-node-key .data/near/localnet/node3/node_key.json --validator-key .data/near/localnet/node3/validator_key.json
+```console
+$ ./target/debug/kuutamod --neard-home .data/near/localnet/kuutamod0/ --voter-node-key .data/near/localnet/kuutamod0/voter_node_key.json --validator-node-key .data/near/localnet/node3/node_key.json --validator-key .data/near/localnet/node3/validator_key.json
 ```
 
 You can check if it becomes a validator by running the command `curl`.
 
-```
-curl http://localhost:2233/metrics
+```console
+$ curl http://localhost:2233/metrics
 # HELP kuutamod_neard_restarts How often neard has been restarted
 # TYPE kuutamod_neard_restarts counter
 kuutamod_neard_restarts 1
@@ -85,7 +94,7 @@ This retrieves data from the prometheus monitoring endpoint of kuutamod.
 The line `kuutamod_state{type="Validating"} 1` indicates that `kuutamod` has set
 up neard as a validator, as you can also see from the neard home directory:
 
-```
+```console
 $ ls -la .data/near/localnet/kuutamod0/
 .rw-r--r-- 2,3k joerg 12 Jul 14:12 config.json
 drwxr-xr-x    - joerg 12 Jul 14:12 data/
@@ -99,8 +108,8 @@ The validator key has been symlinked and the node key has been replaced with the
 
 After that you can also start a second `kuutamod` instance as follows: 
 
-```
-./target/debug/kuutamod --exporter-address 127.0.0.1:2234 --validator-network-addr 0.0.0.0:24569 --voter-network-addr 0.0.0.0:24570 --neard-home .data/near/localnet/kuutamod1/ --voter-node-key .data/near/localnet/kuutamod1/voter_node_key.json --validator-node-key .data/near/localnet/node3/node_key.json --validator-key .data/near/localnet/node3/validator_key.json
+```console
+$ ./target/debug/kuutamod --exporter-address 127.0.0.1:2234 --validator-network-addr 0.0.0.0:24569 --voter-network-addr 0.0.0.0:24570 --neard-home .data/near/localnet/kuutamod1/ --voter-node-key .data/near/localnet/kuutamod1/voter_node_key.json --validator-node-key .data/near/localnet/node3/node_key.json --validator-key .data/near/localnet/node3/validator_key.json
 ```
 
 Note that we choose different network ports for some interfaces so as not to
@@ -198,3 +207,5 @@ lrwxrwxrwx   73 joerg 12 Jul 14:54 node_key.json -> /home/joerg/work/kuutamo/kuu
 lrwxrwxrwx   78 joerg 12 Jul 14:54 validator_key.json -> /home/joerg/work/kuutamo/kuutamod/.data/near/localnet/node3/validator_key.json
 .rw-------  214 joerg 12 Jul 14:54 voter_node_key.json
 ```
+
+## Running in testnet
