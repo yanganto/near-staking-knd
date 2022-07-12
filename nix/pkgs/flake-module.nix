@@ -8,7 +8,7 @@
 
       kuutamod = pkgs.callPackage ./kuutamod.nix { };
 
-      default = self'.packages.neard;
+      default = self'.packages.kuutamod;
     };
   };
 }
