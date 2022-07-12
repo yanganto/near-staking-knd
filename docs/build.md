@@ -1,11 +1,11 @@
 # Build
 
-Kuutamod comes as a single binary and a optional cli `kuutamoctl` to inspect
-kuutamod's state at runtime.
+Kuutamod comes as a single binary and with the optional programme `kuutamoctl`
+to check the  status of Kuutamod at runtime.
 
 ## Build with nix
 
-We primarly develop kuutamod with nix and our development environment is based on it:
+We develop kuutamod primarily with nix and our development environment is based on it: 
 
 1. Install [nix](https://nix.dev/tutorials/install-nix)
 2. Enable [flake support](https://xeiaso.net/blog/nix-flakes-1-2022-02-21) in nix:
@@ -22,7 +22,7 @@ nix run github:kuutamoaps/kuutamod -- --version
 kuutamod 0.1.0
 ```
 
-It's also possible to open a shell with development dependencies like this:
+It is also possible to open a shell with development dependencies like this:
 
 ```
 git clone https://github.com/kuutamoaps/kuutamod/
@@ -30,7 +30,7 @@ cd kuutamod
 nix develop .#
 ```
 
-The resulting shell allows to build kuutamod from nix like this:
+The resulting shell allows to build kuutamod from nix as follows: 
 
 ```
 nix-shell> cargo build
@@ -40,7 +40,7 @@ kuutamod 0.1.0
 
 ## Build without nix
 
-Currently we are only testing `kuutamod` on Linux.
+Currently we are testing `kuutamod` only on Linux.
 
 1. Download kuutamod i.e. with [git](https://git-scm.com/downloads)
 
@@ -48,9 +48,11 @@ Currently we are only testing `kuutamod` on Linux.
 git clone https://github.com/kuutamoaps/kuutamod/
 ```
 
-2. Install will need `rustc` and `cargo` based on your [Linux distributions](https://www.rust-lang.org/learn/get-started).
-   Due to dependencies on neard libraries, you will need a relativly new version
-   of rust. In doubt, install `rustup` to get the latest rust version: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+2. For building, `rustc` and `cargo` are needed depending on the [Linux
+   distribution] (https://www.rust-lang.org/learn/get-started). Due to
+   dependencies on neard libraries, you will need a relatively recent version of
+   of rust. If in doubt, install rustup to get the latest rust version: 
+   `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 
 3. Build kuutamod with `cargo`:
 
