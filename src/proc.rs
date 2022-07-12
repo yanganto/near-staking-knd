@@ -105,11 +105,12 @@ pub fn graceful_stop_neard(process: &mut Child) -> Result<()> {
 
     // wait for neard to finish or for timeout
     let res = unsafe {
-        let mut r = 0;
-        while r == nix::libc::EAGAIN {
-            r = nix::libc::sigtimedwait(mask.as_ref(), ptr::null_mut(), &timeout);
+        loop {
+            let r = nix::libc::sigtimedwait(mask.as_ref(), ptr::null_mut(), &timeout);
+            if r != nix::libc::EAGAIN {
+                break r;
+            }
         }
-        r
     };
     // reset sigprocmask to old value
     if let Err(e) = sigprocmask(SigmaskHow::SIG_SETMASK, Some(&old_mask), None) {
