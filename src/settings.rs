@@ -4,6 +4,7 @@ use crate::near_config::read_near_config;
 use anyhow::{bail, Context, Result};
 use clap::Parser;
 use nix::unistd::{access, AccessFlags};
+use std::fs;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::path::{Path, PathBuf};
 
@@ -84,6 +85,11 @@ fn get_near_key(key: &str, val: &mut PathBuf, credential_filename: &str) -> Resu
             }
         }
     };
+
+    // compute absolute path for symlinking
+    *val = fs::canonicalize(&val)
+        .with_context(|| format!("cannot resolve path for {}", val.display()))?;
+
     access(val, AccessFlags::R_OK | AccessFlags::F_OK)
         .with_context(|| format!("cannot open {} as a file", val.display()))?;
 
