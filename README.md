@@ -21,7 +21,7 @@ kuutamod uses [consul](https://www.consul.io/) by acquiring a distributed lock.
 
 - Tutorials:
   - [Build and install from source](docs/build.md)
-  - TODO: Run kuutamod
+  - [Run kuutamod failover setup](docs/run.md)
   - [Monitoring](docs/monitoring.md)
 - References:
   - [Configuration](docs/configuration.md)
