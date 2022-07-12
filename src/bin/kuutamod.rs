@@ -4,9 +4,9 @@
 //! kuutamod executable
 
 use anyhow::bail;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use kuutamod::prometheus::spawn_prometheus_exporter;
-use kuutamod::settings::settings_from_env;
+use kuutamod::settings::parse_settings;
 use kuutamod::supervisor::run_supervisor;
 use log::warn;
 use std::sync::Arc;
@@ -14,7 +14,7 @@ use std::sync::Arc;
 /// The kuutamod program entry point
 #[tokio::main]
 pub async fn main() -> Result<()> {
-    let settings = Arc::new(settings_from_env().context("Failed to load settings")?);
+    let settings = Arc::new(parse_settings()?);
 
     if let Err(e) = kuutamod::log_fmt::init(&settings.node_id) {
         bail!("Failed to setup logger: {:?}", e);
