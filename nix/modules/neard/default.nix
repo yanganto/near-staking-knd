@@ -32,13 +32,24 @@ in
       default = true;
     };
 
-    s3DataBackupUrl = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      example = "s3://near-protocol-public/backups/mainnet/rpc/latest";
-      description = ''
-        S3 backup url to load initial near database data from
-      '';
+    s3 = {
+      dataBackupUrl = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "s3://near-protocol-public/backups/mainnet/rpc/latest";
+        description = ''
+          S3 backup url to load initial near database data from
+        '';
+      };
+      signRequests = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = ''
+          Does not sign requests when downloading from the s3 bucket.
+          This needs to be false when using the official near s3 backup bucket.
+          Set this to true if you have your own private bucket that needs authentication.
+        '';
+      };
     };
 
     configFile = lib.mkOption {
@@ -109,8 +120,8 @@ in
                 ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} \
                 ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"}
             ''}
-            ${lib.optionalString (cfg.s3DataBackupUrl != null) ''
-              runuser -u neard -g neard -- aws s3 sync --delete ${cfg.s3DataBackupUrl} /var/lib/neard/data
+            ${lib.optionalString (cfg.s3.dataBackupUrl != null) ''
+              runuser -u neard -g neard -- aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupUrl} /var/lib/neard/data
             ''}
             touch /var/lib/neard/.finished
           fi

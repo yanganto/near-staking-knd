@@ -9,7 +9,7 @@ makeTest'
     ];
 
     # FIXME no s3 available in nixos tests yet.
-    kuutamo.neard.s3DataBackupUrl = null;
+    kuutamo.neard.s3.dataBackupUrl = null;
   };
 
   testScript = ''
