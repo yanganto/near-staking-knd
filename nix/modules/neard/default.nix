@@ -63,6 +63,7 @@ in
       default = ./mainnet/genesis.json;
       description = ''
         A file with all the data the network started with at genesis. This contains initial accounts, contracts, access keys, and other records which represents the initial state of the blockchain.
+        If not provided, neard will try to download the genesis file.
       '';
     };
     chainId = lib.mkOption {
