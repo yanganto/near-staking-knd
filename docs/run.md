@@ -265,8 +265,6 @@ $ nix-shell -p awscli --command 'aws s3 --no-sign-request cp s3://near-protocol-
 In this case, the full s3 backup URL for testnet is
 `s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z`.
 
-In this case the full s3 backup url for testnet is `s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z`.
-
 We also need a neard configuration for testnet next to your `configuration.nix`:
 
 ```
