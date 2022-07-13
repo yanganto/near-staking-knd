@@ -21,15 +21,15 @@ port to the internet.
 
 You need the following executables in your `$PATH`.
 
-- [consul](https://www.consul.io/):  This provides a distributed lock for
+- [consul](https://www.consul.io/): This provides a distributed lock for
   kuutamod to detect liveness and prevent two validators from running at the
   same time.
 
 - [neard](https://github.com/near/nearcore/releases/latest): Kuutamod will run this binary.
 
 - [hivemind](https://github.com/DarthSim/hivemind): This is optionally required
-   to run  execute our [Procfile](../Procfile). You can also manually execute the
-   commands contained in this file.
+  to run execute our [Procfile](../Procfile). You can also manually execute the
+  commands contained in this file.
 
 - [Python](https://www.python.org/) for some of the setup scripts.
 
@@ -226,14 +226,14 @@ To do this, add these lines to your `configuration.nix`...
 and create a `flake.nix` as described [here](https://nixos.wiki/wiki/Flakes#Using_nix_flakes_with_NixOS).
 
 In your `flake.nix` you have to add the `kuutamod` flake as source and import
-the nixos modules from it into your configuration.nix. 
+the nixos modules from it into your configuration.nix.
 
 ```
 {
   inputs = {
     # This is probably already there.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
-   
+
     # This is the line you need to add.
     kuutamod.url = "github:kuutamoaps/kuutamod";
   };
@@ -242,9 +242,9 @@ the nixos modules from it into your configuration.nix.
     nixosConfigurations.my-validator = nixpkgs.lib.nixosSystem {
       # Our neard package is currently only tested on x86_64-linux.
       system = "x86_64-linux";
-      modules = [ 
+      modules = [
         ./configuration.nix
-        
+
         # These are the modules provided by our flake
         kuutamod.nixosModules.neard
         kuutamod.nixosModules.kuutamod
@@ -275,7 +275,7 @@ wget https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/t
 git add config.json # optional if your `/etc/nixos` is a git repository, needed for nix to find this file.
 ```
 
-Create a new file called `kuutamod.nix` next to your `configuration.nix`. 
+Create a new file called `kuutamod.nix` next to your `configuration.nix`.
 If your NixOS configuration is managed via a git repository, do not forget to run `git add kuutamod.nix`.
 
 For testnet, add the following configuration to the `kuutamod.nix` file:
@@ -289,18 +289,18 @@ For testnet, add the following configuration to the `kuutamod.nix` file:
   # This becomes relevant when you scale up to multiple machines.
   services.consul.interface.bind = "lo";
   services.consul.extraConfig.bootstrap_expect = 1;
-  
+
   # This is the URL we calculated above:
   kuutamo.neard.s3.dataBackupUrl = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
- 
-  # If you set this to null, neard will download the Genesis file on first startup. 
+
+  # If you set this to null, neard will download the Genesis file on first startup.
   kuutamo.neard.genesisFile = null;
   kuutamo.neard.chainId = "testnet";
   # This is the file we just have downloaded from: https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json
   kuutamo.neard.configFile = ./config.json;
 
-  # We create these keys after the first 'nixos-rebuild switch' 
-  # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix 
+  # We create these keys after the first 'nixos-rebuild switch'
+  # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
   # to securely encrypt and manage these files. For both sops-nix and agenix, set the owner to 'neard' so that the service can read it.
   kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
   kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
