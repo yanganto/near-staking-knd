@@ -285,7 +285,7 @@ For testnet, add the following configuration to the `kuutamod.nix` file:
   # 8.8.8.8 via 131.159.102.254 dev enp24s0f0 src 131.159.102.16 uid 1000
   #   cache
   # This becomes relevant when you scale up to multiple machines.
-  services.consul.interface.bind = "lo";
+  services.consul.interface.bind = "enp24s0f0";
   services.consul.extraConfig.bootstrap_expect = 1;
 
   # This is the URL we calculated above:
@@ -377,3 +377,78 @@ Name: river
 ```
 
 where `name` is the kuutamo node id.
+
+### Multi-Node kuutamo cluster
+
+Once your single-node kuutamod setup works, you can scale out to multiple nodes by changing your `kuutamod.nix`
+like this:
+
+```
+{
+
+  # Same as above, this needs to be an interface should be used to connect to your other machines
+  services.consul.interface.bind = "enp24s0f0";
+
+  # this now needs to be increased to the number of consul nodes your are adding
+  services.consul.extraConfig.bootstrap_expect = 3;
+
+  # We allow these ports for our consul server. Here we assume a trusted network. If this is not the case, read about
+  # setting up encryption and authentication for consul: https://www.consul.io/docs/security/encryption
+  networking.firewall = {
+    allowedTCPPorts = [
+      8301 # lan serf
+      8302 # wan serf
+      8600 # dns
+      8500 # http api
+      8300 # RPC address
+    ];
+    allowedUDPPorts = [
+      8301 # lan serf
+      8302 # wan serf
+      8600 # dns
+    ];
+  };
+
+  # add here the ip addresses or domain names of other hosts, that you want to add to the cluster
+  services.consul.extraConfig.retry_join = [
+    "node0.mydomain.tld"
+    "node1.mydomain.tld"
+    "node3.mydomain.tld"
+  ];
+
+  # Everything below stays the same.
+
+  # This is the URL we calculated above:
+  kuutamo.neard.s3.dataBackupUrl = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
+
+  # If you set this to null, neard will download the Genesis file on first startup.
+  kuutamo.neard.genesisFile = null;
+  kuutamo.neard.chainId = "testnet";
+  # This is the file we just have downloaded from: https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json
+  kuutamo.neard.configFile = ./config.json;
+
+  # We create these keys after the first 'nixos-rebuild switch'
+  # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
+  # to securely encrypt and manage these files. For both sops-nix and agenix, set the owner to 'neard' so that the service can read it.
+  kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
+  kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
+}
+```
+
+Do not forget to also copy `/var/lib/secrets/validator_key.json` and `/var/lib/secrets/node_key.json` from your first machine to the other nodes.
+After running `nixos-rebuild switch` on each of them.
+Check that your consul cluster is working:
+
+If you access `http://localhost:8500/v1/status/peers` from any of the hosts, it should contain all node ips of your consul cluster:
+
+```
+curl http://localhost:8500/v1/status/peers
+["131.0.0.1:8300","131.0.0.2:8300","131.0.0.3:8300"]
+```
+
+Furthermore `http://localhost:8500/v1/status/leader` should contain the consul cluster leader:
+
+```
+curl http://localhost:8500/v1/status/leader
+"131.159.102.16:8300"
+```
