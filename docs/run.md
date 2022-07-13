@@ -228,7 +228,7 @@ and create a `flake.nix` as described [here](https://nixos.wiki/wiki/Flakes#Usin
 In your `flake.nix` you have to add the `kuutamod` flake as source and import
 the nixos modules from it into your configuration.nix.
 
-```
+```nix
 {
   inputs = {
     # This is probably already there.
