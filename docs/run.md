@@ -1,9 +1,9 @@
 # Run a Kuutamod failover setup
 
 This tutorial is splitted into two parts. First we show how to run kuutamod
-locally in a [localnet](https://docs.near.org/docs/concepts/networks#localnet).
+locally in [localnet](https://docs.near.org/docs/concepts/networks#localnet).
 This allows you to understand how kuutamod works and play around with
-failover/crashing kuutamod/neard.
+failover kuutamod and neard.
 
 The second part shows how to deploy validator ha setup for
 [testnet](https://docs.near.org/docs/concepts/networks#testnet) using
@@ -19,49 +19,46 @@ port to the internet.
 
 ### Requirements
 
-You need the following executables in your `$PATH`. 
+You need the following executables in your `$PATH`.
 
 - [consul](https://www.consul.io/):  This provides a distributed lock for
   kuutamod to detect liveness and prevent two validators from running at the
-  same time. 
+  same time.
 
-- [neard](https://github.com/near/nearcore/releases/latest): Kuutamod will run this binary. 
+- [neard](https://github.com/near/nearcore/releases/latest): Kuutamod will run this binary.
 
 - [hivemind](https://github.com/DarthSim/hivemind): This is optionally required
    to run  execute our [Procfile](../Procfile). You can also manually execute the
    commands contained in this file.
 
-- [Python](https://www.python.org/) for some of the setup scripts. 
+- [Python](https://www.python.org/) for some of the setup scripts.
 
 If you have installed the nix package manager (as described [here](./build.md)),
-you can get all dependencies by running 'nix develop' from the source directory
-of kuutamod.
+you can get all dependencies by running `nix develop` from the source directory
+of kuutamod:
 
 ```console
 $ git clone
 $ nix develop
 ```
 
-After install the dependencies or running `nix develop`, run the hivemind command:
+After installing the dependencies or running `nix develop`, run the command hivemind:
 
 ```console
 $ hivemind
 ```
-
-After installing the dependencies or running `nix develop`, run the command
-hivemind: 
 
 Hivemind starts consul, sets up the localnet configuration and starts two neard
 instances for this network. It should be noted that only one consul server is
 running. In a production setup, one should run a
 [cluster](https://www.consul.io/docs/install/bootstrapping), otherwise this
 consul server becomes a single point of failure. The scripts also set up keys
-and configuration for two kuutamod instances. The localnet configuration is
-stored in `.data/near/localnet`. 
+and configuration for two kuutamod instances. The localnet configuration for all
+nodes is stored in `.data/near/localnet`.
 
 If you built kuutamod from source using `cargo build`, the binary is in
 `target/debug` or `target/release`, depending on whether you have a debug or
-release build. 
+release build.
 
 Next, start kuutamod in a new terminal window in addition to hivemind:
 
@@ -89,7 +86,7 @@ kuutamod_state{type="Voting"} 0
 kuutamod_uptime 81917
 ```
 
-This retrieves data from the prometheus monitoring endpoint of kuutamod. 
+This retrieves data from the [prometheus](https://prometheus.io/) monitoring endpoint of kuutamod.
 
 The line `kuutamod_state{type="Validating"} 1` indicates that `kuutamod` has set
 up neard as a validator, as you can also see from the neard home directory:
@@ -104,22 +101,21 @@ lrwxrwxrwx   78 joerg 12 Jul 14:12 validator_key.json -> /home/joerg/work/kuutam
 .rw-------  214 joerg 12 Jul 13:47 voter_node_key.json
 ```
 
-The validator key has been symlinked and the node key has been replaced with the node key specified in `-validator-node-key`. 
+The validator key has been symlinked and the node key has been replaced with the
+node key specified in `-validator-node-key`.
 
-After that you can also start a second `kuutamod` instance as follows: 
+After that you can also start a second `kuutamod` instance as follows:
 
 ```console
 $ ./target/debug/kuutamod --exporter-address 127.0.0.1:2234 --validator-network-addr 0.0.0.0:24569 --voter-network-addr 0.0.0.0:24570 --neard-home .data/near/localnet/kuutamod1/ --voter-node-key .data/near/localnet/kuutamod1/voter_node_key.json --validator-node-key .data/near/localnet/node3/node_key.json --validator-key .data/near/localnet/node3/validator_key.json
 ```
 
-Note that we choose different network ports for some interfaces so as not to
-collide with the first kuutamod instance. Also, we choose a separate directory
-while using the same keys for `--voter-node-key` and `--validator-node-key`. In
-a real setup, kuutamod would run on dedicated machines or VMs, so port
-collisions should not be a problem.  The second kuutamod has its metrics
-endpoint at `http://localhost:2234/metrics`.  Again, with `curl`, we can see
-that it has entered the tuning state, as there is already a running kuutamod
-instance registered:
+Note that we choose different network ports to not collide with the first
+kuutamod instance on the same machine. Also, we choose a separate directory
+while using the same keys for `--voter-node-key` and `--validator-node-key`.
+The second kuutamod has its metrics endpoint at `http://localhost:2234/metrics`.
+Again, with `curl`, we can see that it has entered the Voting state, as there is
+already another kuutamod instance registered:
 
 ```
 $ curl http://localhost:2234/metrics
@@ -148,7 +144,7 @@ lrwxrwxrwx   83 joerg 12 Jul 14:20 node_key.json -> /home/joerg/work/kuutamo/kuu
 .rw-------  214 joerg 12 Jul 13:47 voter_node_key.json
 ```
 
-If we now stop the first `kuutamod` instance with pressing `ctrl-c`...
+If we now stop the first `kuutamod` instance by pressing `ctrl-c`...
 
 ```
 2022-07-12T14:38:22.810412Z  WARN neard: SIGINT, stopping... this may take a few minutes.
@@ -157,7 +153,7 @@ level=info pid=2119211 message="state changed: Voting -> Shutdown" target="kuuta
 level=warn pid=2119211 message="Termination timeout reached. Send SIGKILL to neard!" target="kuutamod::proc" node_id=node
 ```
 
-... we can see that the second instance takes over: 
+... we can see that the second instance takes over:
 
 ```
 2022-07-12T14:52:02.827213Z  INFO stats: #       0 CyjBSLQPeET76Z2tZP2otY8gDFsxANBgobf57o9Mzi8e 4 validators 0 peers ⬇ 0 B/s ⬆ 0 B/s 0.00 bps 0 gas/s CPU: 0%, Mem: 34.0 MB
