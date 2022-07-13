@@ -48,9 +48,9 @@ Currently we are testing `kuutamod` only on Linux.
 git clone https://github.com/kuutamoaps/kuutamod/
 ```
 
-2. For building, `rustc` and `cargo` are needed depending on the [Linux
-   distribution] (https://www.rust-lang.org/learn/get-started). Due to
-   dependencies on neard libraries, you will need a relatively recent version of
+2. For building, `rustc` and `cargo` are needed depending on the 
+   [Linux distribution](https://www.rust-lang.org/learn/get-started). 
+   Due to dependencies on neard libraries, you will need a relatively recent version of
    of rust. If in doubt, install rustup to get the latest rust version: 
    `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 
