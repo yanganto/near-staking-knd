@@ -1,11 +1,11 @@
 # Build
 
 Kuutamod comes as a single binary and with the optional programme `kuutamoctl`
-to check the  status of Kuutamod at runtime.
+to check the status of Kuutamod at runtime.
 
 ## Build with nix
 
-We develop kuutamod primarily with nix and our development environment is based on it: 
+We develop kuutamod primarily with nix and our development environment is based on it:
 
 1. Install [nix](https://nix.dev/tutorials/install-nix)
 2. Enable [flake support](https://xeiaso.net/blog/nix-flakes-1-2022-02-21) in nix:
@@ -30,7 +30,7 @@ cd kuutamod
 nix develop .#
 ```
 
-The resulting shell allows to build kuutamod from nix as follows: 
+The resulting shell allows to build kuutamod from nix as follows:
 
 ```
 nix-shell> cargo build
@@ -48,10 +48,10 @@ Currently we are testing `kuutamod` only on Linux.
 git clone https://github.com/kuutamoaps/kuutamod/
 ```
 
-2. For building, `rustc` and `cargo` are needed depending on the 
-   [Linux distribution](https://www.rust-lang.org/learn/get-started). 
+2. For building, `rustc` and `cargo` are needed depending on the
+   [Linux distribution](https://www.rust-lang.org/learn/get-started).
    Due to dependencies on neard libraries, you will need a relatively recent version of
-   of rust. If in doubt, install rustup to get the latest rust version: 
+   of rust. If in doubt, install rustup to get the latest rust version:
    `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 
 3. Build kuutamod with `cargo`:

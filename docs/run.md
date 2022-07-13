@@ -21,15 +21,15 @@ port to the internet.
 
 You need the following executables in your `$PATH`.
 
-- [consul](https://www.consul.io/):  This provides a distributed lock for
+- [consul](https://www.consul.io/): This provides a distributed lock for
   kuutamod to detect liveness and prevent two validators from running at the
   same time.
 
 - [neard](https://github.com/near/nearcore/releases/latest): Kuutamod will run this binary.
 
 - [hivemind](https://github.com/DarthSim/hivemind): This is optionally required
-   to run  execute our [Procfile](../Procfile). You can also manually execute the
-   commands contained in this file.
+  to run execute our [Procfile](../Procfile). You can also manually execute the
+  commands contained in this file.
 
 - [Python](https://www.python.org/) for some of the setup scripts.
 
@@ -205,3 +205,177 @@ lrwxrwxrwx   78 joerg 12 Jul 14:54 validator_key.json -> /home/joerg/work/kuutam
 ```
 
 ## Running in testnet
+
+### Single node kuutamod
+
+This part of the tutorial assumes that you have installed a computer on which.
+[NixOS](https://nixos.org/manual/nixos/stable/#sec-installation).
+This is not yet a failover setup, as we will only use a single machine for simplicity.
+How to convert this setup into a cluster setup is described in the next section.
+To use the NixOS modules we provide in this repository, you also need to enable Flakes in NixOS.
+To do this, add these lines to your `configuration.nix`...
+
+```nix
+{
+  nix.extraOptions = ''
+    experimental-features = nix-command flakes
+  '';
+}
+```
+
+and create a `flake.nix` as described [here](https://nixos.wiki/wiki/Flakes#Using_nix_flakes_with_NixOS).
+
+In your `flake.nix` you have to add the `kuutamod` flake as source and import
+the nixos modules from it into your configuration.nix.
+
+```
+{
+  inputs = {
+    # This is probably already there.
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+
+    # This is the line you need to add.
+    kuutamod.url = "github:kuutamoaps/kuutamod";
+  };
+  outputs = { self, nixpkgs, kuutamod }: {
+    # Replace 'my-validator' with your hostname here.
+    nixosConfigurations.my-validator = nixpkgs.lib.nixosSystem {
+      # Our neard package is currently only tested on x86_64-linux.
+      system = "x86_64-linux";
+      modules = [
+        ./configuration.nix
+
+        # These are the modules provided by our flake
+        kuutamod.nixosModules.neard
+        kuutamod.nixosModules.kuutamod
+      ];
+    };
+  };
+}
+```
+
+To bootstrap neard, you need an s3 backup of the chain database.
+The module can download this automatically, but needs a timestamp to do so:
+
+```
+$ nix-shell -p awscli --command 'aws s3 --no-sign-request cp s3://near-protocol-public/backups/testnet/rpc/latest -'
+2022-07-13T11:00:40Z
+```
+
+In this case, the full s3 backup URL for testnet is
+`s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z`.
+
+In this case the full s3 backup url for testnet is `s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z`.
+
+We also need a neard configuration for testnet next to your `configuration.nix`:
+
+```
+cd /etc/nixos
+wget https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json
+git add config.json # optional if your `/etc/nixos` is a git repository, needed for nix to find this file.
+```
+
+Create a new file called `kuutamod.nix` next to your `configuration.nix`.
+If your NixOS configuration is managed via a git repository, do not forget to run `git add kuutamod.nix`.
+
+For testnet, add the following configuration to the `kuutamod.nix` file:
+
+```nix
+{
+  # Consul wants to bind to a network interface. You can get your interface as follows:
+  # $ ip route get 8.8.8.8
+  # 8.8.8.8 via 131.159.102.254 dev enp24s0f0 src 131.159.102.16 uid 1000
+  #   cache
+  # This becomes relevant when you scale up to multiple machines.
+  services.consul.interface.bind = "lo";
+  services.consul.extraConfig.bootstrap_expect = 1;
+
+  # This is the URL we calculated above:
+  kuutamo.neard.s3.dataBackupUrl = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
+
+  # If you set this to null, neard will download the Genesis file on first startup.
+  kuutamo.neard.genesisFile = null;
+  kuutamo.neard.chainId = "testnet";
+  # This is the file we just have downloaded from: https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json
+  kuutamo.neard.configFile = ./config.json;
+
+  # We create these keys after the first 'nixos-rebuild switch'
+  # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
+  # to securely encrypt and manage these files. For both sops-nix and agenix, set the owner to 'neard' so that the service can read it.
+  kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
+  kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
+}
+```
+
+Import this file in your `configuration.nix`:
+
+```nix
+{
+  imports = [ ./kuutamod.nix ];
+}
+```
+
+Before we can move on generating validator keys, we need first create the neard user. Therefore run `nixos-rebuild switch`.
+
+```
+nixos-rebuild switch
+```
+
+The first switch will take longer since it blocks on downloading the s3 data backup (around 300GB).
+You can follow the progress by running: `sudo journalctl -u kuutamod -f`.
+
+The next step is to generate and install validator key and validator node key. Note that
+with kuutamod we will have one validator and node key for the active validator,
+while each validator also has its own non-valdiator node key, when its not the active
+validator. Furthermore when the current machine is not a validator it will listen to seperate port.
+This is important for failover since we want to not confuse the neard instances that might
+still have old routing table entries for specific nodes.
+
+To generate these keys. Run the following command but replace
+`myawsome.pool.f863973.m0`, with your own account id of choice:
+
+```
+# we use intentionally the `localnet` here to not having to download genesis files
+$ nix run github:kuutamoaps/kuutamod#neard -- --home /tmp/tmp-near-keys init --chain-id localnet --account-id myawsome.pool.f863973.m0
+warning: Using saved setting for 'extra-substituters = https://cache.garnix.io' from ~/.local/share/nix/trusted-settings.json.
+warning: Using saved setting for 'extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=' from ~/.local/share/nix/trusted-settings.json.
+2022-07-13T10:37:43.778395Z  INFO neard: version="1.27.0" build="nix:1.27.0" latest_protocol=54
+2022-07-13T10:37:43.778551Z  INFO near: Using key ed25519:7Bt35Z83VJjvhWY23rTF9ep5uiDwne1nv1HXPtc3ZMcg for myawsome.pool.f863973.m0
+2022-07-13T10:37:43.778626Z  INFO near: Using key ed25519:BN88UKdWdz1rweHXETKQH3UYu8yxR5P8pn3ssqNAe2kW for node
+2022-07-13T10:37:43.778804Z  INFO near: Generated node key, validator key, genesis file in /tmp/tmp-near-keys
+```
+
+Once the keys are generated, you can install them like this:
+
+```console
+$ sudo install -o neard -g neard -D -m400 /tmp/tmp-near-keys/validator_key.json /var/lib/secrets/validator_key.json
+$ sudo install -o neard -g neard -D -m400 /tmp/tmp-near-keys/node_key.json /var/lib/secrets/node_key.json
+```
+
+If the s3 backup sync was quicker than you generating the key, you might need to
+run `systemctl restart kuutamod` so that it picks up the key. If everything
+went well, you should be able to reach kuutamod's prometheus exporter url:
+
+```
+$ curl http://localhost:2233/metrics
+# HELP kuutamod_state In what state our supervisor statemachine is
+# TYPE kuutamod_state gauge
+kuutamod_state{type="Registering"} 0
+kuutamod_state{type="Shutdown"} 0
+kuutamod_state{type="Startup"} 0
+kuutamod_state{type="Syncing"} 1
+kuutamod_state{type="Validating"} 0
+kuutamod_state{type="Voting"} 0
+# HELP kuutamod_uptime Time in milliseconds how long daemon is running
+# TYPE kuutamod_uptime gauge
+kuutamod_uptime 1273658
+```
+
+Once neard is synced with the network, you should see a kuutamod listed as an active validator using `kuutamoctl`:
+
+```
+$ kuutamoctl active-validator
+Name: river
+```
+
+where `name` is the kuutamo node id.
