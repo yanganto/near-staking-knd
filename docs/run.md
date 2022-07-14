@@ -249,7 +249,7 @@ the nixos modules from it into your configuration.nix.
         ./configuration.nix
 
         # These are the modules provided by our flake
-        kuutamod.nixosModules.neard
+        kuutamod.nixosModules.neard-testnet
         kuutamod.nixosModules.kuutamod
       ];
     };
@@ -268,14 +268,6 @@ $ nix-shell -p awscli --command 'aws s3 --no-sign-request cp s3://near-protocol-
 In this case, the full s3 backup URL for testnet is
 `s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z`.
 
-We also need a neard configuration for testnet next to your `configuration.nix`:
-
-```
-cd /etc/nixos
-wget https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json
-git add config.json # optional if your `/etc/nixos` is a git repository, needed for nix to find this file.
-```
-
 Create a new file called `kuutamod.nix` next to your `configuration.nix`.
 If your NixOS configuration is managed via a git repository, do not forget to run `git add kuutamod.nix`.
 
@@ -293,12 +285,6 @@ For testnet, add the following configuration to the `kuutamod.nix` file:
 
   # This is the URL we calculated above:
   kuutamo.neard.s3.dataBackupUrl = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
-
-  # If you set this to null, neard will download the Genesis file on first startup.
-  kuutamo.neard.genesisFile = null;
-  kuutamo.neard.chainId = "testnet";
-  # This is the file we just have downloaded from: https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json
-  kuutamo.neard.configFile = ./config.json;
 
   # We create these keys after the first 'nixos-rebuild switch'
   # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
