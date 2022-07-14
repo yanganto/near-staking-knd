@@ -1,6 +1,16 @@
 # Configuration
 
-kuutamod uses the following environment variables:
+If you are using our NixOS module, you can find all available options at the
+time in the
+[kuutamod](https://github.com/kuutamoaps/kuutamod/blob/main/nix/modules/kuutamod/default.nix)
+module as well as the
+[neard](https://github.com/kuutamoaps/kuutamod/blob/main/nix/modules/neard/default.nix)
+module. If you plan to use kuutamod in other Linux distributions, we also list
+here the underlying configuration options here.
+
+kuutamod accepts all options to be either passed via commandline arguments or
+via environment variables. Here is a list of all environment variables (you can
+this information also by typing `kuutamod --help`):
 
 - `KUUTAMO_NODE_ID` (default: node), unique identifier for the current node (used in logging)
 - `KUUTAMO_ACCOUNT_ID` (default: default), NEAR Account id of the validator.
