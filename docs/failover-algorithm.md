@@ -54,44 +54,23 @@ In this case `kuutamod` is in `Validating` state.
 In order to pass from one state to another, certain conditions must be
 fulfilled. In the following we will go through all the possible transitions.
 
-### 1. Startup -> 2. Syncing
-
-- If the http endpoint '/status' of neard is available.
-
-### 2. Syncing -> 1. Startup
-
-- When the neard process stops
-- If the '/status' http endpoint is not available for 3 uninterrupted calls (one call per second).
-
-### 2. Syncing -> 3. Registering
-
-- When the '/status' endpoint indicates that synchronisation is complete
-
-### 3. Registering -> 1. Startup
-
-- When the Neard process is terminated
-- When the '/status' endpoint is unreachable for 3 uninterrupted calls (one call per second)
-
-### 3. Registering -> 2. Syncing
-
-- When the '/status' endpoint indicates that neard is back in synchronisation status.
-
-### 3. Registering -> 4. Voting
-
-- When the consultation session has been successfully created
-
-### 3. Voting -> 4. Validator
-
-- If kuutamod can get a session lock for the key '/kuutamod-leader/<account_name>' in consul
-
-### 4. Validator -> 3. Registering
-
-- When consul reports that our session has expired
-
-### 4. Validator -> 3. Startup
-
-- When neard process stops
-
-### 4. Validator -> 3. Voting
-
-- If the session cannot be renewed for 20 seconds, restart neard without validator key
+```mermaid
+sequenceDiagram
+    participant Startup
+    participant Syncing
+    participant Registering
+    participant Voting
+    participant Validating
+    Startup->>Syncing: '/status' HTTP endpoint of neard is available
+    Syncing->>Startup: Neard stops
+    Syncing->>Startup: '/status' HTTP endpoint not available for 3 uninterrupted calls (one call per second).
+    Syncing->>Registering: '/status' HTTP endpoint indicates that NEARD is synced.
+    Registering->>Startup: Neard stops
+    Registering->>Startup: '/status' HTTP endpoint not available for 3 uninterrupted calls (one call per second).
+    Registering->>Syncing: '/status' HTTP endpoint indicates that neard is syncing
+    Registering->>Voting: Consul session successfully created
+    Voting->>Validating: Kuutamod acquired session lock for '/kuutamod-leader/<account_name>' in consul
+    Validating->>Registering: Consul session has expired
+    Validating->>Startup: Neard stops
+    Validating->>Voting: Session cannot be renewed for 20 seconds
+```
