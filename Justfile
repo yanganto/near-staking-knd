@@ -9,6 +9,20 @@ create-staking-pool:
     --accountId "owner" \
     --gas=300000000000000
 
+# Upgrade neard package
+upgrade-neard:
+  nix-update --override-filename nix/pkgs/neard/stable.nix \
+    --version-regex '^(\d+\.\d+\.\d+)$' \
+    -f nix/pkgs/neard/nix-update.nix \
+    --build --commit neard
+
+# Upgrade neard-unstable package
+upgrade-neard-unstable:
+  nix-update --override-filename nix/pkgs/neard/unstable.nix \
+    --version-regex '^(\d+\.\d+\.\d+(-rc.\d+)?)$' \
+    -f nix/pkgs/neard/nix-update.nix \
+    --build --commit neard-unstable --version=unstable
+
 # Run kuutamo stack locally
 run:
   hivemind
