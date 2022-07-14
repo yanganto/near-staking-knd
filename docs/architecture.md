@@ -50,4 +50,4 @@ is available:
 
 ## Further readings
 
-In our [failover article](FAILOVER.md) we describe the algorithm used for failover.
+In our [failover article](failover-algorithm.md) we describe the algorithm used for failover.

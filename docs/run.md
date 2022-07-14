@@ -9,6 +9,9 @@ The second part shows how to deploy validator ha setup for
 [testnet](https://docs.near.org/docs/concepts/networks#testnet) using
 [NixOS](https://nixos.org/).
 
+If you want to get an high-level overview of how kuutamod works, you can also
+read the [Architecture](./architecture.md) page.
+
 ## Running in localnet
 
 This is the easiest way to test kuutamod, which requires the least amount of
@@ -452,3 +455,12 @@ Furthermore `http://localhost:8500/v1/status/leader` should contain the consul c
 curl http://localhost:8500/v1/status/leader
 "131.159.102.16:8300"
 ```
+
+Just like in the `localnet` example, you can query
+`http://localhost:2233/metrics` on each host or use `kuutamoctl` to see which
+host is currently the designated validator.
+
+## Further reading
+
+- [Configuration](./configuration.md): All configuration options in kuutamod
+- [Failover algorithm](./failover-algorithm.md) describes the runtime behavior of kuutamod in depth
