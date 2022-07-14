@@ -250,6 +250,9 @@ the nixos modules from it into your configuration.nix.
 
         # These are the modules provided by our flake
         kuutamod.nixosModules.neard-testnet
+        # or if you want to join other networks, use one of these as needed.
+        # kuutamod.nixosModules.neard-shardnet
+        # kuutamod.nixosModules.neard-mainnet
         kuutamod.nixosModules.kuutamod
       ];
     };
