@@ -2,6 +2,8 @@
   description = "A supervisor for neard that implements failover for NEAR validators";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+  # for rustc 1.62.0
+  inputs.nixpkgs-staging-next.url = "github:NixOS/nixpkgs/staging-next";
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
   inputs.flake-parts.inputs.nixpkgs.follows = "nixpkgs";
   inputs.core-contracts.url = "github:near/core-contracts";
