@@ -40,9 +40,13 @@ rustPlatform.buildRustPackage rec {
       ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch
     ];
 
-  # Stateviewer has a test dependency on the wasm contracts.
-  # Since we are not building tests, we can skip those.
-  cargoPatches = lib.optional (version != "1.27.0") ./0001-make-near-test-contracts-optional.patch;
+  cargoPatches = lib.optionals (version != "1.27.0") [
+    # Stateviewer has a test dependency on the wasm contracts.
+    # Since we are not building tests, we can skip those.
+    ./0001-make-near-test-contracts-optional.patch
+    # upstream forgot to bump cargo.lock here
+    ./Cargo-lock-fix.patch
+  ];
 
   postPatch = ''
     substituteInPlace neard/build.rs \
