@@ -30,7 +30,7 @@
             # tasks and automation
             pkgs.just
             pkgs.jq
-            pkgs.nodePackages.near-cli
+            self'.packages.near-cli
             pkgs.nix-update
 
             # for tests
