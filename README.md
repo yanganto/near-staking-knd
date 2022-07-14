@@ -17,12 +17,18 @@ instance can be promoted to an active validator by restarting it with the
 validator keys. To avoid having two active validators running at the same time,
 kuutamod uses [consul](https://www.consul.io/) by acquiring a distributed lock.
 
+## Status: beta
+
+Kuutamod is continously tested and also used in production for validators.
+However `kuutamod`'s' interface are still under active development and might
+change significantly.
+
 ## Docs
 
 - Tutorials:
   - [Build and install from source](docs/build.md)
   - [Run kuutamod failover setup](docs/run.md)
-  - [Monitoring](docs/monitoring.md)
+  <!-- TODO - [Monitoring](docs/monitoring.md) -->
 - References:
   - [Configuration](docs/configuration.md)
 - [Architecture](docs/architecture.md)
