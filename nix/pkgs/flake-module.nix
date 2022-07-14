@@ -9,6 +9,9 @@
 
       kuutamod = pkgs.callPackage ./kuutamod.nix { };
 
+      # passthru as convinience for the CI.
+      nix-update = pkgs.nix-update;
+
       default = self'.packages.kuutamod;
     };
   };
