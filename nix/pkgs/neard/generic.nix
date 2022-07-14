@@ -10,7 +10,7 @@
 , autoPatchelfHook
 }:
 
-{ version, sha256, cargoSha256 }:
+{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ] }:
 # based on https://github.com/ZentriaMC/neard-nix/blob/master/neard.nix
 rustPlatform.buildRustPackage rec {
   pname = "neard";
@@ -21,7 +21,7 @@ rustPlatform.buildRustPackage rec {
     owner = "near";
     repo = "nearcore";
     # there is also a branch for this version number, so we need to be explicit
-    rev = "refs/tags/${version}";
+    rev = if rev == null then "refs/tags/${version}" else rev;
     inherit sha256;
   };
 
@@ -36,17 +36,15 @@ rustPlatform.buildRustPackage rec {
   patches =
     if (version == "1.27.0") then [
       ./0001-reduce-max_open_files-when-checking-version.patch
-    ] else [
+    ] else if (version == "1.28.0-rc.2") then [
       ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch
-    ];
+    ] else [ ];
 
-  cargoPatches = lib.optionals (version != "1.27.0") [
-    # Stateviewer has a test dependency on the wasm contracts.
-    # Since we are not building tests, we can skip those.
-    ./0001-make-near-test-contracts-optional.patch
+  # Stateviewer has a test dependency on the wasm contracts.
+  # Since we are not building tests, we can skip those.
+  cargoPatches = lib.optional (version != "1.27.0") ./0001-make-near-test-contracts-optional.patch
     # upstream forgot to bump cargo.lock here
-    ./Cargo-lock-fix.patch
-  ];
+    ++ lib.optional (version == "1.28.0-rc.2") ./Cargo-lock-fix.patch;
 
   postPatch = ''
     substituteInPlace neard/build.rs \
@@ -61,6 +59,7 @@ rustPlatform.buildRustPackage rec {
   CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "1";
   CARGO_PROFILE_RELEASE_LTO = "fat";
   NEAR_RELEASE_BUILD = "release";
+  inherit cargoBuildFlags;
 
   OPENSSL_NO_VENDOR = 1; # we want to link to OpenSSL provided by Nix
 

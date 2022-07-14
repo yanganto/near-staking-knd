@@ -4,4 +4,5 @@ with import <nixpkgs> { };
 {
   neard = pkgs.callPackage ./stable.nix { };
   neard-unstable = pkgs.callPackage ./unstable.nix { };
+  neard-shardnet = pkgs.callPackage ./shardnet.nix { };
 }

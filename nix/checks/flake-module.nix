@@ -14,6 +14,9 @@
         kuutamod-nixos-tests-unstable = self'.checks.kuutamod-nixos-tests.override {
           neard = self'.packages.neard-unstable;
         };
+        kuutamod-nixos-tests-shardnet = self'.checks.kuutamod-nixos-tests.override {
+          neard = self'.packages.neard-shardnet;
+        };
         # for testing with binary releases
         #kuutamod-tests-bin = self'.checks.kuutamod-tests.override {
         #  neard = self'.packages.neard-bin;
