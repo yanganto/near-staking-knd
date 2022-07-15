@@ -299,7 +299,7 @@ For testnet, add the following configuration to the `kuutamod.nix` file:
   services.consul.extraConfig.bootstrap_expect = 1;
 
   # This is the URL we calculated above:
-  kuutamo.neard.s3.dataBackupUrl = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
+  kuutamo.neard.s3.dataBackupDirectory = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
 
   # We create these keys after the first 'nixos-rebuild switch'
   # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
@@ -423,7 +423,7 @@ like this:
   # Everything below stays the same.
 
   # This is the URL we calculated above:
-  kuutamo.neard.s3.dataBackupUrl = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
+  kuutamo.neard.s3.dataBackupDirectory = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
 
   # If you set this to null, neard will download the Genesis file on first startup.
   kuutamo.neard.genesisFile = null;
