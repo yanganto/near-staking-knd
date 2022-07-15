@@ -19,8 +19,6 @@ makeTest' {
     };
     services.consul.extraConfig.bootstrap_expect = 1;
 
-    # FIXME no s3 available in nixos tests yet.
-    kuutamo.neard.s3.dataBackupUrl = lib.mkForce null;
     kuutamo.kuutamod.validatorKeyFile = ./validator_key.json;
     kuutamo.kuutamod.validatorNodeKeyFile = ./node_key.json;
   };

@@ -33,12 +33,20 @@ in
     };
 
     s3 = {
-      dataBackupUrl = lib.mkOption {
+      dataBackupDirectory = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        example = "s3://near-protocol-public/backups/mainnet/rpc/latest";
+        example = "s3://near-protocol-public/backups/testnet/rpc/2022-07-12T23:00:50Z";
         description = ''
-          S3 backup url to load initial near database data from
+          S3 backup bucket directory to load initial near database data from
+        '';
+      };
+      dataBackupTarball = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "s3://build.openshards.io/stakewars/shardnet/data.tar.gz";
+        description = ''
+          S3 backup tarball to load initial near database data from
         '';
       };
       signRequests = lib.mkOption {
@@ -121,8 +129,8 @@ in
                 ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} \
                 ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"}
             ''}
-            ${lib.optionalString (cfg.s3.dataBackupUrl != null) ''
-              runuser -u neard -g neard -- aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupUrl} /var/lib/neard/data
+            ${lib.optionalString (cfg.s3.dataBackupDirectory != null) ''
+              runuser -u neard -g neard -- aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupDirectory} /var/lib/neard/data
             ''}
             ${lib.optionalString (cfg.s3.dataBackupTarball != null) ''
               runuser -u neard -g neard -- aws s3 --no-sign-request cp ${cfg.s3.dataBackupTarball} .

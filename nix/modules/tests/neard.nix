@@ -7,9 +7,6 @@ makeTest'
     imports = [
       ../neard
     ];
-
-    # FIXME no s3 available in nixos tests yet.
-    kuutamo.neard.s3.dataBackupUrl = null;
   };
 
   testScript = ''
