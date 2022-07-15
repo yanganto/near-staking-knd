@@ -124,6 +124,11 @@ in
             ${lib.optionalString (cfg.s3.dataBackupUrl != null) ''
               runuser -u neard -g neard -- aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupUrl} /var/lib/neard/data
             ''}
+            ${lib.optionalString (cfg.s3.dataBackupTarball != null) ''
+              runuser -u neard -g neard -- aws s3 --no-sign-request cp ${cfg.s3.dataBackupTarball} .
+              runuser -u neard -g neard tar -xzvf data.tar.gz
+              rm -rf data.tar.gz
+            ''}
             touch /var/lib/neard/.finished
           fi
 
