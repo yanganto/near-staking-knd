@@ -110,7 +110,7 @@ in
         pkgs.awscli2
         cfg.package
         pkgs.util-linux
-      ];
+      ] ++ lib.optional (cfg.s3.dataBackupTarball != null) pkgs.libarchive;
 
       serviceConfig = {
         StateDirectory = "neard";
@@ -133,9 +133,9 @@ in
               runuser -u neard -g neard -- aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupDirectory} /var/lib/neard/data
             ''}
             ${lib.optionalString (cfg.s3.dataBackupTarball != null) ''
-              runuser -u neard -g neard -- aws s3 --no-sign-request cp ${cfg.s3.dataBackupTarball} .
-              runuser -u neard -g neard tar -xzvf data.tar.gz
-              rm -rf data.tar.gz
+              runuser -u neard -g neard -- aws s3 --no-sign-request cp ${cfg.s3.dataBackupTarball} /var/lib/neard/data.tar.gz
+              runuser -u neard -g neard -- bsdtar -C /var/lib/neard -xzf /var/lib/neard/data.tar.gz
+              rm -rf /var/lib/neard/data.tar.gz
             ''}
             touch /var/lib/neard/.finished
           fi
