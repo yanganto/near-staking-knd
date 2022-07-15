@@ -66,7 +66,11 @@ release build.
 Next, start kuutamod in a new terminal window in addition to hivemind:
 
 ```console
-$ ./target/debug/kuutamod --neard-home .data/near/localnet/kuutamod0/ --voter-node-key .data/near/localnet/kuutamod0/voter_node_key.json --validator-node-key .data/near/localnet/node3/node_key.json --validator-key .data/near/localnet/node3/validator_key.json
+$ ./target/debug/kuutamod --neard-home .data/near/localnet/kuutamod0/ \
+  --voter-node-key .data/near/localnet/kuutamod0/voter_node_key.json \
+  --validator-node-key .data/near/localnet/node3/node_key.json \
+  --validator-key .data/near/localnet/node3/validator_key.json \
+  --near-boot-nodes $(jq -r .public_key < .data/near/localnet/node0/node_key.json)@127.0.0.1:33301
 ```
 
 You can check if it becomes a validator by running the command `curl`.
@@ -110,7 +114,15 @@ node key specified in `-validator-node-key`.
 After that you can also start a second `kuutamod` instance as follows:
 
 ```console
-$ ./target/debug/kuutamod --exporter-address 127.0.0.1:2234 --validator-network-addr 0.0.0.0:24569 --voter-network-addr 0.0.0.0:24570 --neard-home .data/near/localnet/kuutamod1/ --voter-node-key .data/near/localnet/kuutamod1/voter_node_key.json --validator-node-key .data/near/localnet/node3/node_key.json --validator-key .data/near/localnet/node3/validator_key.json
+$ ./target/debug/kuutamod \
+  --exporter-address 127.0.0.1:2234 \
+  --validator-network-addr 0.0.0.0:24569 \
+  --voter-network-addr 0.0.0.0:24570 \
+  --neard-home .data/near/localnet/kuutamod1/ \
+  --voter-node-key .data/near/localnet/kuutamod1/voter_node_key.json \
+  --validator-node-key .data/near/localnet/node3/node_key.json \
+  --validator-key .data/near/localnet/node3/validator_key.json \
+  --near-boot-nodes $(jq -r .public_key < .data/near/localnet/node0/node_key.json)@127.0.0.1:33301
 ```
 
 Note that we choose different network ports to not collide with the first
