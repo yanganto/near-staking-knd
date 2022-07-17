@@ -20,7 +20,7 @@ kuutamod uses [consul](https://www.consul.io/) by acquiring a distributed lock.
 ## Status: beta
 
 kuutamod is continously tested and also used in production for validators.
-However `kuutamod`'s' interface are still under active development and might
+However `kuutamod`'s interface are still under active development and might
 change significantly.
 
 ## Docs
