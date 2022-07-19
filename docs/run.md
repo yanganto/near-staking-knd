@@ -293,10 +293,12 @@ In this case, the full s3 backup URL (to be used in the config below) is
 
 For `mainnet` replace the word `testnet` in the urls above.
 
-**Stakenet**
+**Shardnet**
 
-For `stakenet` at the time of writing backups are not versioned, so for the time being, if deploying on `shardnet` remove this option,
-for now we have hardcoded the `shardnet` node to pull from this backup. As shardnet evolves and alignes this will be updated.   
+
+At the time of writing `shardnet` does not provide any official backups sources.
+In our module we however provide our own [unversioned bucket](https://github.com/kuutamolabs/kuutamod/blob/main/nix/modules/neard/shardnet/default.nix)
+that is daily updated. As shardnet evolves and alignes this will be updated.
 
 ---
 
