@@ -38,7 +38,9 @@ rustPlatform.buildRustPackage rec {
       ./0001-reduce-max_open_files-when-checking-version.patch
     ] else if (version == "1.28.0-rc.3") then [
       ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch
-    ] else [ ];
+    ] else [
+      ./0001-also-respect-storage-config-when-checking-rocksdb-ve.patch
+    ];
 
   # Stateviewer has a test dependency on the wasm contracts.
   # Since we are not building tests, we can skip those.
