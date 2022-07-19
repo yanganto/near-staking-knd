@@ -7,15 +7,15 @@
           inherit self;
           inherit (self'.devShells.default) formatters;
         };
-        kuutamod-nixos-tests = pkgs.callPackage ./kuutamod-nixos-tests.nix {
+        kuutamod-unit-tests = pkgs.callPackage ./kuutamod-unit-tests.nix {
           neard = self'.packages.neard;
           kuutamod = self'.packages.kuutamod;
         };
-        kuutamod-nixos-tests-unstable = self'.checks.kuutamod-nixos-tests.override {
+        kuutamod-unit-tests-unstable = self'.checks.kuutamod-unit-tests.override {
           neard = self'.packages.neard-unstable;
         };
         # FIXME: checkout out why this is timing out on garnix, while it works fine locally
-        #kuutamod-nixos-tests-shardnet = self'.checks.kuutamod-nixos-tests.override {
+        #kuutamod-unit-tests-shardnet = self'.checks.kuutamod-unit-tests.override {
         #  neard = self'.packages.neard-shardnet;
         #};
         # for testing with binary releases
