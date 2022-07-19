@@ -36,7 +36,7 @@ rustPlatform.buildRustPackage rec {
   patches =
     if (version == "1.27.0") then [
       ./0001-reduce-max_open_files-when-checking-version.patch
-    ] else if (version == "1.28.0-rc.2") then [
+    ] else if (version == "1.28.0-rc.3") then [
       ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch
     ] else [ ];
 
