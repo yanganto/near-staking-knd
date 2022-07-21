@@ -11,6 +11,7 @@
           ./neard/shardnet
         ];
       };
+      kuutamo-binary-cache = ./binary-cache;
       kuutamod = ./kuutamod;
       default = self.nixosModules.kuutamod;
     };
