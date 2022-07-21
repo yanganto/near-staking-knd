@@ -44,9 +44,7 @@ rustPlatform.buildRustPackage rec {
 
   # Stateviewer has a test dependency on the wasm contracts.
   # Since we are not building tests, we can skip those.
-  cargoPatches = lib.optional (version != "1.27.0") ./0001-make-near-test-contracts-optional.patch
-    # upstream forgot to bump cargo.lock here
-    ++ lib.optional (version == "1.28.0-rc.2") ./Cargo-lock-fix.patch;
+  cargoPatches = lib.optional (version != "1.27.0") ./0001-make-near-test-contracts-optional.patch;
 
   postPatch = ''
     substituteInPlace neard/build.rs \
