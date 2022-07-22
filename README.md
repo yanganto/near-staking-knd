@@ -15,10 +15,7 @@ keys, while the other nodes stay synchronised with the blockchain ready to take 
 of a failure, i.e. a neard crash, network split or hardware failure, a passive
 instance can be promoted to an active validator by restarting it with the
 validator keys. To avoid having two active validators running at the same time,
-kuutamod uses [consul](https://www.consul.io/) by acquiring a distributed lock.
-
-In production, Systemd or another supervisor must be used as this will terminate 
-neard in the case kuutamod crashes.
+kuutamod uses [consul](https://www.consul.io/) by acquiring a distributed lock and relies on systemd or other supervisor to terminate neard in the event of a failure of kuutamod as neard is started as a child process.
 
 ## Status: beta
 
