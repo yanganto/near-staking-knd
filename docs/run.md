@@ -5,8 +5,8 @@ locally in [localnet](https://docs.near.org/docs/concepts/networks#localnet).
 This allows you to understand how kuutamod works and play around with
 failover kuutamod and neard.
 
-**NOTE:** In production, Systemd or another supervisor must be used as this will terminate 
-neard in the case kuutamod crashes.
+**NB: In production, Systemd or another supervisor must be used as this will terminate 
+neard in the case kuutamod crashes.**
 
 The second part shows how to deploy validator ha setup for
 [testnet](https://docs.near.org/docs/concepts/networks#testnet) using
