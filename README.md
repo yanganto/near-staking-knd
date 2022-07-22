@@ -9,7 +9,7 @@ produced). Validators who do not complete the work assigned to them receive
 fewer rewards and may be excluded from the group of validators who are allowed
 to validate for some time.
 
-Kuutamod therefore allows multiple NEAR validators to operate in an
+kuutamod allows multiple NEAR validators to operate in an
 active-passive setup. The active validator node is started with the validator
 keys, while the other nodes are synchronised with the blockchain. In the event
 of a failure, i.e. a neard crash, network split or hardware failure, a passive
