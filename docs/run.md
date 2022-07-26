@@ -1,4 +1,4 @@
-# Run a Kuutamod failover setup
+# Run a kuutamod failover setup
 
 This tutorial is splitted into two parts. First we show how to run kuutamod
 locally in [localnet](https://docs.near.org/docs/concepts/networks#localnet).
