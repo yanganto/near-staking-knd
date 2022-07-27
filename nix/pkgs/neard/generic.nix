@@ -34,9 +34,7 @@ rustPlatform.buildRustPackage rec {
   #
   # This should be fixed in https://github.com/near/nearcore/pull/6858
   patches =
-    if (version == "1.27.0") then [
-      ./0001-reduce-max_open_files-when-checking-version.patch
-    ] else if (version == "1.28.0-rc.3") then [
+    if (version == "1.28.0") then [
       ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch
     ] else [
       ./0001-also-respect-storage-config-when-checking-rocksdb-ve.patch
