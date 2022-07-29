@@ -27,7 +27,7 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           commit-message: Upgrade neard
-          branch: neard-updates
+          branch: near-cli
           token: ${{ secrets.GH_TOKEN_FOR_CI }}
           delete-branch: true
           title: Upgrade near-cli
