@@ -8,7 +8,7 @@ generic {
   # compare with https://github.com/near/nearcore/releases/tag/shardnet
   rev = "c1b047b8187accbf6bd16539feb7bb60185bdc38";
   sha256 = "sha256-QokYs/ET2erO4J9aaaSJUpgMsZIyN/1GP5m9gSIlyS0=";
-  cargoSha256 = "sha256-zKDrrz9e66AY/GslohM7beAGz6utCnMsheI+L2h9PTU=";
+  cargoSha256 = "sha256-khTuIw2O6H71EyculFh0PmyzYSJwTz15jg7cl9OU8WU=";
   cargoBuildFlags = [
     "--features=shardnet"
   ];
