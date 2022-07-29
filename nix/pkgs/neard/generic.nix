@@ -33,12 +33,7 @@ rustPlatform.buildRustPackage rec {
   # Also see https://github.com/near/nearcore/issues/6857
   #
   # This should be fixed in https://github.com/near/nearcore/pull/6858
-  patches =
-    if (version == "1.28.0") then [
-      ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch
-    ] else [
-      ./0001-also-respect-storage-config-when-checking-rocksdb-ve.patch
-    ];
+  patches = lib.optional (version == "1.28.0") ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch;
 
   # Stateviewer has a test dependency on the wasm contracts.
   # Since we are not building tests, we can skip those.
