@@ -5,7 +5,7 @@
       neard = pkgs.callPackage ./neard/stable.nix { };
       neard-unstable = pkgs.callPackage ./neard/unstable.nix { };
       neard-bin = pkgs.callPackage ./neard/bin.nix { };
-      neard-shardnet = inputs'.nixpkgs-staging-next.legacyPackages.callPackage ./neard/shardnet.nix { };
+      neard-shardnet = pkgs.callPackage ./neard/shardnet.nix { };
       inherit (pkgs.callPackages ./near-cli/overrides.nix { }) near-cli;
 
       kuutamod = pkgs.callPackage ./kuutamod.nix { };

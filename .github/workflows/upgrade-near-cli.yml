@@ -1,0 +1,38 @@
+name: "Update neard"
+on:
+  repository_dispatch:
+  workflow_dispatch:
+  schedule:
+    - cron:  '51 2 * * *'
+jobs:
+  createPullRequest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN_FOR_CI }}
+      - uses: cachix/install-nix-action@v16
+        with:
+          extra_nix_config: |
+            extra-substituters = https://cache.garnix.io
+            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+      - name: Update neard stable
+        run: nix run --inputs-from .# nixpkgs#node2nix -- -14 --input ./node-packages.json
+      - name: Format expressions
+        run: nix run --inputs-from .# nixpkgs#nixpkgs-fmt -- .
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          commit-message: Upgrade neard
+          branch: neard-updates
+          token: ${{ secrets.GH_TOKEN_FOR_CI }}
+          delete-branch: true
+          title: Upgrade near-cli
+          body: |
+            See changelog https://github.com/near/near-cli
+
+      - name: Check outputs
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
