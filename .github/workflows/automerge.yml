@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - update_flake_lock_action
-      - neard-updates
+      - near-cli
 
 jobs:
   wait-for-check-regexp:
