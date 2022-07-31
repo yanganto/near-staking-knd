@@ -247,13 +247,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-18.6.2" = {
+    "@types/node-18.6.3" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "18.6.2";
+      version = "18.6.3";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-18.6.2.tgz";
-        sha512 = "KcfkBq9H4PI6Vpu5B/KoPeuVDAbmi+2mDBqGPGUgoL7yXQtcWGu2vJWmmRkneWK3Rh0nIAX192Aa87AqKHYChQ==";
+        url = "https://registry.npmjs.org/@types/node/-/node-18.6.3.tgz";
+        sha512 = "6qKpDtoaYLM+5+AFChLhHermMQxc3TOEFIDzrZLPRGHPrLEwqFkkT5Kx3ju05g6X7uDPazz3jHbKPX0KzCjntg==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -2561,7 +2561,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-18.6.2"
+      sources."@types/node-18.6.3"
       sources."@types/stack-utils-2.0.1"
       sources."@types/yargs-16.0.4"
       sources."@types/yargs-parser-21.0.0"
