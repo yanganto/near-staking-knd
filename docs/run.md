@@ -222,7 +222,7 @@ lrwxrwxrwx   78 joerg 12 Jul 14:54 validator_key.json -> /home/joerg/work/kuutam
 .rw-------  214 joerg 12 Jul 14:54 voter_node_key.json
 ```
 
-## Running on `mainnet`, `testnet, or `stakenet`
+## Running on `mainnet`, `testnet`, or `shardnet`
 
 ### Single node kuutamod
 
