@@ -36,3 +36,6 @@ this information also by typing `kuutamod --help`):
   to be set up prior to start.
 - `KUUTAMO_NEARD_BOOTNODES`: (default: None, optional) if provided, neard will
   use these nodes for bootstrapping connection to the network.
+  
+- `KUUTAMO_CONSUL_URL` (default: http://localhost:8500, optional), the consul agent url 
+- `KUUTAMO_CONSUL_TOKEN` (default: http://localhost:8500, optional), Consul token used for authentication, also see `https://www.consul.io/docs/security/acl/acl-tokens` 
