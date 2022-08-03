@@ -59,7 +59,7 @@ in
         # high-perf: https://www.consul.io/docs/install/performance
         performance.raft_multiplier = 2;
         # Allow user to have an external consul server for consensus.
-        server = lib.mkForce true;
+        server = lib.mkDefault true;
       };
     };
 
