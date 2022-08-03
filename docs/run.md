@@ -44,7 +44,7 @@ you can get all dependencies by running `nix develop` from the source directory
 of kuutamod:
 
 ```console
-$ git clone
+$ git clone https://github.com/kuutamolabs/kuutamod
 $ nix develop
 ```
 
@@ -298,9 +298,7 @@ For `mainnet` replace the word `testnet` in the urls above.
 
 **Shardnet**
 
-
-At the time of writing `shardnet` does not provide any official backups sources.
-In our module we however provide our own [unversioned bucket](https://github.com/kuutamolabs/kuutamod/blob/main/nix/modules/neard/shardnet/default.nix)
+In our module we provide our own [unversioned bucket](https://github.com/kuutamolabs/kuutamod/blob/main/nix/modules/neard/shardnet/default.nix)
 that is daily updated. As shardnet evolves and alignes this will be updated.
 
 ---
