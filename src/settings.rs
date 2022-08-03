@@ -22,6 +22,10 @@ pub struct Settings {
         env = "KUUTAMO_CONSUL_URL"
     )]
     pub consul_url: String,
+    /// Consul token used for authentication, also see `https://www.consul.io/docs/security/acl/acl-tokens`
+    #[clap(long, env = "KUUTAMO_CONSUL_TOKEN")]
+    pub consul_token: Option<String>,
+
     /// Node id of the kuutamo instance
     #[clap(long, default_value = "node", env = "KUUTAMO_NODE_ID")]
     pub node_id: String,

@@ -120,8 +120,11 @@ impl StateMachine {
                 settings.near_rpc_addr.port()
             ))?,
             neard_process: None,
-            consul_client: ConsulClient::new(&settings.consul_url)
-                .context("Failed to create consul client")?,
+            consul_client: ConsulClient::new(
+                &settings.consul_url,
+                settings.consul_token.as_deref(),
+            )
+            .context("Failed to create consul client")?,
             consul_session: None,
             exit_signal_handler: ExitSignalHandler::new()
                 .context("Failed to setup signal handler")?,
@@ -204,8 +207,8 @@ impl CreateSession {
             Ok(s) => Some(s),
             Err(e) => {
                 warn!("Cannot reach consul: {}", e);
-                self.next_try = Instant::now().add(Duration::from_millis(1));
-                self.backoff = std::cmp::max(self.backoff * 2, 5000);
+                self.backoff = std::cmp::min(self.backoff * 2, 5000);
+                self.next_try = Instant::now().add(Duration::from_millis(self.backoff));
                 None
             }
         }
