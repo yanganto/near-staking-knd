@@ -58,7 +58,8 @@ in
         retry_interval = "1s";
         # high-perf: https://www.consul.io/docs/install/performance
         performance.raft_multiplier = 2;
-        server = true;
+        # Allow user to have an external consul server for consensus.
+        server = lib.mkForce true;
       };
     };
 
