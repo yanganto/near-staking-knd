@@ -4,11 +4,11 @@ let
   generic = pkgs.callPackage ./generic.nix { };
 in
 generic {
-  version = "2022-07-28";
-  # compare with https://github.com/near/nearcore/releases/tag/shardnet
-  rev = "c1b047b8187accbf6bd16539feb7bb60185bdc38";
-  sha256 = "sha256-QokYs/ET2erO4J9aaaSJUpgMsZIyN/1GP5m9gSIlyS0=";
-  cargoSha256 = "sha256-khTuIw2O6H71EyculFh0PmyzYSJwTz15jg7cl9OU8WU=";
+  version = "2022-08-03";
+  # compare with https://github.com/near/stakewars-iii/blob/main/commit.md
+  rev = "68bfa84ed1455f891032434d37ccad696e91e4f5";
+  sha256 = "sha256-HBYt7B7Ex0qQ3BpDWFfb/X7leTQ12luhZp6KR0kaVeE=";
+  cargoSha256 = "sha256-fIAm8wCIE16ypc5Jav5iIwa2+yMg8N8yoeyyX0BRfMI=";
   cargoBuildFlags = [
     "--features=shardnet"
   ];
