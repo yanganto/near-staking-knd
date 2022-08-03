@@ -207,8 +207,8 @@ impl CreateSession {
             Ok(s) => Some(s),
             Err(e) => {
                 warn!("Cannot reach consul: {}", e);
-                self.next_try = Instant::now().add(Duration::from_millis(1));
-                self.backoff = std::cmp::max(self.backoff * 2, 5000);
+                self.backoff = std::cmp::min(self.backoff * 2, 5000);
+                self.next_try = Instant::now().add(Duration::from_millis(self.backoff));
                 None
             }
         }
