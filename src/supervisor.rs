@@ -120,8 +120,11 @@ impl StateMachine {
                 settings.near_rpc_addr.port()
             ))?,
             neard_process: None,
-            consul_client: ConsulClient::new(&settings.consul_url)
-                .context("Failed to create consul client")?,
+            consul_client: ConsulClient::new(
+                &settings.consul_url,
+                settings.consul_token.as_deref(),
+            )
+            .context("Failed to create consul client")?,
             consul_session: None,
             exit_signal_handler: ExitSignalHandler::new()
                 .context("Failed to setup signal handler")?,

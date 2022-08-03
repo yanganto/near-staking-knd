@@ -1,6 +1,7 @@
 //! Consul client implementation
 
 use anyhow::{bail, Context, Result};
+use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use reqwest::Url;
 use serde::Deserialize;
@@ -14,6 +15,7 @@ use std::str;
 pub struct ConsulClient {
     client: Client,
     url: Url,
+    headers: HeaderMap,
 }
 
 /// Behavior to take when a session is invalidated
@@ -129,11 +131,19 @@ impl ConsulClient {
     /// # Arguments
     ///
     /// * `url` - The consul endpoint url
-    pub fn new(url: &str) -> Result<ConsulClient> {
+    pub fn new(url: &str, token: Option<&str>) -> Result<ConsulClient> {
         let url = Url::parse(url).with_context(|| "Failed to create consul url")?;
+        let mut headers = HeaderMap::new();
+        if let Some(token) = token {
+            headers.insert(
+                "X-Consul-Token",
+                HeaderValue::from_str(token).context("invalid consul token")?,
+            );
+        }
         Ok(ConsulClient {
             client: Client::new(),
             url,
+            headers,
         })
     }
 
@@ -163,6 +173,7 @@ impl ConsulClient {
         let res = self
             .client
             .put(url)
+            .headers(self.headers.clone())
             .json(&map)
             .send()
             .await
@@ -211,6 +222,7 @@ impl ConsulClient {
         let res = self
             .client
             .get(url)
+            .headers(self.headers.clone())
             .send()
             .await
             .context("Failed to get session")?;
@@ -247,6 +259,7 @@ impl ConsulClient {
         let resp = self
             .client
             .put(url)
+            .headers(self.headers.clone())
             .send()
             .await
             .context("Failed to renew session")?;
@@ -276,6 +289,7 @@ impl ConsulClient {
         let res = self
             .client
             .put(url)
+            .headers(self.headers.clone())
             .send()
             .await
             .context("Failed to delete session")?;
@@ -303,6 +317,7 @@ impl ConsulClient {
         let res = self
             .client
             .get(url)
+            .headers(self.headers.clone())
             .send()
             .await
             .context("Failed to get key")?;
@@ -348,6 +363,7 @@ impl ConsulClient {
         let res = self
             .client
             .put(url)
+            .headers(self.headers.clone())
             .json(&value)
             .send()
             .await

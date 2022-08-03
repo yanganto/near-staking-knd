@@ -21,7 +21,7 @@ def assert_key_equal(expected: Path, current: Path) -> None:
 def test_single_node(
     kuutamod: Path,
     command: Command,
-    consul: Consul,
+    consul_with_acls: Consul,
     near_network: NearNetwork,
     ports: Ports,
 ) -> None:
@@ -35,8 +35,10 @@ def test_single_node(
     validator_port = exporter_port + 1
     voter_port = exporter_port + 2
 
+    consul_token = consul_with_acls.management_token
+    assert consul_token is not None
     env = dict(
-        KUUTAMO_CONSUL_URL=f"http://127.0.0.1:{consul.http_port}",
+        KUUTAMO_CONSUL_URL=f"http://127.0.0.1:{consul_with_acls.http_port}",
         KUUTAMO_EXPORTER_ADDRESS=f"127.0.0.1:{exporter_port}",
         KUUTAMO_VALIDATOR_NETWORK_ADDR=f"127.0.0.1:{validator_port}",
         KUUTAMO_VOTER_NETWORK_ADDR=f"127.0.0.1:{voter_port}",
@@ -45,6 +47,7 @@ def test_single_node(
         KUUTAMO_VOTER_NODE_KEY=str(voter_node_key),
         KUUTAMO_NEARD_HOME=str(neard_home),
         KUUTAMO_NEARD_BOOTNODES=near_network.boostrap_node,
+        KUUTAMO_CONSUL_TOKEN=consul_token,
         RUST_BACKTRACE="1",
     )
     proc = command.run([str(kuutamod)], extra_env=env)

@@ -11,8 +11,16 @@ use serde_json::to_string_pretty;
 #[clap(author, version, about, long_about = None)]
 struct Args {
     /// Consul url to interact with
-    #[clap(long, default_value = "http://localhost:8500", env = "NAME")]
+    #[clap(
+        long,
+        default_value = "http://localhost:8500",
+        env = "KUUTAMO_CONSUL_URL"
+    )]
     consul_url: String,
+
+    /// The consul token to authenticate, used for authentication https://www.consul.io/docs/security/acl/acl-tokens
+    #[clap(long, env = "KUUTAMO_CONSUL_TOKEN")]
+    pub consul_token: Option<String>,
 
     #[clap(long, action, help = "output in json format")]
     json: bool,
@@ -29,7 +37,9 @@ enum Action {
 const ACCOUNT_ID: &str = "KUUTAMO_ACCOUNT_ID";
 
 async fn show_active_validator(args: &Args) -> Result<i32> {
-    let client = ConsulClient::new(&args.consul_url).context("Failed to create consul client")?;
+    let token = args.consul_token.as_deref();
+    let client =
+        ConsulClient::new(&args.consul_url, token).context("Failed to create consul client")?;
 
     let account_id = std::env::var(ACCOUNT_ID).unwrap_or_else(|_| "default".to_string());
 
