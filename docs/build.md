@@ -17,24 +17,24 @@ echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 
 3. Build and run kuutamod:
 
-```
-nix run github:kuutamolabs/kuutamod -- --version
+```console
+$ nix run github:kuutamolabs/kuutamod -- --version
 kuutamod 0.1.0
 ```
 
 It is also possible to open a shell with development dependencies like this:
 
-```
-git clone https://github.com/kuutamolabs/kuutamod/
-cd kuutamod
-nix develop .#
+```console
+$ git clone https://github.com/kuutamolabs/kuutamod/
+$ cd kuutamod
+$ nix develop .#
 ```
 
 The resulting shell allows to build kuutamod from nix as follows:
 
-```
-nix-shell> cargo build
-./target/debug/kuutamod --version
+```console
+$ nix-shell>$ cargo build
+$ ./target/debug/kuutamod --version
 kuutamod 0.1.0
 ```
 
@@ -44,8 +44,8 @@ Currently we are testing `kuutamod` only on Linux.
 
 1. Download kuutamod i.e. with [git](https://git-scm.com/downloads)
 
-```
-git clone https://github.com/kuutamolabs/kuutamod/
+```colsole
+$ git clone https://github.com/kuutamolabs/kuutamod/
 ```
 
 2. For building, `rustc` and `cargo` are needed depending on the
@@ -56,9 +56,9 @@ git clone https://github.com/kuutamolabs/kuutamod/
 
 3. Build kuutamod with `cargo`:
 
-```
-cd kuutamod
-cargo build --release
-./target/release/kuutamod --version
+```console
+$ cd kuutamod
+$ cargo build --release
+$ ./target/release/kuutamod --version
 kuutamod 0.1.0
 ```
