@@ -179,7 +179,7 @@ impl NeardStatus {
 async fn wait_for_neard_exit(neard_process: Option<&mut NeardProcess>) {
     if let Some(p) = neard_process {
         match p.wait().await {
-            Ok(res) => warn!("Neard finished unexpectly with {}", res),
+            Ok(res) => warn!("Neard finished unexpectly with {}. Check the logs above for potential error or panic messages from neard.", res),
             Err(err) => warn!("Cannot get status of neard process {}", err),
         }
     }
