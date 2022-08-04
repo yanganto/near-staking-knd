@@ -29,6 +29,14 @@ in
         Node ID used in logs
       '';
     };
+    consulTokenFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        File containing consul token file used for authenticating consul agent.
+        See https://www.consul.io/docs/security/acl/acl-tokens
+      '';
+    };
     accountId = lib.mkOption {
       type = lib.types.str;
       default = "default";

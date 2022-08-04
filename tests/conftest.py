@@ -7,4 +7,5 @@ pytest_plugins = [
     "consul",
     "root",
     "near_network",
+    "temporary_file",
 ]

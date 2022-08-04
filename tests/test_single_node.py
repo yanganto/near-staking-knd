@@ -3,6 +3,7 @@
 import time
 import json
 from pathlib import Path
+from tempfile import _TemporaryFileWrapper
 
 from command import Command
 from consul import Consul
@@ -24,6 +25,7 @@ def test_single_node(
     consul_with_acls: Consul,
     near_network: NearNetwork,
     ports: Ports,
+    temporary_file: "_TemporaryFileWrapper[str]",
 ) -> None:
     # FIXME Just now we use the validator key of genesis node3 for our setup
     validator_key = near_network.home / "node3" / "validator_key.json"
@@ -37,6 +39,9 @@ def test_single_node(
 
     consul_token = consul_with_acls.management_token
     assert consul_token is not None
+    temporary_file.write(consul_token)
+    temporary_file.flush()
+
     env = dict(
         KUUTAMO_CONSUL_URL=f"http://127.0.0.1:{consul_with_acls.http_port}",
         KUUTAMO_EXPORTER_ADDRESS=f"127.0.0.1:{exporter_port}",
@@ -47,7 +52,7 @@ def test_single_node(
         KUUTAMO_VOTER_NODE_KEY=str(voter_node_key),
         KUUTAMO_NEARD_HOME=str(neard_home),
         KUUTAMO_NEARD_BOOTNODES=near_network.boostrap_node,
-        KUUTAMO_CONSUL_TOKEN=consul_token,
+        KUUTAMO_CONSUL_TOKEN_FILE=temporary_file.name,
         RUST_BACKTRACE="1",
     )
     proc = command.run([str(kuutamod)], extra_env=env)
