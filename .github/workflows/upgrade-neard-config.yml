@@ -6,33 +6,28 @@ on:
     - cron:  '51 2 * * *'
 jobs:
   createPullRequest:
+    strategy:
+      matrix:
+        network: [mainnet, testnet]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_TOKEN_FOR_CI }}
-      - uses: cachix/install-nix-action@v16
-        with:
-          extra_nix_config: |
-            extra-substituters = https://cache.garnix.io
-            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
-      - name: Update neard stable
+      - name: Upgrade neard configuration
         run: |
-          cd nix/pkgs/near-cli/
-          nix run --inputs-from .# nixpkgs#node2nix -- -14 --input ./node-packages.json
-      - name: Format expressions
-        run: nix run --inputs-from .# nixpkgs#nixpkgs-fmt -- .
+          curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/config.json > nix/modules/neard/${{matrix.network}}/config.json
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v4
         with:
-          commit-message: Upgrade near-cli
-          branch: near-cli
+          commit-message: Upgrade near configuration for ${{matrix.network}}
+          branch: near-config-${{matrix}}
           token: ${{ secrets.GH_TOKEN_FOR_CI }}
           delete-branch: true
-          title: Upgrade near-cli
+          title: Upgrade near configuration for ${{matrix.network}}
           body: |
-            See changelog https://github.com/near/near-cli
+            Also check if the new configuration is still valid
 
       - name: Check outputs
         run: |
