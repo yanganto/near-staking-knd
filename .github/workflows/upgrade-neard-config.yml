@@ -1,4 +1,4 @@
-name: "Update near-cli"
+name: "Update near-config"
 on:
   repository_dispatch:
   workflow_dispatch:
