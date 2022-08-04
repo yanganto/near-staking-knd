@@ -38,4 +38,4 @@ this information also by typing `kuutamod --help`):
   use these nodes for bootstrapping connection to the network.
   
 - `KUUTAMO_CONSUL_URL` (default: http://localhost:8500, optional), the consul agent url 
-- `KUUTAMO_CONSUL_TOKEN` (default: http://localhost:8500, optional), Consul token used for authentication, also see `https://www.consul.io/docs/security/acl/acl-tokens` 
+- `KUUTAMO_CONSUL_TOKEN_FILE` (no default, optional), Consul token used for authentication, also see `https://www.consul.io/docs/security/acl/acl-tokens` 

@@ -23,7 +23,10 @@ pub struct Settings {
     )]
     pub consul_url: String,
     /// Consul token used for authentication, also see `https://www.consul.io/docs/security/acl/acl-tokens`
-    #[clap(long, env = "KUUTAMO_CONSUL_TOKEN")]
+    #[clap(long, env = "KUUTAMO_CONSUL_TOKEN_FILE")]
+    pub consul_token_file: Option<PathBuf>,
+    /// Contains the content of `consul_token_file`
+    #[clap(skip = None)]
     pub consul_token: Option<String>,
 
     /// Node id of the kuutamo instance
@@ -120,9 +123,16 @@ pub fn parse_settings() -> Result<Settings> {
         "voter_node_key.json",
     )?;
 
+    settings.consul_token = match settings.consul_token_file {
+        Some(ref file) => Some(
+            fs::read_to_string(&file)
+                .with_context(|| format!("cannot read consul token file {}", file.display()))?,
+        ),
+        None => None,
+    };
+
     let config_path = &settings.neard_home.join("config.json");
     let config = read_near_config(config_path).context("failed to parse near config")?;
-
     settings.near_rpc_addr = config.rpc_addr;
 
     Ok(settings)

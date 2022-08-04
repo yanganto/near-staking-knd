@@ -6,6 +6,8 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use kuutamod::{consul_client::ConsulClient, leader_protocol::consul_leader_key};
 use serde_json::to_string_pretty;
+use std::fs;
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -19,8 +21,8 @@ struct Args {
     consul_url: String,
 
     /// The consul token to authenticate, used for authentication https://www.consul.io/docs/security/acl/acl-tokens
-    #[clap(long, env = "KUUTAMO_CONSUL_TOKEN")]
-    pub consul_token: Option<String>,
+    #[clap(long, env = "KUUTAMO_CONSUL_TOKEN_FILE")]
+    pub consul_token_file: Option<PathBuf>,
 
     #[clap(long, action, help = "output in json format")]
     json: bool,
@@ -37,9 +39,15 @@ enum Action {
 const ACCOUNT_ID: &str = "KUUTAMO_ACCOUNT_ID";
 
 async fn show_active_validator(args: &Args) -> Result<i32> {
-    let token = args.consul_token.as_deref();
-    let client =
-        ConsulClient::new(&args.consul_url, token).context("Failed to create consul client")?;
+    let token = match args.consul_token_file {
+        Some(ref file) => Some(
+            fs::read_to_string(&file)
+                .with_context(|| format!("cannot read consul token file {}", file.display()))?,
+        ),
+        None => None,
+    };
+    let client = ConsulClient::new(&args.consul_url, token.as_deref())
+        .context("Failed to create consul client")?;
 
     let account_id = std::env::var(ACCOUNT_ID).unwrap_or_else(|_| "default".to_string());
 
