@@ -19,17 +19,25 @@ def near_network(command: Command, ports: Ports) -> Iterator[NearNetwork]:
         neard_home = Path(dir) / "neard_home"
         near_network = setup_network_config(neard_home, ports.allocate(6 * 2))
         node = near_network.boostrap_node
-        command.run(
+        p1 = command.run(
             ["neard", "--home", str(neard_home / "node0"), "run"],
             extra_env=dict(RUST_LOG="info"),
         )
-        command.run(
+        p2 = command.run(
             ["neard", "--home", str(neard_home / "node1"), "run", "--boot-nodes", node],
             extra_env=dict(RUST_LOG="warn"),
         )
-        command.run(
+        p3 = command.run(
             ["neard", "--home", str(neard_home / "node2"), "run", "--boot-nodes", node],
             extra_env=dict(RUST_LOG="warn"),
         )
-        # node3 serves as our validator key just now.
-        yield near_network
+        try:
+            # node3 serves as our validator key just now.
+            yield near_network
+        finally:
+            # stop neard processes before removing neard_home
+            for p in [p1, p2, p3]:
+                try:
+                    p.kill()
+                except IOError:
+                    pass
