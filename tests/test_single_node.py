@@ -40,6 +40,8 @@ def test_single_node(
     consul_token = consul_with_acls.management_token
     assert consul_token is not None
     temporary_file.write(consul_token)
+    # Check if kuutamod handles trailing newline gracefully
+    temporary_file.write("\n")
     temporary_file.flush()
 
     env = dict(

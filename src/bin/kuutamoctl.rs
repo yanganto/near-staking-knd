@@ -40,10 +40,11 @@ const ACCOUNT_ID: &str = "KUUTAMO_ACCOUNT_ID";
 
 async fn show_active_validator(args: &Args) -> Result<i32> {
     let token = match args.consul_token_file {
-        Some(ref file) => Some(
-            fs::read_to_string(&file)
-                .with_context(|| format!("cannot read consul token file {}", file.display()))?,
-        ),
+        Some(ref file) => {
+            let s = fs::read_to_string(&file)
+                .with_context(|| format!("cannot read consul token file {}", file.display()))?;
+            Some(s.trim_end().to_string())
+        }
         None => None,
     };
     let client = ConsulClient::new(&args.consul_url, token.as_deref())
