@@ -190,7 +190,7 @@ in
 
         SystemCallArchitectures = "native";
         # blacklist some syscalls
-        SystemCallFilter = [ "~@cpu-emulation @debug @keyring @mount @obsolete @privileged @setuid @ipc" ];
+        SystemCallFilter = [ "~@cpu-emulation @debug @keyring @mount @obsolete @privileged @setuid" ];
       } // lib.optionalAttrs (cfg.enableSolanaKernelTuning) {
         LimitNOFILE = "1000000";
       };

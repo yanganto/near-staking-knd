@@ -57,6 +57,10 @@ def test_single_node(
     )
     proc = command.run([str(kuutamod)], extra_env=env)
     wait_for_port("127.0.0.1", exporter_port, proc=proc)
+
+    # kuutamod reduces its oom score a bit
+    assert Path(f"/proc/{proc.pid}/oom_score_adj").read_text() == "100\n"
+
     # Should start on voter port (This check might racy)
     wait_for_port("127.0.0.1", voter_port, proc=proc)
     while True:

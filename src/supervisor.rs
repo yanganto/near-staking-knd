@@ -6,6 +6,7 @@ use crate::exit_signal_handler::ExitSignalHandler;
 use crate::leader_protocol::consul_leader_key;
 use crate::near_client::NeardClient;
 use crate::neard_process::{setup_validator, setup_voter, NeardProcess};
+use crate::oom_score;
 use crate::scoped_consul_session::ScopedConsulSession;
 use crate::settings::Settings;
 use anyhow::bail;
@@ -526,6 +527,9 @@ impl StateMachine {
 /// Runs neard and participate in consul leader election
 pub async fn run_supervisor(settings: &Arc<Settings>) -> Result<()> {
     initialize_state_gauge();
+
+    oom_score::adjust_oom_score(oom_score::KUUTAMOD_OOM_SCORE)
+        .context("cannot adjust oom score")?;
 
     let mut state = StateMachine::new(settings).context("Failed to initialize state machine")?;
 

@@ -9,6 +9,7 @@ pub mod log_fmt;
 pub mod near_client;
 pub mod near_config;
 pub mod neard_process;
+pub mod oom_score;
 pub mod proc;
 pub mod prometheus;
 pub mod scoped_consul_session;

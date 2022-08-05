@@ -12,11 +12,13 @@ use nix::unistd::Pid;
 use prometheus::{register_int_counter, IntCounter};
 use std::ffi::OsStr;
 use std::path::Path;
-use std::ptr;
 use std::sync::Mutex;
+use std::{io, ptr};
 use tokio::process::Child;
 use tokio::process::Command;
 use tokio::time::Duration;
+
+use crate::oom_score;
 
 /// How much time we give neard to exit. We give it some time to sync rocksdb to disk.
 const NEARD_STOP_TIMEOUT: Duration = Duration::from_secs(60);
@@ -54,6 +56,14 @@ fn set_neard_pid(p: Option<Pid>) {
     }
 }
 
+fn reset_oom_score() -> io::Result<()> {
+    let r = oom_score::adjust_oom_score(oom_score::DEFAULT_OOM_SCORE);
+    if let Err(ref e) = r {
+        warn!("Failed to reset oom score: {}", e);
+    }
+    r
+}
+
 /// Starts a neard daemon for the given home
 pub fn run_neard(neard_home: &Path, boot_nodes: &Option<String>) -> Result<Child> {
     let mut args = vec![
@@ -65,16 +75,22 @@ pub fn run_neard(neard_home: &Path, boot_nodes: &Option<String>) -> Result<Child
         args.push(OsStr::new("--boot-nodes"));
         args.push(OsStr::new(v.as_str()));
     };
-    let cmd = Command::new("neard").args(args).spawn().with_context(|| {
-        format!(
-            "failed to spawn `neard --home {} run`",
-            neard_home.display()
-        )
-    });
-    if let Ok(ref proc) = cmd {
-        set_neard_pid(proc.id().map(|id| Pid::from_raw(id as i32)));
+    let proc = unsafe {
+        Command::new("neard")
+            .args(args)
+            .pre_exec(reset_oom_score)
+            .spawn()
+            .with_context(|| {
+                format!(
+                    "failed to spawn `neard --home {} run`",
+                    neard_home.display()
+                )
+            })
+    };
+    if let Ok(ref p) = proc {
+        set_neard_pid(p.id().map(|id| Pid::from_raw(id as i32)));
     }
-    cmd
+    proc
 }
 
 /// Stops a process by first sending SIGTERM and than after `NEARD_STOP_TIMEOUT`

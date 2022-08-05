@@ -20,6 +20,8 @@ makeTest' {
     services.consul.extraConfig.bootstrap_expect = 1;
 
     kuutamo.kuutamod.validatorKeyFile = ./validator_key.json;
+
+    virtualisation.memorySize = 1024;
     kuutamo.kuutamod.validatorNodeKeyFile = ./node_key.json;
   };
 
