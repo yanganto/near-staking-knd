@@ -97,7 +97,7 @@ in
           "KUUTAMO_VOTER_NODE_KEY=/var/lib/neard/voter_node_key.json"
           "KUUTAMO_VALIDATOR_KEY=${cfg.validatorKeyFile}"
           "KUUTAMO_VALIDATOR_NODE_KEY=${cfg.validatorNodeKeyFile}"
-        ];
+        ] ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}";
 
         RuntimeDirectory = "kuutamod";
 
