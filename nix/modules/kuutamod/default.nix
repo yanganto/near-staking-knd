@@ -105,6 +105,9 @@ in
           touch /run/kuutamod/restart
         ''}";
 
+        # If neard goes out-of-memory, we want to keep kuutamod running.
+        OOMPolicy = "continue";
+
         # this script is run as root
         ExecStartPre =
           config.systemd.services.neard.serviceConfig.ExecStartPre
