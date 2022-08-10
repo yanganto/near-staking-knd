@@ -105,7 +105,7 @@ in
           set -x
           touch /run/kuutamod/restart
           # reload consul token file
-          kill -SIGUSR $MAINPID
+          kill -SIGUSR1 $MAINPID
         ''}";
 
         # If neard goes out-of-memory, we want to keep kuutamod running.
