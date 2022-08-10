@@ -9,13 +9,14 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::fmt;
 use std::str;
+use std::sync::Mutex;
 
 /// A client implementing the Consul leader election: https://learn.hashicorp.com/tutorials/consul/application-leader-elections
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct ConsulClient {
     client: Client,
     url: Url,
-    headers: HeaderMap,
+    headers: Mutex<HeaderMap>,
 }
 
 /// Behavior to take when a session is invalidated
@@ -133,18 +134,41 @@ impl ConsulClient {
     /// * `url` - The consul endpoint url
     pub fn new(url: &str, token: Option<&str>) -> Result<ConsulClient> {
         let url = Url::parse(url).with_context(|| "Failed to create consul url")?;
-        let mut headers = HeaderMap::new();
+        let client = ConsulClient {
+            client: Client::new(),
+            url,
+            headers: Mutex::new(HeaderMap::new()),
+        };
+        client.set_token(token)?;
+        Ok(client)
+    }
+
+    /// Set consul auth token.
+    pub fn set_token(&self, token: Option<&str>) -> Result<()> {
+        let mut headers = match self.headers.lock() {
+            Ok(h) => h,
+            Err(e) => {
+                bail!("Cannot get header lock: {}", e);
+            }
+        };
         if let Some(token) = token {
             headers.insert(
                 "X-Consul-Token",
                 HeaderValue::from_str(token).context("invalid consul token")?,
             );
+        } else {
+            headers.remove("X-Consul-Token");
         }
-        Ok(ConsulClient {
-            client: Client::new(),
-            url,
-            headers,
-        })
+        Ok(())
+    }
+
+    fn headers(&self) -> Result<HeaderMap> {
+        match self.headers.lock() {
+            Ok(h) => Ok(h.clone()),
+            Err(e) => {
+                bail!("Cannot get header lock: {}", e);
+            }
+        }
     }
 
     /// Initializes and returns a new session.
@@ -173,7 +197,7 @@ impl ConsulClient {
         let res = self
             .client
             .put(url)
-            .headers(self.headers.clone())
+            .headers(self.headers()?)
             .json(&map)
             .send()
             .await
@@ -222,7 +246,7 @@ impl ConsulClient {
         let res = self
             .client
             .get(url)
-            .headers(self.headers.clone())
+            .headers(self.headers()?)
             .send()
             .await
             .context("Failed to get session")?;
@@ -259,7 +283,7 @@ impl ConsulClient {
         let resp = self
             .client
             .put(url)
-            .headers(self.headers.clone())
+            .headers(self.headers()?)
             .send()
             .await
             .context("Failed to renew session")?;
@@ -289,7 +313,7 @@ impl ConsulClient {
         let res = self
             .client
             .put(url)
-            .headers(self.headers.clone())
+            .headers(self.headers()?)
             .send()
             .await
             .context("Failed to delete session")?;
@@ -317,7 +341,7 @@ impl ConsulClient {
         let res = self
             .client
             .get(url)
-            .headers(self.headers.clone())
+            .headers(self.headers()?)
             .send()
             .await
             .context("Failed to get key")?;
@@ -363,7 +387,7 @@ impl ConsulClient {
         let res = self
             .client
             .put(url)
-            .headers(self.headers.clone())
+            .headers(self.headers()?)
             .json(&value)
             .send()
             .await

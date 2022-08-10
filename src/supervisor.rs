@@ -19,9 +19,10 @@ use nix::unistd;
 use prometheus::{register_int_gauge_vec, IntGaugeVec};
 use std::borrow::Borrow;
 use std::collections::HashMap;
-use std::fmt;
 use std::ops::Add;
 use std::sync::Arc;
+use std::{fmt, fs};
+use tokio::signal::unix::{signal, Signal, SignalKind};
 use tokio::time::{self, Duration, Instant};
 
 lazy_static! {
@@ -88,12 +89,13 @@ impl fmt::Display for StateType {
 #[derive(Debug)]
 struct StateMachine {
     inner: StateType,
-    settings: Arc<Settings>,
+    settings: Settings,
     neard_process: Option<NeardProcess>,
     neard_client: NeardClient,
     consul_client: ConsulClient,
     consul_session: Option<ConsulSession>,
     exit_signal_handler: ExitSignalHandler,
+    reload_signal: Signal,
     leader_metadata: HashMap<&'static str, String>,
     leader_key: String,
 }
@@ -112,15 +114,15 @@ fn get_leader_metadata(node_id: &str) -> Result<HashMap<&'static str, String>> {
 }
 
 impl StateMachine {
-    pub fn new(settings: &Arc<Settings>) -> Result<StateMachine> {
+    pub fn new(settings: &Settings) -> Result<StateMachine> {
         Ok(StateMachine {
             inner: StateType::Startup,
-            settings: Arc::clone(settings),
+            settings: settings.clone(),
+            neard_process: None,
             neard_client: NeardClient::new(&format!(
                 "http://localhost:{}",
                 settings.near_rpc_addr.port()
             ))?,
-            neard_process: None,
             consul_client: ConsulClient::new(
                 &settings.consul_url,
                 settings.consul_token.as_deref(),
@@ -129,6 +131,8 @@ impl StateMachine {
             consul_session: None,
             exit_signal_handler: ExitSignalHandler::new()
                 .context("Failed to setup signal handler")?,
+            reload_signal: signal(SignalKind::user_defined1())
+                .context("Cannot register SIGUSR1 handler")?,
             leader_metadata: get_leader_metadata(&settings.node_id)
                 .context("Failed to construct leader metadata")?,
             leader_key: consul_leader_key(&settings.account_id),
@@ -240,6 +244,22 @@ async fn acquire_key(
     ChorumResult::IsFollower
 }
 
+fn reload_configuration(settings: &mut Settings, consul_client: &ConsulClient) -> Result<()> {
+    settings.consul_token = match settings.consul_token_file {
+        Some(ref file) => {
+            let s = fs::read_to_string(&file)
+                .with_context(|| format!("cannot read consul token file {}", file.display()))?;
+            info!("Update consul token");
+            Some(s.trim_end().to_string())
+        }
+        None => None,
+    };
+    consul_client
+        .set_token(settings.consul_token.as_deref())
+        .context("failed to update consul token")?;
+    Ok(())
+}
+
 impl StateMachine {
     async fn handle_startup(&mut self) -> Result<StateType> {
         // give up after three times
@@ -276,6 +296,9 @@ impl StateMachine {
                     _ = self.exit_signal_handler.recv() => {
                         return Ok(StateType::Shutdown)
                     }
+                    _ = self.reload_signal.recv() => {
+                        reload_configuration(&mut self.settings, &self.consul_client)?
+                    }
                 }
             }
         }
@@ -292,6 +315,9 @@ impl StateMachine {
                 }
                 _ = self.exit_signal_handler.recv() => {
                     return Ok(StateType::Shutdown)
+                }
+                _ = self.reload_signal.recv() => {
+                    reload_configuration(&mut self.settings, &self.consul_client)?
                 }
                 status = neard_status.query(&self.neard_client)=> {
                     match status {
@@ -325,6 +351,9 @@ impl StateMachine {
                 },
                 _ = self.exit_signal_handler.recv() => {
                     return Ok(StateType::Shutdown)
+                }
+                _ = self.reload_signal.recv() => {
+                    reload_configuration(&mut self.settings, &self.consul_client)?
                 }
                 res = neard_status.handle_neard_desyncs(&self.neard_client) => {
                     return Ok(res)
@@ -362,6 +391,9 @@ impl StateMachine {
                 _ = self.exit_signal_handler.recv() => {
                     session.destroy().await;
                     return Ok(StateType::Shutdown)
+                }
+                _ = self.reload_signal.recv() => {
+                    reload_configuration(&mut self.settings, &self.consul_client)?
                 }
                 res = time::sleep_until(next_acquire).then(|()| acquire_key(&self.consul_client, &self.leader_key, &self.leader_metadata, session.borrow())) => {
                     if let ChorumResult::IsMaster = res {
@@ -439,6 +471,9 @@ impl StateMachine {
                     drop(validator);
                     session.destroy().await;
                     return Ok(StateType::Shutdown)
+                }
+                _ = self.reload_signal.recv() => {
+                    reload_configuration(&mut self.settings, &self.consul_client)?
                 }
                 res = neard_status.query(&self.neard_client) => {
                     match res {
