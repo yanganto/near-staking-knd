@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 const CREDENTIALS_DIRECTORY: &str = "CREDENTIALS_DIRECTORY";
 
 /// Setting options for kuutamod
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(author, version, about, long_about = None)]
 pub struct Settings {
     /// The consul agent url

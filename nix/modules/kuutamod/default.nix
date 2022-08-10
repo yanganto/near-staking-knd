@@ -102,7 +102,10 @@ in
         RuntimeDirectory = "kuutamod";
 
         ExecReload = "${pkgs.writeShellScript "kuutamod-schedule-reload" ''
+          set -x
           touch /run/kuutamod/restart
+          # reload consul token file
+          kill -SIGUSR $MAINPID
         ''}";
 
         # If neard goes out-of-memory, we want to keep kuutamod running.
