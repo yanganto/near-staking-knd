@@ -38,7 +38,7 @@ lazy_static! {
 const CONSUL_SESSION_TTL: Duration = Duration::from_secs(30);
 /// How often to renew a consul session
 const CONSUL_SESSION_RENEWAL: Duration = Duration::from_secs(10);
-const CONSUL_SESSION_RENEWAL_ERROR: Duration = Duration::from_secs(10);
+const CONSUL_SESSION_RENEWAL_ERROR: Duration = Duration::from_secs(5);
 /// How much time we give neard to make it's `/status` endpoint available
 const NEARD_STARTUP_TIMEOUT: Duration = Duration::from_secs(120);
 /// How often we try to become consul leader (validator)
