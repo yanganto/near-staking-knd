@@ -5,7 +5,7 @@ This lab assumes you have created an account on shardnet. [Challange 1](https://
 - Get [NixOS EC2 AMI](https://nixos.org/download.html#nixos-amazon)
   In this demo I used London (eu-west-2): `ami-08f3c1eb533a42ac1` 
 - Setup VM
-  AWS > EC2 > AMIs > `ami-08f3c1eb533a42ac1` > Launch instance from AMI > For this demo I used: c5a.xlarge, 500GIB gp3 > Launch instance
+  AWS > EC2 > AMIs > `ami-08f3c1eb533a42ac1` > Launch instance from AMI > Launch instance
 - SSH to instance
 
 #### Edit `configuration.nix` so it is as below: `nano /etc/nixos/configuration.nix`
