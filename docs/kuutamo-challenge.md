@@ -12,23 +12,22 @@
  - Rewards: xx
 Setup a kuutamo High Availability NEAR Validator running on `shardnet`
 
-The kuutamo NEAR Validator combines a preconfigured security and performance Linux operating system (NixOS), kuutamod, consul and neard.
+The kuutamo HA NEAR Validator node distribution combines a Linux operating system (NixOS) preconfigured for security and performance for this use case, kuutamod, consuld and neard.
 
 kuutamod is a distributed supervisor for neard that implements failover. To avoid having two active validators running simultaneously, kuutamod uses consul by acquiring a distributed lock.
 
-For support join [kuutamo-chat on Matrix](https://matrix.to/#/#kuutamo-chat:kuutamo.chat)
+For support join [kuutamo-chat on Matrix](https://matrix.to/#/#kuutamo-chat:kuutamo.chat) 
 
 ## Tasks:
 
- 1. Deploy kuutamod on localnet following 
- 2. Deploy a HA pool on shardnet as your_poolname_kuutamo.factory.near. Write a blog post documenting your experience. (3/5 of challenge rewards)
+ 1. Deploy kuutamod on localnet following [this guide](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#running-a-localnet-cluster-for-testing-and-development). Write a blog post documenting your experience.
+ 2. Deploy a HA pool using kuutamo on with a name appended with `_kuutamo` on shardnet (i.e. `mypoolname_kuutamo.factory.shardnet.near`) following [this guide](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#running-on-mainnet-testnet-or-shardnet). Write a blog post documenting your experience.
 
 ## Deliverables
 
  - Blog for localnet deployment
- - Blog for shardnet deployment
- - On each kuutamo node, run the commands below and screenshot outputs in blogs.
-```
+ - Blog for shardnet deployment. On each kuutamo node, once your system is operational, run the commands below and include in blog.
+```console
 $ nixos-version
 $ journalctl -u kuutamod.service | grep 'state changed'
 $ systemctl status kuutamod
