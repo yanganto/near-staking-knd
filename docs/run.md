@@ -21,7 +21,9 @@ This is the easiest way to test kuutamod, which requires the least amount of
 resources as it does not require downloading large amounts of chain data. We
 will set up a local NEAR network and allow kuutamod to connect to it. This
 tutorial is intended to work on a single computer without the need for an open
-port to the internet.
+port to the internet. This setup is **not** recommended for production use.
+In particular a supervisor like systemd is recommended for running kuutamod to
+stop neard in case kuutamod is killed.
 
 ### Requirements
 
