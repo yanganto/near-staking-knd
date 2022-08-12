@@ -21,7 +21,7 @@ For support join [kuutamo-chat on Matrix](https://matrix.to/#/#kuutamo-chat:kuut
 ## Tasks:
 
  1. Deploy kuutamod on localnet following [this guide](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#running-a-localnet-cluster-for-testing-and-development). Write a blog post documenting your experience.
- 2. Deploy a HA pool using kuutamo on with a name appended with `_kuutamo` on shardnet (i.e. `mypoolname_kuutamo.factory.shardnet.near`) following [this guide](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#running-on-mainnet-testnet-or-shardnet). Write a blog post documenting your experience.
+ 2. Deploy a HA pool using kuutamo with a name appended with `_kuutamo` on shardnet (i.e. `mypoolname_kuutamo.factory.shardnet.near`) following [this guide](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#running-on-mainnet-testnet-or-shardnet). Write a blog post documenting your experience.
 
 ## Deliverables
 
