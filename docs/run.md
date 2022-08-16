@@ -353,33 +353,29 @@ You can follow the progress by running: `sudo journalctl -u kuutamod -f`.
 The next step is to generate and install validator key and validator node key. Note that
 with kuutamod we will have one validator and node key for the active validator,
 while each validator also has its own non-valdiator node key, when its not the active
-validator. Furthermore when the current machine is not a validator it will listen to seperate port.
+validator. These non-validator keys are created automatically by kuutamod.
+Furthermore when the current machine is not a validator it will listen to seperate port.
 This is important for failover since we want to not confuse the neard instances that might
 still have old routing table entries for specific nodes.
 
 To generate these keys. Run the following command but replace
-`myawsome.pool.f863973.m0`, with your own account id of choice:
-
-```
-# we use intentionally the `localnet` here to not having to download genesis files
-$ nix run github:kuutamolabs/kuutamod#neard -- --home /tmp/tmp-near-keys init --chain-id localnet --account-id myawsome.pool.f863973.m0
-warning: Using saved setting for 'extra-substituters = https://cache.garnix.io' from ~/.local/share/nix/trusted-settings.json.
-warning: Using saved setting for 'extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=' from ~/.local/share/nix/trusted-settings.json.
-2022-07-13T10:37:43.778395Z  INFO neard: version="1.27.0" build="nix:1.27.0" latest_protocol=54
-2022-07-13T10:37:43.778551Z  INFO near: Using key ed25519:7Bt35Z83VJjvhWY23rTF9ep5uiDwne1nv1HXPtc3ZMcg for myawsome.pool.f863973.m0
-2022-07-13T10:37:43.778626Z  INFO near: Using key ed25519:BN88UKdWdz1rweHXETKQH3UYu8yxR5P8pn3ssqNAe2kW for node
-2022-07-13T10:37:43.778804Z  INFO near: Generated node key, validator key, genesis file in /tmp/tmp-near-keys
-```
-
-Once the keys are generated, you can install them like this:
+`kuutamo-test_kuutamo.shardnet.pool.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>
 
 ```console
-$ sudo install -o neard -g neard -D -m400 /tmp/tmp-near-keys/validator_key.json /var/lib/secrets/validator_key.json
-$ sudo install -o neard -g neard -D -m400 /tmp/tmp-near-keys/node_key.json /var/lib/secrets/node_key.json
+$ export NEAR_ENV=<mainnet|testnet|shardnet>
+$ nix run github:kuutamoaps/kuutamod#near-cli generate-key kuutamo-test_kuutamo.shardnet.pool.near
+$ nix run github:kuutamoaps/kuutamod#near-cli generate-key node_key
 ```
 
-If the s3 backup sync was quicker than you generating the key, you might need to
-run `systemctl restart kuutamod` so that it picks up the key. If everything
+Once the keys are generated, you can install them like this (but replace
+`kuutamo-test_kuutamo.shardnet.pool.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>):
+
+```console
+$ sudo install -o neard -g neard -D -m400 /.near-credentials/<mainnet|testnet|shardnet>/kuutamo-test_kuutamo.shardnet.pool.near.json /var/lib/secrets/validator_key.json
+$ sudo install -o neard -g neard -D -m400 /.near-credentials/<mainnet|testnet|shardnet>/node_key.json /var/lib/secrets/node_key.json
+```
+
+You will need to run `systemctl restart kuutamod` so that it picks up the key. If everything
 went well, you should be able to reach kuutamod's prometheus exporter url:
 
 ```
