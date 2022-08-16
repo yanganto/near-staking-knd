@@ -358,7 +358,9 @@ Furthermore when the current machine is not a validator it will listen to sepera
 This is important for failover since we want to not confuse the neard instances that might
 still have old routing table entries for specific nodes.
 
-To generate these keys. Run the following command but replace
+#### Generate keys. 
+
+Run the following command but replace
 `kuutamo-test_kuutamo.shardnet.pool.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>
 
 ```console
