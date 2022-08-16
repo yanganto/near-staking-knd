@@ -2,6 +2,7 @@
 
 import time
 import json
+import signal
 from pathlib import Path
 from tempfile import _TemporaryFileWrapper
 
@@ -57,32 +58,38 @@ def test_single_node(
         KUUTAMO_CONSUL_TOKEN_FILE=temporary_file.name,
         RUST_BACKTRACE="1",
     )
+
     proc = command.run([str(kuutamod)], extra_env=env)
-    wait_for_port("127.0.0.1", exporter_port, proc=proc)
+    try:
+        wait_for_port("127.0.0.1", exporter_port, proc=proc)
 
-    # kuutamod reduces its oom score a bit
-    assert Path(f"/proc/{proc.pid}/oom_score_adj").read_text() == "100\n"
+        # kuutamod reduces its oom score a bit
+        assert Path(f"/proc/{proc.pid}/oom_score_adj").read_text() == "100\n"
 
-    # Should start on voter port (This check might racy)
-    wait_for_port("127.0.0.1", voter_port, proc=proc)
-    while True:
+        # Should start on voter port (This check might racy)
+        wait_for_port("127.0.0.1", voter_port, proc=proc)
+        while True:
+            res = query_prometheus_endpoint("127.0.0.1", exporter_port)
+            if res.get('kuutamod_state{type="Validating"}') == "1":
+                break
+            time.sleep(0.1)
+
+        # Should start on voter port.
+        wait_for_port("127.0.0.1", validator_port)
+        assert_key_equal(validator_node_key, neard_home / "node_key.json")
+        assert_key_equal(validator_key, neard_home / "validator_key.json")
+        time.sleep(5)  # it should stay master at this point
         res = query_prometheus_endpoint("127.0.0.1", exporter_port)
-        if res.get('kuutamod_state{type="Validating"}') == "1":
-            break
-        time.sleep(0.1)
-
-    # Should start on voter port.
-    wait_for_port("127.0.0.1", validator_port)
-    assert_key_equal(validator_node_key, neard_home / "node_key.json")
-    assert_key_equal(validator_key, neard_home / "validator_key.json")
-    time.sleep(5)  # it should stay master at this point
-    res = query_prometheus_endpoint("127.0.0.1", exporter_port)
-    # only one needed restart to get into validator state
-    assert res.get("kuutamod_neard_restarts") == "1"
-    assert int(res.get("kuutamod_uptime", "0")) > 0
-    assert res.get('kuutamod_state{type="Validating"}') == "1"
-    assert res.get('kuutamod_state{type="Registering"}') == "0"
-    assert res.get('kuutamod_state{type="Shutdown"}') == "0"
-    assert res.get('kuutamod_state{type="Startup"}') == "0"
-    assert res.get('kuutamod_state{type="Syncing"}') == "0"
-    assert res.get('kuutamod_state{type="Voting"}') == "0"
+        # only one needed restart to get into validator state
+        assert res.get("kuutamod_neard_restarts") == "1"
+        assert int(res.get("kuutamod_uptime", "0")) > 0
+        assert res.get('kuutamod_state{type="Validating"}') == "1"
+        assert res.get('kuutamod_state{type="Registering"}') == "0"
+        assert res.get('kuutamod_state{type="Shutdown"}') == "0"
+        assert res.get('kuutamod_state{type="Startup"}') == "0"
+        assert res.get('kuutamod_state{type="Syncing"}') == "0"
+        assert res.get('kuutamod_state{type="Voting"}') == "0"
+    finally:
+        # terminate kuutamod -> neard properly so we can cleanup the temporary directory
+        proc.send_signal(signal.SIGTERM)
+        proc.wait()
