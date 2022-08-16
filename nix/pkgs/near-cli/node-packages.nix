@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-18.7.2" = {
+    "@types/node-18.7.5" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "18.7.2";
+      version = "18.7.5";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-18.7.2.tgz";
-        sha512 = "ce7MIiaYWCFv6A83oEultwhBXb22fxwNOQf5DIxWA4WXvDQ7K+L0fbWl/YOfCzlR5B/uFkSnVBhPcOfOECcWvA==";
+        url = "https://registry.npmjs.org/@types/node/-/node-18.7.5.tgz";
+        sha512 = "NcKK6Ts+9LqdHJaW6HQmgr7dT/i3GOHG+pt6BiWv++5SnjtRd4NXeiuN2kA153SjhXPR/AhHIPHPbrsbpUVOww==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -2656,10 +2656,10 @@ in
   near-cli = nodeEnv.buildNodePackage {
     name = "near-cli";
     packageName = "near-cli";
-    version = "3.4.1";
+    version = "3.4.2";
     src = fetchurl {
-      url = "https://registry.npmjs.org/near-cli/-/near-cli-3.4.1.tgz";
-      sha512 = "PiEQZNQ+A2wqRG9pvth6Phro/t6YWFyGRGj3xQnWkoPyODcPqTZY3BEChvMrDSbPL7hS0PAZoofFadnVF8Zyjg==";
+      url = "https://registry.npmjs.org/near-cli/-/near-cli-3.4.2.tgz";
+      sha512 = "0EaNAw5SKSIIJrJajG32CNMGfBtZTgIrOVKSXBTWpvo+F0OozsbvuO4UG3ZSRNThXHijxybp58SqPiU3JuzXGA==";
     };
     dependencies = [
       sources."@babel/code-frame-7.18.6"
@@ -2715,7 +2715,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-18.7.2"
+      sources."@types/node-18.7.5"
       sources."@types/stack-utils-2.0.1"
       sources."@types/yargs-16.0.4"
       sources."@types/yargs-parser-21.0.0"
