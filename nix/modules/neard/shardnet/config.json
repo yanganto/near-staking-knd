@@ -40,8 +40,8 @@
     "whitelist_nodes": "",
     "max_num_peers": 40,
     "minimum_outbound_peers": 5,
-    "ideal_connections_lo": 10,
-    "ideal_connections_hi": 15,
+    "ideal_connections_lo": 30,
+    "ideal_connections_hi": 35,
     "peer_recent_time_window": {
       "secs": 600,
       "nanos": 0
