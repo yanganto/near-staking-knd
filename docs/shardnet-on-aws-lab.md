@@ -62,15 +62,8 @@ $ nixos-rebuild switch --flake /etc/nixos#validator
 #### Create keys
 
 1. Follow [instructions to create wallet and install near-cli](https://github.com/near/stakewars-iii/blob/main/challenges/001.md) 
-2. Follow instructions to [generate keys](https://github.com/near/stakewars-iii/blob/main/challenges/002.md#activating-the-node-as-validator)
-3. Copy key to validator
+2. Follow instructions to [generate key and install them]([https://github.com/near/stakewars-iii/blob/main/challenges/002.md#activating-the-node-as-validator](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#generate-keys))
 
-#### Install keys
- 
-```console
-$ sudo install -o neard -g neard -D -m400 /var/lib/neard/voter_node_key.json /var/lib/secrets/node_key.json
-$ sudo install -o neard -g neard -D -m400 /you.shardnet.near.json /var/lib/secrets/validator_key.json
-```
 You can view logs in the systemd journal
 ```console
 $ journalctl -u kuutamod.service -f
