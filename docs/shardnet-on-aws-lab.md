@@ -100,7 +100,7 @@ where `Name` is the kuutamo node id.
 #### Next Steps
 
 - You can now mount your staking pool [Challenge 3](https://github.com/near/stakewars-iii/blob/main/challenges/003.md)
-- You can add more nodes to create an active/passive ha cluster. See [kuutamo GitHub README.md](https://github.com/kuutamolabs/kuutamod/blob/main/README.md) for more information. 
+- You can add more nodes to create an active/passive ha cluster. See [this section](https://github.com/kuutamolabs/kuutamod/blob/main/README.md](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#multi-node-kuutamo-cluster) for more information. 
 
 ---
 kuutamolabs  
