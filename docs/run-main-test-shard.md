@@ -151,6 +151,21 @@ $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet|s
 $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet|shardnet>/node_key.json /var/lib/secrets/node_key.json
 ```
 
+---
+#### SHIM [2022-08-16]
+Our neard init does not download genesis -- to-fix
+Temp fix, manually download the `genesis.json` following commands below:
+
+```console
+$ cd /var/lib/neard
+$ wget https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/shardnet/genesis.json.xz -o genesis.json.xz
+$ nix-shell -p xz
+$ [nix-shell] $ unxz genesis.json.xz
+$ [nix-shell] $ exit
+$
+```
+---
+
 You will now need to run `systemctl restart kuutamod` so that it picks up the keys. If everything
 went well, you should be able to reach kuutamod's prometheus exporter url:
 
