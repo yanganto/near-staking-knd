@@ -373,8 +373,8 @@ Once the keys are generated, you can install them like this (but replace
 `kuutamo-test_kuutamo.shardnet.pool.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>):
 
 ```console
-$ sudo install -o neard -g neard -D -m400 /.near-credentials/<mainnet|testnet|shardnet>/kuutamo-test_kuutamo.shardnet.pool.near.json /var/lib/secrets/validator_key.json
-$ sudo install -o neard -g neard -D -m400 /.near-credentials/<mainnet|testnet|shardnet>/node_key.json /var/lib/secrets/node_key.json
+$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet|shardnet>/kuutamo-test_kuutamo.shardnet.pool.near.json /var/lib/secrets/validator_key.json
+$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet|shardnet>/node_key.json /var/lib/secrets/node_key.json
 ```
 
 You will now need to run `systemctl restart kuutamod` so that it picks up the keys. If everything
