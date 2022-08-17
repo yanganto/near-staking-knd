@@ -22,7 +22,7 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           commit-message: Upgrade near configuration for ${{matrix.network}}
-          branch: near-config-${{matrix}}
+          branch: near-config-${{matrix.network}}
           token: ${{ secrets.GH_TOKEN_FOR_CI }}
           delete-branch: true
           title: Upgrade near configuration for ${{matrix.network}}
