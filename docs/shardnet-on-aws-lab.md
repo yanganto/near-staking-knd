@@ -3,7 +3,7 @@
 This lab assumes you have created an account on shardnet. [Challange 1](https://github.com/near/stakewars-iii/blob/main/challenges/001.md)
 
 - Get [NixOS EC2 AMI](https://nixos.org/download.html#nixos-amazon)
-  In this demo I used London (eu-west-2): `ami-08f3c1eb533a42ac1` 
+  In this demo I used London (eu-west-2): `ami-08f3c1eb533a42ac1` NB: Each region uses an AMI with a different name so double check that you picked the correct region if the AMI doesn't show up in the AWS UI.
 - Setup VM
   AWS > EC2 > AMIs > `ami-08f3c1eb533a42ac1` > Launch instance from AMI > Launch instance
 - SSH to instance
