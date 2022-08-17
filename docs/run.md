@@ -309,7 +309,7 @@ that is daily updated. As shardnet evolves and alignes this will be updated.
 Create a new file called `kuutamod.nix` next to your `configuration.nix` in `/etc/nixos/`.
 If your NixOS configuration is managed via a git repository, do not forget to run `git add kuutamod.nix`.
 
-Add the following configuration to the `kuutamod.nix` file:
+Add the following configuration to the `/etc/nixos/kuutamod.nix` file:
 
 ```nix
 {
