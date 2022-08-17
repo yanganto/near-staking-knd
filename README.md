@@ -28,7 +28,7 @@ change significantly.
 - Tutorials:
   - [Build and install from source](docs/build.md)
   - [Run kuutamod on a localnet](docs/run-localnet.md)
-  - [Run kuutamod on mainnet|localnet|shardnet](docs/run-main-local-shard.md)
+  - [Run kuutamod on mainnet|localnet|shardnet](docs/run-main-test-shard.md)
   <!-- TODO - [Monitoring](docs/monitoring.md) -->
 - References:
   - [Configuration](docs/configuration.md)
