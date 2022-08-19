@@ -1,6 +1,6 @@
 # Running on `mainnet`, `testnet`, or `shardnet`
 
-### Single node kuutamod
+## Single node kuutamod
 
 This part of the tutorial assumes that you have installed a computer on which.
 [NixOS](https://nixos.org/manual/nixos/stable/#sec-installation).
@@ -38,6 +38,11 @@ the nixos modules from it into your configuration.nix.
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
+       
+        # Optional: This adds a our binary cache so you don't have to compile neard/kuutamod yourself.
+        # The binary cache module, won't be effective on the first run of nixos-rebuild, but you can specify it also via command line like this:
+        # $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+        self.inputs.kuutamod.nixosModules.kuutamo-binary-cache 
 
         # These are the modules provided by our flake
         kuutamod.nixosModules.neard-testnet
@@ -151,6 +156,7 @@ $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet|s
 $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet|shardnet>/node_key.json /var/lib/secrets/node_key.json
 ```
 
+<!--
 ---
 #### SHIM [2022-08-16]
 Our neard init does not download genesis -- to-fix
@@ -165,6 +171,7 @@ $ [nix-shell] $ exit
 $
 ```
 ---
+-->
 
 You will now need to run `systemctl restart kuutamod` so that it picks up the keys. If everything
 went well, you should be able to reach kuutamod's prometheus exporter url:
@@ -193,7 +200,7 @@ Name: river
 
 where `name` is the kuutamo node id.
 
-### Multi-Node kuutamo cluster
+## Multi-Node kuutamo cluster
 
 Once your single-node kuutamod setup works, you can scale out to multiple nodes by changing your `kuutamod.nix`
 like this:
@@ -272,7 +279,7 @@ Just like in the `localnet` example, you can query
 `http://localhost:2233/metrics` on each host or use `kuutamoctl` to see which
 host is currently the designated validator.
 
-## Further reading
+# Further reading
 
 - [Configuration](./configuration.md): All configuration options in kuutamod
 - [Failover algorithm](./failover-algorithm.md) describes the runtime behavior of kuutamod in depth

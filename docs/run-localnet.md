@@ -223,3 +223,8 @@ lrwxrwxrwx   73 joerg 12 Jul 14:54 node_key.json -> /home/joerg/work/kuutamo/kuu
 lrwxrwxrwx   78 joerg 12 Jul 14:54 validator_key.json -> /home/joerg/work/kuutamo/kuutamod/.data/near/localnet/node3/validator_key.json
 .rw-------  214 joerg 12 Jul 14:54 voter_node_key.json
 ```
+
+# Further reading
+
+See the next [chapter](./run-main-test-shard.md) to learn how to run kuutamod
+cluster in production using our NixOS module.
