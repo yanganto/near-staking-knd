@@ -9,13 +9,20 @@ produced). Validators who do not complete the work assigned to them receive
 fewer rewards and may be excluded from the group of validators who are allowed
 to validate for some time.
 
-kuutamod allows multiple NEAR validators to operate in an
-active-passive setup. The active validator node is started with the validator
-keys, while the other nodes stay synchronised with the blockchain ready to take over if needed. In the event
-of a failure, i.e. a neard crash, network split or hardware failure, a passive
-instance can be promoted to an active validator by restarting it with the
-validator keys. To avoid having two active validators running at the same time,
-kuutamod uses [consul](https://www.consul.io/) by acquiring a distributed lock.
+kuutamod allows multiple NEAR validators to operate in an active-passive setup.
+
+One validator becomes the active validator node, and is started with the
+validator keys, while the other nodes stay synchronised with the blockchain
+ready to take over if needed.
+
+In the event of a failure, i.e. a neard crash, network split or hardware
+failure of the active validator node, a passive instance will get be promoted
+to an active validator. This is accomplished by kuutamod automatically
+restarting a passive node with validator keys. Future work is planned to be
+able to switch active/passive mode at runtime.
+
+To avoid having two active validators running at the same time, kuutamod uses
+[consul](https://www.consul.io/) by acquiring a distributed lock.
 
 ## Status: beta
 

@@ -38,11 +38,11 @@ the nixos modules from it into your configuration.nix.
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
-       
+
         # Optional: This adds a our binary cache so you don't have to compile neard/kuutamod yourself.
         # The binary cache module, won't be effective on the first run of nixos-rebuild, but you can specify it also via command line like this:
         # $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
-        self.inputs.kuutamod.nixosModules.kuutamo-binary-cache 
+        self.inputs.kuutamod.nixosModules.kuutamo-binary-cache
 
         # These are the modules provided by our flake
         kuutamod.nixosModules.neard-testnet
@@ -56,29 +56,36 @@ the nixos modules from it into your configuration.nix.
 }
 ```
 
----
+## Bootstrap from S3
 
-To bootstrap neard quickly, you can use an s3 backup of the chain database.
-These are available for mainnet, testnet:
+To bootstrap neard quickly, you can use an S3 backup of the chain database.
 
-The module can download this automatically, but for mainnet and testnet you need to specify a timestamp to do so:
+### mainnet / testnet
+For `mainnet` and `testnet`, these are provided in the `near-protocol-public`
+S3 bucket.
 
-**Testnet**
+You need to determine the latest timestamp manually, and configure
+the config with the URL:
 
 ```
 $ nix-shell -p awscli --command 'aws s3 --no-sign-request cp s3://near-protocol-public/backups/testnet/rpc/latest -'
 2022-07-15T11:00:30Z
 ```
 
-In this case, the full s3 backup URL (to be used in the config below) is  
+In this case, the full s3 backup URL (to be used in the config below, as
+`kuutamo.neard.s3.dataBackupDirectory`) is
 `s3://near-protocol-public/backups/testnet/rpc/2022-07-15T11:00:30Z`.
-
-**Mainnet**
 
 For `mainnet` replace the word `testnet` in the urls above.
 
----
+### shardnet
+For `shardnet`, there's another (unversioned) bucket, so there's no need to set
+the timestamp manually.
 
+If you use `kuutamod.nixosModules.neard-shardnet` in your config above, it'll
+automatically use the unversioned snapshot.
+
+---
 
 Create a new file called `kuutamod.nix` next to your `configuration.nix` in `/etc/nixos/`.
 If your NixOS configuration is managed via a git repository, do not forget to run `git add kuutamod.nix`.
@@ -124,15 +131,15 @@ nixos-rebuild switch --flake /etc/nixos#my-validator
 The first switch will take longer since it blocks on downloading the s3 data backup (around 300GB).
 You can follow the progress by running: `sudo journalctl -u kuutamod -f`.
 
-The next step is to generate and install validator key and validator node key. Note that
-with kuutamod we will have one validator and node key for the active validator,
-while each validator also has its own non-valdiator node key, when its not the active
-validator. These non-validator keys are created automatically by kuutamod.
-Furthermore when the current machine is not a validator it will listen to seperate port.
-This is important for failover since we want to not confuse the neard instances that might
-still have old routing table entries for specific nodes.
+#### Node keys / generating the active validator key
 
-#### Generate keys. 
+Note that with kuutamod there will be one validator and node key for the active
+validator, while each validator also has its own non-validator node key, which
+is used during passive mode. The passive keys are created automatically by
+kuutamod.
+
+The next step is to generate and install the active validator key and validator
+node key.
 
 Run the following command but replace
 `kuutamo-test_kuutamo.shardnet.pool.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>
