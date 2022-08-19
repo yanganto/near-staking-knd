@@ -59,7 +59,7 @@ the nixos modules from it into your configuration.nix.
 ---
 
 To bootstrap neard quickly, you can use an s3 backup of the chain database.
-These are available for mainnet, testnet and stakenet:
+These are available for mainnet, testnet:
 
 The module can download this automatically, but for mainnet and testnet you need to specify a timestamp to do so:
 
@@ -76,11 +76,6 @@ In this case, the full s3 backup URL (to be used in the config below) is
 **Mainnet**
 
 For `mainnet` replace the word `testnet` in the urls above.
-
-**Shardnet**
-
-In our module we provide our own [unversioned bucket](https://github.com/kuutamolabs/kuutamod/blob/main/nix/modules/neard/shardnet/default.nix)
-that is daily updated. As shardnet evolves and alignes this will be updated.
 
 ---
 
