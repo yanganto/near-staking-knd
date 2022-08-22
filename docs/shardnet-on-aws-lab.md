@@ -69,6 +69,11 @@ This lab assumes you have created an account on shardnet. [Challange 1](https://
 ```
 
 #### Rebuild and switch to new configuration
+##### If you are wanting to use the binary cache
+```console
+$ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
+```
+##### If not and you want compile neard and kuutamod on the machine (remember to comment out this line in `flake.nix`  `self.inputs.kuutamod.nixosModules.kuutamo-binary-cache`)
 ```console
 $ nixos-rebuild switch --flake /etc/nixos#validator
 ```
