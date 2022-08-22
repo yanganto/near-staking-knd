@@ -65,7 +65,7 @@ $ nixos-rebuild switch --flake /etc/nixos#validator
 #### Create keys
 
 1. Follow [instructions to create wallet and install near-cli](https://github.com/near/stakewars-iii/blob/main/challenges/001.md) 
-2. Follow instructions to [generate keys and install them](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#generate-keys)
+2. Follow instructions to [generate keys and install them](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run-main-test-shard.md#generate-keys)
 
 You can view logs in the systemd journal
 ```console
