@@ -103,7 +103,7 @@ Jul 17 21:43:50 river kuutamod[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: 
 #### Next Steps
 
 - You can now mount your staking pool [Challenge 3](https://github.com/near/stakewars-iii/blob/main/challenges/003.md)
-- You can add more nodes to create an active/passive ha cluster. See [this section](https://github.com/kuutamolabs/kuutamod/blob/main/README.md](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#multi-node-kuutamo-cluster) for more information. 
+- You can add more nodes to create an active/passive ha cluster. See [this section](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#multi-node-kuutamo-cluster) for more information. 
 
 ---
 kuutamolabs  
