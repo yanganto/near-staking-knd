@@ -42,6 +42,11 @@ This lab assumes you have created an account on shardnet. [Challange 1](https://
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
+        
+        # Optional: This adds a our binary cache so you don't have to compile neard/kuutamod yourself.
+        # The binary cache module, won't be effective on the first run of nixos-rebuild, but you can specify it also via command line like this:
+        # $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
+        self.inputs.kuutamod.nixosModules.kuutamo-binary-cache
 
         kuutamod.nixosModules.neard-shardnet
         kuutamod.nixosModules.kuutamod
