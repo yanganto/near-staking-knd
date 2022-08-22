@@ -17,7 +17,7 @@ To do this, add these lines to your `configuration.nix`...
 }
 ```
 
-and create a `flake.nix` as described [here](https://nixos.wiki/wiki/Flakes#Using_nix_flakes_with_NixOS).
+and create a `flake.nix` file in /etc/nixos/ [More info on flakes](https://nixos.wiki/wiki/Flakes#Using_nix_flakes_with_NixOS).
 
 In your `flake.nix` you have to add the `kuutamod` flake as source and import
 the nixos modules from it into your configuration.nix.
