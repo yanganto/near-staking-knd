@@ -19,7 +19,13 @@ This lab assumes you have created an account on shardnet. [Challange 1](https://
 
   nix.extraOptions = ''
   experimental-features = nix-command flakes
-  '';  
+  '';
+  
+  # Even with 32GB Memory will still got memory allocation issues. Adding 4GB swap helped.
+  swapDevices = [{
+    device = "/swapfile";
+    size = 4096;
+  }];
 }
 ```
 
