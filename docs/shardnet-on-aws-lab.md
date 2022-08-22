@@ -67,17 +67,11 @@ $ nixos-rebuild switch --flake /etc/nixos#validator
 1. Follow [instructions to create wallet and install near-cli](https://github.com/near/stakewars-iii/blob/main/challenges/001.md) 
 2. Follow instructions to [generate keys and install them](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run-main-test-shard.md#generate-keys)
 
-You can view logs in the systemd journal
-```console
-$ journalctl -u kuutamod.service -f
-Jul 17 21:43:50 river kuutamod[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: # 1102053 7zgkxdDiKBoqud9DuSC47cwZ94e63BwGj1NNKs93JcLs Validator | 100 validators 29 peers ⬇ 345 kB/s ⬆ 485 kB/s 0.80 bps 0 gas/s CPU: 0%, Mem: 1.77 GB
-```
 
-If the s3 backup sync was quicker than you generating the key, you might need to
-run `systemctl restart kuutamod` so that it picks up the key. If everything
+You will need restart kuutamod with `systemctl restart kuutamod` so that it picks up the key. If everything
 went well, you should be able to reach kuutamod's prometheus exporter url:
 
-```
+```consile
 $ curl http://localhost:2233/metrics
 # HELP kuutamod_state In what state our supervisor statemachine is
 # TYPE kuutamod_state gauge
@@ -98,6 +92,12 @@ $ kuutamoctl active-validator
 Name: river
 ```
 where `Name` is the kuutamo node id.
+
+You can view logs in the systemd journal
+```console
+$ journalctl -u kuutamod.service -f
+Jul 17 21:43:50 river kuutamod[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: # 1102053 7zgkxdDiKBoqud9DuSC47cwZ94e63BwGj1NNKs93JcLs Validator | 100 validators 29 peers ⬇ 345 kB/s ⬆ 485 kB/s 0.80 bps 0 gas/s CPU: 0%, Mem: 1.77 GB
+```
 
 ---
 #### Next Steps
