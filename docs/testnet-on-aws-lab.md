@@ -77,8 +77,7 @@ $ nixos-rebuild switch --flake /etc/nixos#validator
 
 #### Create keys
 
-1. Follow [instructions to create wallet and install near-cli](https://github.com/near/stakewars-iii/blob/main/challenges/001.md) 
-2. Follow instructions to [generate keys and install them](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run-main-test-shard.md#node-keys--generating-the-active-validator-key)
+Follow instructions to [generate keys and install them](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run-main-test-shard.md#node-keys--generating-the-active-validator-key)
 
 
 You will need restart kuutamod with `systemctl restart kuutamod` so that it picks up the key. If everything
