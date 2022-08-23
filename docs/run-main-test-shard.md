@@ -218,6 +218,7 @@ like this:
 {
 
   # Same as above, this needs to be an interface should be used to connect to your other machines
+  # If you've come from the AWS guide, note you may need to change this.
   services.consul.interface.bind = "enp24s0f0";
 
   # this now needs to be increased to the number of consul nodes your are adding
