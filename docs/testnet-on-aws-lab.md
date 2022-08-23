@@ -64,12 +64,12 @@ the config with the URL:
 
 ```
 $ nix --extra-experimental-features "nix-command flakes" shell nixpkgs#awscli2 -c aws s3 --no-sign-request cp s3://near-protocol-public/backups/testnet/rpc/latest -
-2022-07-15T11:00:30Z
+2022-08-23T11:00:30Z
 ```
 
 In this case, the full s3 backup URL (to be used in the config below, as
 `kuutamo.neard.s3.dataBackupDirectory`) is
-`s3://near-protocol-public/backups/testnet/rpc/2022-07-15T11:00:30Z`
+`s3://near-protocol-public/backups/testnet/rpc/2022-08-23T11:00:30Z`
 
 
 #### Add `kuutamod.nix` file as below: `nano /etc/nixos/kuutamod.nix`
