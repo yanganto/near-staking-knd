@@ -1,6 +1,4 @@
-# Lab: Single node kuutamo near validator up on shardnet using AWS.
-
-This lab assumes you have created an account on shardnet. [Challange 1](https://github.com/near/stakewars-iii/blob/main/challenges/001.md)
+# Lab: Single node kuutamo near validator up on testnet using AWS.
 
 - Get [NixOS EC2 AMI](https://nixos.org/download.html#nixos-amazon)
   In this demo I used N.Virginia (us-east-1): `ami-0223db08811f6fb2d` NB: Each region uses an AMI with a different name so double check that you picked the correct region on the NixOS site if the AMI doesn't show up in the AWS UI.
@@ -21,7 +19,6 @@ This lab assumes you have created an account on shardnet. [Challange 1](https://
   experimental-features = nix-command flakes
   '';
   
-  # Even with 32GB Memory will still got memory allocation issues. Adding 4GB swap helped.
   swapDevices = [{
     device = "/swapfile";
     size = 4096;
@@ -48,7 +45,7 @@ This lab assumes you have created an account on shardnet. [Challange 1](https://
         # $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
         self.inputs.kuutamod.nixosModules.kuutamo-binary-cache
 
-        kuutamod.nixosModules.neard-shardnet
+        kuutamod.nixosModules.neard-testnet
         kuutamod.nixosModules.kuutamod
       ];
     };
@@ -118,7 +115,6 @@ Jul 17 21:43:50 river kuutamod[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: 
 ---
 #### Next Steps
 
-- You can now mount your staking pool [Challenge 3](https://github.com/near/stakewars-iii/blob/main/challenges/003.md)
 - You can add more nodes to create an active/passive ha cluster. See [this section](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#multi-node-kuutamo-cluster) for more information. 
 
 ---
