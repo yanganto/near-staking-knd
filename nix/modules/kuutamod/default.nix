@@ -80,7 +80,11 @@ in
     ];
 
     # this is useful for kuutamodctl
-    environment.variables."KUUTAMO_ACCOUNT_ID" = cfg.accountId;
+    environment.variables = {
+      "KUUTAMO_ACCOUNT_ID" = cfg.accountId;
+    } // lib.optionalAttrs (cfg.consulTokenFile != null) {
+      "KUUTAMO_CONSUL_TOKEN_FILE" = "/run/kuutamod/consul-token";
+    };
 
     systemd.services.kuutamod = {
       wantedBy = [ "multi-user.target" ];
@@ -101,12 +105,20 @@ in
 
         RuntimeDirectory = "kuutamod";
 
-        ExecReload = "${pkgs.writeShellScript "kuutamod-schedule-reload" ''
+        ExecReload = [
+          "${pkgs.writeShellScript "kuutamod-schedule-reload" ''
           set -x
           touch /run/kuutamod/restart
           # reload consul token file
           kill -SIGUSR1 $MAINPID
-        ''}";
+
+          ${lib.optionalString (cfg.consulTokenFile != null) ''
+            # We need those keys for kuutamoctl as root
+            # We copy the token from the service here to make things like systemd's LoadCredential and secrets from vault work.
+            install -m400 "${cfg.consulTokenFile}" /run/kuutamod/consul-token
+          ''}
+        ''}"
+        ];
 
         # If neard goes out-of-memory, we want to keep kuutamod running.
         OOMPolicy = "continue";
@@ -122,7 +134,8 @@ in
                   mv /var/lib/neard/node_key.json /var/lib/neard/voter_node_key.json
                 fi
               ''}"
-          ];
+            # we need to execute this as the neard user so we get access to private tmp
+          ] ++ lib.optional (cfg.consulTokenFile != null) "${pkgs.coreutils}/bin/install -m400 '${cfg.consulTokenFile}' /run/kuutamod/consul-token";
         ExecStart = "${kuutamod}/bin/kuutamod";
       };
     };
