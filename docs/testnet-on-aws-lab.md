@@ -52,6 +52,26 @@
   };
 }
 
+## Bootstrap from S3
+
+To bootstrap neard quickly, you can use an S3 backup of the chain database.
+
+### mainnet / testnet
+For `mainnet` and `testnet`, these are provided in the `near-protocol-public`
+S3 bucket.
+
+You need to determine the latest timestamp manually, and configure
+the config with the URL:
+
+```
+$ nix-shell -p awscli --command 'aws s3 --no-sign-request cp s3://near-protocol-public/backups/testnet/rpc/latest -'
+2022-07-15T11:00:30Z
+```
+
+In this case, the full s3 backup URL (to be used in the config below, as
+`kuutamo.neard.s3.dataBackupDirectory`) is
+`s3://near-protocol-public/backups/testnet/rpc/2022-07-15T11:00:30Z`.
+
 ```
 #### Add `kuutamod.nix` file as below: `nano /etc/nixos/kuutamod.nix`
 ```nix
@@ -59,6 +79,9 @@
   # consul is here because you can add more kuutamod nodes later and create an Active/Passive HA cluster.
   services.consul.interface.bind = "ens5";
   services.consul.extraConfig.bootstrap_expect = 1;
+  
+  # This is the URL we calculated above:
+  kuutamo.neard.s3.dataBackupDirectory = "s3://near-protocol-public/backups/testnet/rpc/2022-07-15T11:00:30Z";
 
   kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
   kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
