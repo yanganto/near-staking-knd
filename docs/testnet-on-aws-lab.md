@@ -63,7 +63,7 @@ You need to determine the latest timestamp manually, and configure
 the config with the URL:
 
 ```
-$ nix-shell -p awscli --command 'aws s3 --no-sign-request cp s3://near-protocol-public/backups/testnet/rpc/latest -'
+$ nix --extra-experimental-features "nix-command flakes" shell nixpkgs#awscli2 -c aws s3 --no-sign-request cp s3://near-protocol-public/backups/testnet/rpc/latest -
 2022-07-15T11:00:30Z
 ```
 
