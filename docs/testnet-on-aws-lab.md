@@ -188,7 +188,7 @@ Jul 17 21:43:50 river kuutamod[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: 
 ---
 #### Next Steps
 
-- You can add more nodes to create an active/passive ha cluster. See [this section](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run.md#multi-node-kuutamo-cluster) for more information. 
+- You can add more nodes to create an active/passive ha cluster. See [this section](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run-main-test-shard.md#multi-node-kuutamo-cluster) for more information. 
 
 ---
 kuutamolabs  
