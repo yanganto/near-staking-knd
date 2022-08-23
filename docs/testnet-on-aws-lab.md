@@ -56,8 +56,6 @@
 #### Bootstrap from S3
 
 To bootstrap neard quickly, you can use an S3 backup of the chain database.
-
-#### mainnet / testnet
 For `mainnet` and `testnet`, these are provided in the `near-protocol-public`
 S3 bucket.
 
@@ -71,9 +69,9 @@ $ nix-shell -p awscli --command 'aws s3 --no-sign-request cp s3://near-protocol-
 
 In this case, the full s3 backup URL (to be used in the config below, as
 `kuutamo.neard.s3.dataBackupDirectory`) is
-`s3://near-protocol-public/backups/testnet/rpc/2022-07-15T11:00:30Z`.
+`s3://near-protocol-public/backups/testnet/rpc/2022-07-15T11:00:30Z`
 
-```
+
 #### Add `kuutamod.nix` file as below: `nano /etc/nixos/kuutamod.nix`
 ```nix
 {
@@ -90,11 +88,13 @@ In this case, the full s3 backup URL (to be used in the config below, as
 ```
 
 #### Rebuild and switch to new configuration
-##### If you are wanting to use the binary cache
+If you are wanting to use the binary cache:
+
 ```console
 $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
 ```
-##### If not and you want compile neard and kuutamod on the machine (remember to comment out this line in `flake.nix`  `self.inputs.kuutamod.nixosModules.kuutamo-binary-cache`)
+If not, and you want compile neard and kuutamod on the machine (remember to comment out this line in `flake.nix`  `self.inputs.kuutamod.nixosModules.kuutamo-binary-cache`):
+
 ```console
 $ nixos-rebuild switch --flake /etc/nixos#validator
 ```
