@@ -53,11 +53,11 @@
 }
 ```
 
-## Bootstrap from S3
+#### Bootstrap from S3
 
 To bootstrap neard quickly, you can use an S3 backup of the chain database.
 
-### mainnet / testnet
+#### mainnet / testnet
 For `mainnet` and `testnet`, these are provided in the `near-protocol-public`
 S3 bucket.
 
