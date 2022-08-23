@@ -122,10 +122,39 @@ You can continue the rest of this setup but note this needs to complete first, t
 
 #### Create keys
 
-Follow instructions to [generate keys and install them](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run-main-test-shard.md#node-keys--generating-the-active-validator-key)
+Note that with kuutamod there will be one validator and node key for the active
+validator, while each validator also has its own non-validator node key, which
+is used during passive mode. The passive keys are created automatically by
+kuutamod.
 
+The next step is to generate and install the active validator key and validator
+node key.
 
-You will need restart kuutamod with `systemctl restart kuutamod` so that it picks up the key. If everything
+Run the following command but replace
+`kuutamo-test_kuutamo.f863973.m0`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>
+
+```console
+$ export NEAR_ENV=testnet
+$ nix run github:kuutamoaps/kuutamod#near-cli generate-key kuutamo-test_kuutamo.f863973.m0
+$ nix run github:kuutamoaps/kuutamod#near-cli generate-key node_key
+```
+
+You then must edit these files and change `private_key` to `secret_key`.
+
+```console
+$ nano ~/.near-credentials/testnet/kuutamo-test_kuutamo.f863973.m0.json
+$ nano ~/.near-credentials/testnet/node_key.json
+```
+
+You can then install them like this (but replace
+`kuutamo-test_kuutamo.f863973.m0`, with your own pool id:
+
+```console
+$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/kuutamo-test_kuutamo.f863973.m0.json /var/lib/secrets/validator_key.json
+$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/node_key.json /var/lib/secrets/node_key.json
+```
+
+You will then need restart kuutamod with `systemctl restart kuutamod` so that it picks up the key. If everything
 went well, you should be able to reach kuutamod's prometheus exporter url:
 
 ```console
