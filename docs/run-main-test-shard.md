@@ -150,7 +150,14 @@ $ nix run github:kuutamoaps/kuutamod#near-cli generate-key kuutamo-test_kuutamo.
 $ nix run github:kuutamoaps/kuutamod#near-cli generate-key node_key
 ```
 
-Once the keys are generated, you can install them like this (but replace
+You then must edit these files and change `private_key` to `secret_key`.
+
+```console
+$ nano ~/.near-credentials/<mainnet|testnet|shardnet>/kuutamo-test_kuutamo.shardnet.pool.near.json
+$ nano ~/.near-credentials/<mainnet|testnet|shardnet>/node_key.json
+```
+
+You can then install them like this (but replace
 `kuutamo-test_kuutamo.shardnet.pool.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>):
 
 ```console
