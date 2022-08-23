@@ -131,11 +131,11 @@ The next step is to generate and install the active validator key and validator
 node key.
 
 Run the following command but replace
-`kuutamo-test_kuutamo.f863973.m0`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>
+`kuutamo-test_kuutamo.pool.f863973.m0`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>
 
 ```console
 $ export NEAR_ENV=testnet
-$ nix run github:kuutamoaps/kuutamod#near-cli generate-key kuutamo-test_kuutamo.f863973.m0
+$ nix run github:kuutamoaps/kuutamod#near-cli generate-key kuutamo-test_kuutamo.pool.f863973.m0
 $ nix run github:kuutamoaps/kuutamod#near-cli generate-key node_key
 ```
 
