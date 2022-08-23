@@ -142,8 +142,7 @@ $ nix run github:kuutamoaps/kuutamod#near-cli generate-key node_key
 You then must edit these files and change `private_key` to `secret_key`.
 
 ```console
-$ nano ~/.near-credentials/testnet/kuutamo-test_kuutamo.f863973.m0.json
-$ nano ~/.near-credentials/testnet/node_key.json
+$ sed -i -e 's/private_key/secret_key/' ~/.near-credentials/testnet/kuutamo-test_kuutamo.f863973.m0.json ~/.near-credentials/testnet/node_key.json
 ```
 
 You can then install them like this (but replace
