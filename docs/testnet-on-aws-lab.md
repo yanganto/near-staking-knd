@@ -96,13 +96,29 @@ In this case, the full s3 backup URL (to be used in the config below, as
 If you are wanting to use the binary cache:
 
 ```console
-$ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
+$ nixos-rebuild boot --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
 ```
 If not, and you want compile neard and kuutamod on the machine (remember to comment out this line in `flake.nix`  `self.inputs.kuutamod.nixosModules.kuutamo-binary-cache`):
 
 ```console
-$ nixos-rebuild switch --flake /etc/nixos#validator
+$ nixos-rebuild boot --flake /etc/nixos#validator
+warning: creating lock file '/etc/nixos/flake.lock'
+building the system configuration...
+updating GRUB 2 menu...
 ```
+
+#### Reboot the machine
+```console
+$ reboot
+```
+
+SSH back into the machine. It can take a couple of minutes to be ready. Then run `journalctl -u kuutamod.service -n 10` 
+This will show you the 10 most recent kuutamod logs. If you logged straight back in after reboot you'll probably see something like this:
+![image](https://user-images.githubusercontent.com/38218340/186202697-8b83218a-188d-4610-8ecd-c6025ca9bf89.png)
+
+This is the S3 backup download, and at time of writing takes about an hour to download.
+
+You can continue the rest of this setup but note this needs to complete first, then the block/chunk validations, before you'll move on from the 'Syncing' kuutamod state.
 
 #### Create keys
 
@@ -112,7 +128,7 @@ Follow instructions to [generate keys and install them](https://github.com/kuuta
 You will need restart kuutamod with `systemctl restart kuutamod` so that it picks up the key. If everything
 went well, you should be able to reach kuutamod's prometheus exporter url:
 
-```consile
+```console
 $ curl http://localhost:2233/metrics
 # HELP kuutamod_state In what state our supervisor statemachine is
 # TYPE kuutamod_state gauge
