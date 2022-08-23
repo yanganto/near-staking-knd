@@ -76,6 +76,11 @@ In this case, the full s3 backup URL (to be used in the config below, as
 ```nix
 {
   # consul is here because you can add more kuutamod nodes later and create an Active/Passive HA cluster.
+  # Consul wants to bind to a network interface. You can get your interface as follows:
+  # $ ip route get 8.8.8.8
+  # 8.8.8.8 via 131.159.102.254 dev enp24s0f0 src 131.159.102.16 uid 1000
+  #   cache
+  # This becomes relevant when you scale up to multiple machines.
   services.consul.interface.bind = "ens5";
   services.consul.extraConfig.bootstrap_expect = 1;
   
