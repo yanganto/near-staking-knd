@@ -51,6 +51,7 @@
     };
   };
 }
+```
 
 ## Bootstrap from S3
 
