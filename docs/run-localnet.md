@@ -41,7 +41,7 @@ You need the following executables in your `$PATH`.
 
 - [Python](https://www.python.org/) for some of the setup scripts.
 
-If you have installed the nix package manager (as described [here](./build.md)),
+Install the nix package manager (as described [here](https://nix.dev/tutorials/install-nix)),
 you can get all dependencies by running `nix develop` from the source directory
 of kuutamod:
 
@@ -64,7 +64,7 @@ consul server becomes a single point of failure. The scripts also set up keys
 and configuration for two kuutamod instances. The localnet configuration for all
 nodes is stored in `.data/near/localnet`.
 
-If you built kuutamod from source using `cargo build`, the binary is in
+Note: If you built kuutamod from source using `cargo build`, the binary is in
 `target/debug` or `target/release`, depending on whether you have a debug or
 release build.
 
