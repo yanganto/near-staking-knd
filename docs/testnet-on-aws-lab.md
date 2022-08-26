@@ -6,7 +6,7 @@
   ![image](https://user-images.githubusercontent.com/38218340/185245850-28b37993-3645-491a-b6fd-bb908737bf8d.png)
   
 - Setup VM
-  AWS > EC2 > AMIs > `ami-0223db08811f6fb2d` > Launch instance from AMI (we tested on c6a.4xlarge with 300GB gp3 disk) > Launch instance
+  AWS > EC2 > AMIs > `ami-0223db08811f6fb2d` > Launch instance from AMI (we tested on c6a.4xlarge with 500GB gp3 disk) > Launch instance
 - SSH to instance
 
 #### Edit `configuration.nix` so it is as below: `nano /etc/nixos/configuration.nix`
