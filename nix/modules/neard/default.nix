@@ -122,7 +122,7 @@ in
             install -d -o neard -g neard /var/lib/neard
             ${lib.optionalString (cfg.genesisFile == null && cfg.chainId != null) ''
               if [[ ! -e /var/lib/neard/genesis.json ]]; then
-                aws s3 --no-sign-request cp s3://build.nearprotocol.com/nearcore-deploy/${cfg.chainId}/genesis.json /var/lib/neard/genesis.json
+                runuser -u neard -g neard -- aws s3 --no-sign-request cp s3://build.nearprotocol.com/nearcore-deploy/${cfg.chainId}/genesis.json /var/lib/neard/genesis.json
               fi
             ''}
 
