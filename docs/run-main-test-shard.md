@@ -292,4 +292,5 @@ host is currently the designated validator.
 # Further reading
 
 - [Configuration](./configuration.md): All configuration options in kuutamod
+- [Reset neard](./reset-neard): How to reset neard, i.e. after a network fork or when changing the chain.
 - [Failover algorithm](./failover-algorithm.md) describes the runtime behavior of kuutamod in depth
