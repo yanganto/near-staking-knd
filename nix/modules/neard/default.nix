@@ -120,12 +120,11 @@ in
             # Boostrap chain data for new nodes
 
             install -d -o neard -g neard /var/lib/neard
-            ${if (cfg.genesisFile != null) then "ln -sf ${cfg.genesisFile} /var/lib/neard/genesis.json"
-              else lib.optionalString (cfg.chainId != null) ''
-                if [[ ! -e /var/lib/neard/genesis.json ]]; then
-                  aws s3 --no-sign-request cp s3://build.nearprotocol.com/nearcore-deploy/${cfg.chainId}/genesis.json /var/lib/neard/genesis.json
-                fi
-              ''}
+            ${lib.optionalString (cfg.genesisFile == null && cfg.chainId != null) ''
+              if [[ ! -e /var/lib/neard/genesis.json ]]; then
+                runuser -u neard -g neard -- aws s3 --no-sign-request cp s3://build.nearprotocol.com/nearcore-deploy/${cfg.chainId}/genesis.json /var/lib/neard/genesis.json
+              fi
+            ''}
 
             if [[ ! -f /var/lib/neard/.finished ]]; then
               ${lib.optionalString (cfg.generateNodeKey) ''
@@ -144,6 +143,7 @@ in
 
             # Update configuration
             install -D -m755 -o neard -g neard ${cfg.configFile} /var/lib/neard/config.json
+            ${lib.optionalString (cfg.genesisFile != null) "ln -sf ${cfg.genesisFile} /var/lib/neard/genesis.json"}
           ''}"
         ];
         ExecStart = "${cfg.package}/bin/neard --home /var/lib/neard run";
