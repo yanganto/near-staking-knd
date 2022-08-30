@@ -131,7 +131,7 @@ The next step is to generate and install the active validator key and validator
 node key.
 
 Run the following command but replace
-`kuutamo-test_kuutamo.pool.f863973.m0`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>
+`kuutamo-test_kuutamo.pool.f863973.m0`, with your own pool id
 
 ```console
 $ export NEAR_ENV=testnet
