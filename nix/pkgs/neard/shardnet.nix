@@ -4,11 +4,11 @@ let
   generic = pkgs.callPackage ./generic.nix { };
 in
 generic {
-  version = "2022-08-16";
+  version = "2022-08-25";
   # compare with https://github.com/near/stakewars-iii/blob/main/commit.md
-  rev = "f7f0cb22e85e9c781a9c71df7dcb17f507ff6fde";
-  sha256 = "sha256-kSHZ0xnba0finFFk4wKAYayllejCC14/IBAZOJqs/pM=";
-  cargoSha256 = "sha256-NhLtWZckCIAYCsan6hH1K2upsoVp/AaeXkR+hHULNFw=";
+  rev = "fe435d02c5ea497933c89d5e7d1703d9379b7e1f";
+  sha256 = "sha256-LeQooMbMCKzd/xLaVnIRCXoI5Uc8lOhJX/jQVKt1+h0=";
+  cargoSha256 = "sha256-OIFR4zCLT9qw+LIJKrcm6p295dn7ThaKnXeADljcQ8k=";
   cargoBuildFlags = [
     "--features=shardnet"
   ];
