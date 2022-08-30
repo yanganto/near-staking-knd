@@ -5,7 +5,7 @@ on:
   schedule:
     - cron:  '51 2 * * *'
 jobs:
-  createPullRequest:
+  updateNeardConfig:
     strategy:
       matrix:
         network: [mainnet, testnet, shardnet]
@@ -26,6 +26,34 @@ jobs:
           token: ${{ secrets.GH_TOKEN_FOR_CI }}
           delete-branch: true
           title: Upgrade near configuration for ${{matrix.network}}
+          body: |
+            Also check if the new configuration is still valid
+
+      - name: Check outputs
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+  updateGenesisConfig:
+    strategy:
+      matrix:
+        network: [mainnet]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN_FOR_CI }}
+      - name: Upgrade neard configuration
+        run: |
+          curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/genesis.json > nix/modules/neard/${{matrix.network}}/genesis.json
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          commit-message: Upgrade near configuration for ${{matrix.network}}
+          branch: near-genesis-${{matrix.network}}
+          token: ${{ secrets.GH_TOKEN_FOR_CI }}
+          delete-branch: true
+          title: Upgrade genesis.json for ${{matrix.network}}
           body: |
             Also check if the new configuration is still valid
 
