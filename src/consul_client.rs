@@ -20,7 +20,7 @@ pub struct ConsulClient {
 }
 
 /// Behavior to take when a session is invalidated
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum SessionBehavior {
     /// Causes any locks that are held to be released
@@ -30,7 +30,7 @@ pub enum SessionBehavior {
 }
 
 /// A consul session according to https://www.consul.io/api-docs/session
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct ConsulSession {
     #[serde(rename = "ID")]
     id: String,
@@ -393,7 +393,7 @@ impl ConsulClient {
             .await
             .context("Failed to acquire key")?;
         match res.status() {
-            code if code.is_success() => return Ok(res.json::<bool>().await?),
+            code if code.is_success() => Ok(res.json::<bool>().await?),
             code => {
                 let text = res.text().await.unwrap_or_else(|_| "".to_string());
                 bail!(
