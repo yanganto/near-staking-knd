@@ -116,34 +116,35 @@ in
         # this script is run as root
         ExecStartPre = [
           "+${pkgs.writeShellScript "neard-setup" ''
-          set -eux -o pipefail
-          # Boostrap chain data for new nodes
+            set -eux -o pipefail
+            # Boostrap chain data for new nodes
 
-          install -d -o neard -g neard /var/lib/neard
+            install -d -o neard -g neard /var/lib/neard
+            ${if (cfg.genesisFile != null) then "ln -sf ${cfg.genesisFile} /var/lib/neard/genesis.json"
+              else lib.optionalString (cfg.chainId != null) ''
+                if [[ ! -e /var/lib/neard/genesis.json ]]; then
+                  aws s3 --no-sign-request cp s3://build.nearprotocol.com/nearcore-deploy/${cfg.chainId}/genesis.json /var/lib/neard/genesis.json
+                fi
+              ''}
 
-          if [[ ! -f /var/lib/neard/.finished ]]; then
-            ${lib.optionalString (cfg.generateNodeKey) ''
-              runuser -u neard -g neard -- ${cfg.package}/bin/neard --home /var/lib/neard init \
-                ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"} \
-                ${lib.optionalString (cfg.chainId != null && cfg.genesisFile == null) "--download-genesis"}
-            ''}
-            ${lib.optionalString (cfg.s3.dataBackupDirectory != null) ''
-              runuser -u neard -g neard -- aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupDirectory} /var/lib/neard/data
-            ''}
-            ${lib.optionalString (cfg.s3.dataBackupTarball != null) ''
-              runuser -u neard -g neard -- aws s3 --no-sign-request cp ${cfg.s3.dataBackupTarball} /var/lib/neard/data.tar.gz
-              runuser -u neard -g neard -- bsdtar -C /var/lib/neard -xzf /var/lib/neard/data.tar.gz
-              rm -rf /var/lib/neard/data.tar.gz
-            ''}
-            touch /var/lib/neard/.finished
-          fi
+            if [[ ! -f /var/lib/neard/.finished ]]; then
+              ${lib.optionalString (cfg.generateNodeKey) ''
+                runuser -u neard -g neard -- ${cfg.package}/bin/neard --home /var/lib/neard init ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"}
+              ''}
+              ${lib.optionalString (cfg.s3.dataBackupDirectory != null) ''
+                runuser -u neard -g neard -- aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupDirectory} /var/lib/neard/data
+              ''}
+              ${lib.optionalString (cfg.s3.dataBackupTarball != null) ''
+                runuser -u neard -g neard -- aws s3 --no-sign-request cp ${cfg.s3.dataBackupTarball} /var/lib/neard/data.tar.gz
+                runuser -u neard -g neard -- bsdtar -C /var/lib/neard -xzf /var/lib/neard/data.tar.gz
+                rm -rf /var/lib/neard/data.tar.gz
+              ''}
+              touch /var/lib/neard/.finished
+            fi
 
-          # Update configuration
-          install -D -m755 -o neard -g neard ${cfg.configFile} /var/lib/neard/config.json
-          ${lib.optionalString (cfg.genesisFile != null) ''
-            ln -sf ${cfg.genesisFile} /var/lib/neard/genesis.json
-          ''}
-        ''}"
+            # Update configuration
+            install -D -m755 -o neard -g neard ${cfg.configFile} /var/lib/neard/config.json
+          ''}"
         ];
         ExecStart = "${cfg.package}/bin/neard --home /var/lib/neard run";
         Restart = "always";
@@ -197,3 +198,5 @@ in
     };
   };
 }
+
+
