@@ -155,6 +155,7 @@
     "enable_statistics_export": true,
     "max_open_files": 10000,
     "col_state_cache_size": 536870912,
-    "block_size": 16384
+    "block_size": 16384,
+    "trie_cache_capacities": []
   }
 }
