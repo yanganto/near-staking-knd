@@ -33,11 +33,11 @@ rustPlatform.buildRustPackage rec {
   # Also see https://github.com/near/nearcore/issues/6857
   #
   # This should be fixed in https://github.com/near/nearcore/pull/6858
-  patches = lib.optional (version == "1.28.0") ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch;
+  patches = lib.optional (version == "1.28.1") ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch;
 
   # Stateviewer has a test dependency on the wasm contracts.
   # Since we are not building tests, we can skip those.
-  cargoPatches = lib.optional (version != "1.27.0") ./0001-make-near-test-contracts-optional.patch;
+  cargoPatches = [ ./0001-make-near-test-contracts-optional.patch ];
 
   postPatch = ''
     substituteInPlace neard/build.rs \
