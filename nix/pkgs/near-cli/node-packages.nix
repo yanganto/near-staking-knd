@@ -103,31 +103,31 @@ let
         sha512 = "6wDYdbWrw9VwHIcoDnqWBaDFyviyjZWv6H9vz9Vyhe4Qd7TIFmbTl/eWs6hZvtZBza9K8y7zD8ChHwRI4s9tSw==";
       };
     };
-    "@ledgerhq/hw-transport-6.27.2" = {
+    "@ledgerhq/hw-transport-6.27.3" = {
       name = "_at_ledgerhq_slash_hw-transport";
       packageName = "@ledgerhq/hw-transport";
-      version = "6.27.2";
+      version = "6.27.3";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.27.2.tgz";
-        sha512 = "GF4pmK78rEKhZfbmunwQ131c+0MGa6L5IoYlwgFcg6CaFpUjjPiTCKUFsm4flsE0Z0Ltn9QuKoe+xEHULo7rGA==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.27.3.tgz";
+        sha512 = "vQMNCC1DUDtS+nkJsbycgFMSodmj91WuGSxX7RjOz2vuZBc6jXtDn9jzYdsfyKOwnvalQAkXm9hWWHlrMIKdNQ==";
       };
     };
-    "@ledgerhq/hw-transport-node-hid-6.27.2" = {
+    "@ledgerhq/hw-transport-node-hid-6.27.3" = {
       name = "_at_ledgerhq_slash_hw-transport-node-hid";
       packageName = "@ledgerhq/hw-transport-node-hid";
-      version = "6.27.2";
+      version = "6.27.3";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-6.27.2.tgz";
-        sha512 = "N2tyGLLZqgNrWA1xc9fbdFc7c7pr3dpbsMwC6LW0ilHiGWXzC6XSPSJZARO1j0G4LQIqBq7rAuNzlr4u1p4jkw==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-6.27.3.tgz";
+        sha512 = "XhbAPfRhjC78cIMPzAUAaZw/14lru88SJiyMlupY8VocbG//iuhPv7YvfbgS4nO2tXgeYIrRT3eTWBuLTEfCag==";
       };
     };
-    "@ledgerhq/hw-transport-node-hid-noevents-6.27.2" = {
+    "@ledgerhq/hw-transport-node-hid-noevents-6.27.3" = {
       name = "_at_ledgerhq_slash_hw-transport-node-hid-noevents";
       packageName = "@ledgerhq/hw-transport-node-hid-noevents";
-      version = "6.27.2";
+      version = "6.27.3";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.27.2.tgz";
-        sha512 = "/f0rAREa6CNq88y9NMTVVTHx3FHkmnbILhd4gDWcm7OC36mg7bLN9edbq8a4zNRdMvBKX+/Lg1hMgLdqEJagBw==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.27.3.tgz";
+        sha512 = "aShJbG7I9TrsffLKkwJWhi/3FC9JnxyxVUjMtmZFN+XfJztWVxSIf2iB6asY2A0BYHIbmnanQIzk/0Z+FBrTjA==";
       };
     };
     "@ledgerhq/hw-transport-u2f-5.36.0-deprecated" = {
@@ -173,6 +173,15 @@ let
       src = fetchurl {
         url = "https://registry.npmjs.org/@ledgerhq/logs/-/logs-6.10.0.tgz";
         sha512 = "lLseUPEhSFUXYTKj6q7s2O3s2vW2ebgA11vMAlKodXGf5AFw4zUoEbTz9CoFOC9jS6xY4Qr8BmRnxP/odT4Uuw==";
+      };
+    };
+    "@ledgerhq/logs-6.10.1-nightly.0" = {
+      name = "_at_ledgerhq_slash_logs";
+      packageName = "@ledgerhq/logs";
+      version = "6.10.1-nightly.0";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@ledgerhq/logs/-/logs-6.10.1-nightly.0.tgz";
+        sha512 = "hwoUwlC7le37kQ72W8hAzVq070zuY6IEpssYNXDTr3pEfc3cprTAgEnaBsb0jXQGiLdONPvxc7nPp8nSyGD3hQ==";
       };
     };
     "@segment/loosely-validate-event-2.0.0" = {
@@ -2677,11 +2686,15 @@ in
       sources."@jest/environment-27.5.1"
       sources."@jest/fake-timers-27.5.1"
       sources."@jest/types-27.5.1"
-      sources."@ledgerhq/devices-7.0.0"
+      (sources."@ledgerhq/devices-7.0.0" // {
+        dependencies = [
+          sources."@ledgerhq/logs-6.10.0"
+        ];
+      })
       sources."@ledgerhq/errors-6.10.1"
-      sources."@ledgerhq/hw-transport-6.27.2"
-      sources."@ledgerhq/hw-transport-node-hid-6.27.2"
-      sources."@ledgerhq/hw-transport-node-hid-noevents-6.27.2"
+      sources."@ledgerhq/hw-transport-6.27.3"
+      sources."@ledgerhq/hw-transport-node-hid-6.27.3"
+      sources."@ledgerhq/hw-transport-node-hid-noevents-6.27.3"
       (sources."@ledgerhq/hw-transport-u2f-5.36.0-deprecated" // {
         dependencies = [
           sources."@ledgerhq/devices-5.51.1"
@@ -2706,7 +2719,7 @@ in
           sources."@ledgerhq/logs-5.50.0"
         ];
       })
-      sources."@ledgerhq/logs-6.10.0"
+      sources."@ledgerhq/logs-6.10.1-nightly.0"
       sources."@segment/loosely-validate-event-2.0.0"
       sources."@sindresorhus/is-0.14.0"
       sources."@sinonjs/commons-1.8.3"
