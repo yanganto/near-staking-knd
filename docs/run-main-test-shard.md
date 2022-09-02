@@ -253,9 +253,6 @@ like this:
   # This is the URL we calculated above:
   kuutamo.neard.s3.dataBackupDirectory = "s3://near-protocol-public/backups/testnet/rpc/2022-07-13T11:00:40Z";
 
-  # If you set this to null, neard will download the Genesis file on first startup.
-  kuutamo.neard.genesisFile = null;
-
   # We create these keys after the first 'nixos-rebuild switch'
   # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
   # to securely encrypt and manage these files. For both sops-nix and agenix, set the owner to 'neard' so that the service can read it.
