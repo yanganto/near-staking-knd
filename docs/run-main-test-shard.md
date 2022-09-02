@@ -255,9 +255,6 @@ like this:
 
   # If you set this to null, neard will download the Genesis file on first startup.
   kuutamo.neard.genesisFile = null;
-  kuutamo.neard.chainId = "testnet";
-  # This is the file we just have downloaded from: https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json
-  kuutamo.neard.configFile = ./config.json;
 
   # We create these keys after the first 'nixos-rebuild switch'
   # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
