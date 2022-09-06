@@ -150,7 +150,7 @@ You can then install them like this (but replace
 `kuutamo-test_kuutamo.f863973.m0`, with your own pool id:
 
 ```console
-$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/kuutamo-test_kuutamo.f863973.m0.json /var/lib/secrets/validator_key.json
+$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/kuutamo-test_kuutamo.pool.f863973.m0.json /var/lib/secrets/validator_key.json
 $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/node_key.json /var/lib/secrets/node_key.json
 ```
 
