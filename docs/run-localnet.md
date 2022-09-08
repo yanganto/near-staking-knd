@@ -69,7 +69,9 @@ Note: If you built kuutamod from source using `cargo build`, the binary is in
 `target/debug` or `target/release`, depending on whether you have a debug or
 release build.
 
-Next, start kuutamod in a new terminal window in addition to hivemind:
+Next, start kuutamod in a **new terminal window** so you can run commands whilst hivemind is running. You will
+also need to `cd kuutamod` and run `nix --extra-experimental-features "nix-command flakes" develop`, if using nix,
+to get the dependencies in your `$PATH` in this new session. Then:
 
 ```console
 $ ./target/debug/kuutamod --neard-home .data/near/localnet/kuutamod0/ \
