@@ -74,6 +74,7 @@ also need to `cd kuutamod` and run `nix --extra-experimental-features "nix-comma
 to get the dependencies in your `$PATH` in this new session. Then:
 
 ```console
+$ cargo build
 $ ./target/debug/kuutamod --neard-home .data/near/localnet/kuutamod0/ \
   --voter-node-key .data/near/localnet/kuutamod0/voter_node_key.json \
   --validator-node-key .data/near/localnet/node3/node_key.json \
