@@ -27,16 +27,18 @@ stop neard in case kuutamod is killed.
 
 ### Requirements
 
+It is expected that this guide is being followed on a OS you are familiar with.
+
 Install the nix package manager (as described [here](https://nix.dev/tutorials/install-nix)),
 and you will get all dependencies needed by running `nix develop` from the source directory
 of kuutamod
 
 ```console
 $ git clone https://github.com/kuutamolabs/kuutamod
-$ nix --extra-experimental-features "nix-command flakes" develop
+$ nix develop
 ```
 
-If you don't use nix you will need the following executables in your `$PATH`.
+Note: If you don't use nix you will need the following executables in your `$PATH`.
 
 - [consul](https://www.consul.io/): This provides a distributed lock for
   kuutamod to detect liveness and prevent two validators from running at the
@@ -51,7 +53,7 @@ If you don't use nix you will need the following executables in your `$PATH`.
 - [Python](https://www.python.org/) for some of the setup scripts.
 
 
-After installing the dependencies or running `nix develop`, run the command hivemind:
+After installing the dependencies **or** running `nix develop`, run the command hivemind:
 
 ```console
 $ hivemind
@@ -70,8 +72,7 @@ Note: If you built kuutamod from source using `cargo build`, the binary is in
 release build.
 
 Next, start kuutamod in a **new terminal window** so you can run commands whilst hivemind is running. You will
-also need to `cd kuutamod` and run `nix --extra-experimental-features "nix-command flakes" develop`, if using nix,
-to get the dependencies in your `$PATH` in this new session. Then:
+also need to `cd kuutamod` and run `nix develop`, if using nix to get the dependencies in your `$PATH` in this new session. Then:
 
 ```console
 $ cargo build
