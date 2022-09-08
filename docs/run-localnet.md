@@ -27,7 +27,16 @@ stop neard in case kuutamod is killed.
 
 ### Requirements
 
-You need the following executables in your `$PATH`.
+Install the nix package manager (as described [here](https://nix.dev/tutorials/install-nix)),
+and you will get all dependencies needed by running `nix develop` from the source directory
+of kuutamod
+
+```console
+$ git clone https://github.com/kuutamolabs/kuutamod
+$ nix --extra-experimental-features "nix-command flakes" develop
+```
+
+If you don't use nix you will need the following executables in your `$PATH`.
 
 - [consul](https://www.consul.io/): This provides a distributed lock for
   kuutamod to detect liveness and prevent two validators from running at the
@@ -41,14 +50,6 @@ You need the following executables in your `$PATH`.
 
 - [Python](https://www.python.org/) for some of the setup scripts.
 
-Install the nix package manager (as described [here](https://nix.dev/tutorials/install-nix)),
-you can get all dependencies by running `nix develop` from the source directory
-of kuutamod:
-
-```console
-$ git clone https://github.com/kuutamolabs/kuutamod
-$ nix develop
-```
 
 After installing the dependencies or running `nix develop`, run the command hivemind:
 
