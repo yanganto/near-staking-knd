@@ -1435,13 +1435,13 @@ let
         sha512 = "VjSeb/lHmkoyd8ryPVIKvOCn4D1koMqY+vqyjjUfc3xyKtP4dYOxM44sZrnqQSzSds3xyOrUTLTC9LVCVgLngw==";
       };
     };
-    "is2-2.0.7" = {
+    "is2-2.0.9" = {
       name = "is2";
       packageName = "is2";
-      version = "2.0.7";
+      version = "2.0.9";
       src = fetchurl {
-        url = "https://registry.npmjs.org/is2/-/is2-2.0.7.tgz";
-        sha512 = "4vBQoURAXC6hnLFxD4VW7uc04XiwTTl/8ydYJxKvPwkWQrSjInkuM5VZVg6BGr1/natq69zDuvO9lGpLClJqvA==";
+        url = "https://registry.npmjs.org/is2/-/is2-2.0.9.tgz";
+        sha512 = "rZkHeBn9Zzq52sd9IUIV3a5mfwBY+o2HePMh0wkGBM4z4qjvy2GwVxQ6nNXSfw6MmVP6gf1QIlWjiOavhM3x5g==";
       };
     };
     "isarray-1.0.0" = {
@@ -2873,7 +2873,7 @@ in
       sources."is-url-1.2.4"
       sources."is-wsl-2.2.0"
       sources."is-yarn-global-0.3.0"
-      sources."is2-2.0.7"
+      sources."is2-2.0.9"
       sources."isarray-1.0.0"
       sources."jest-environment-node-27.5.1"
       sources."jest-message-util-27.5.1"
