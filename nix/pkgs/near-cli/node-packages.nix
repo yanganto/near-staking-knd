@@ -625,13 +625,13 @@ let
         sha512 = "5tK7EtrZ0N+OLFMthtqOj4fI2Jeb88C4CAZPu25LDVUgXJ0A3Js4PMGqrn0JU1W0Mh1/Z8wZzYPxqUrXeBboCQ==";
       };
     };
-    "ci-info-3.3.2" = {
+    "ci-info-3.4.0" = {
       name = "ci-info";
       packageName = "ci-info";
-      version = "3.3.2";
+      version = "3.4.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/ci-info/-/ci-info-3.3.2.tgz";
-        sha512 = "xmDt/QIAdeZ9+nfdPsaBCpMvHNLFiLdjj59qjqn+6iPe6YmHGQ35sBnQ8uslRBXFmXkiZQOJRjvQeoGppoTjjg==";
+        url = "https://registry.npmjs.org/ci-info/-/ci-info-3.4.0.tgz";
+        sha512 = "t5QdPT5jq3o262DOQ8zA6E1tlH2upmUc4Hlvrbx1pGYJuiiHl7O7rvVNI+l8HTVhd/q3Qc9vqimkNk5yiXsAug==";
       };
     };
     "cipher-base-1.0.4" = {
@@ -2880,7 +2880,7 @@ in
       sources."jest-mock-27.5.1"
       (sources."jest-util-27.5.1" // {
         dependencies = [
-          sources."ci-info-3.3.2"
+          sources."ci-info-3.4.0"
         ];
       })
       sources."join-component-1.1.0"
