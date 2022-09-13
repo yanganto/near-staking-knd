@@ -29,9 +29,9 @@ the nixos modules from it into your configuration.nix.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
     # This is the line you need to add.
-    kuutamod.url = "github:kuutamolabs/kuutamod";
+    near-staking-knd.url = "github:kuutamolabs/near-staking-knd";
   };
-  outputs = { self, nixpkgs, kuutamod }: {
+  outputs = { self, nixpkgs, near-staking-knd }: {
     # Replace 'my-validator' with your hostname here.
     nixosConfigurations.my-validator = nixpkgs.lib.nixosSystem {
       # Our neard package is currently only tested on x86_64-linux.
@@ -42,14 +42,14 @@ the nixos modules from it into your configuration.nix.
         # Optional: This adds a our binary cache so you don't have to compile neard/kuutamod yourself.
         # The binary cache module, won't be effective on the first run of nixos-rebuild, but you can specify it also via command line like this:
         # $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
-        self.inputs.kuutamod.nixosModules.kuutamo-binary-cache
+        near-staking-knd.nixosModules.kuutamo-binary-cache
 
         # These are the modules provided by our flake
-        kuutamod.nixosModules.neard-testnet
+        near-staking-knd.nixosModules.neard-testnet
         # or if you want to join other networks, use one of these as needed.
-        # kuutamod.nixosModules.neard-shardnet
-        # kuutamod.nixosModules.neard-mainnet
-        kuutamod.nixosModules.kuutamod
+        # near-staking-knd.nixosModules.neard-shardnet
+        # near-staking-knd.nixosModules.neard-mainnet
+        near-staking-knd.nixosModules.kuutamod
       ];
     };
   };
@@ -82,7 +82,7 @@ For `mainnet` replace the word `testnet` in the urls above.
 For `shardnet`, there's another (unversioned) bucket, so there's no need to set
 the timestamp manually.
 
-If you use `kuutamod.nixosModules.neard-shardnet` in your config above, it'll
+If you use `near-staking-knd.nixosModules.neard-shardnet` in your config above, it'll
 automatically use the unversioned snapshot.
 
 ---
@@ -146,8 +146,8 @@ Run the following command but replace
 
 ```console
 $ export NEAR_ENV=<mainnet|testnet|shardnet>
-$ nix run github:kuutamoaps/kuutamod#near-cli generate-key kuutamo-test_kuutamo.shardnet.pool.near
-$ nix run github:kuutamoaps/kuutamod#near-cli generate-key node_key
+$ nix run github:kuutamoaps/near-staking-knd#near-cli generate-key kuutamo-test_kuutamo.shardnet.pool.near
+$ nix run github:kuutamoaps/near-staking-knd#near-cli generate-key node_key
 ```
 
 You then must edit these files and change `private_key` to `secret_key`.

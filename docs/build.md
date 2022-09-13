@@ -17,16 +17,17 @@ echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 
 3. Build and run kuutamod:
 
+
 ```console
-$ nix run github:kuutamolabs/kuutamod -- --version
+$ nix run github:kuutamolabs/near-staking-knd -- --version
 kuutamod 0.1.0
 ```
 
 It is also possible to open a shell with development dependencies like this:
 
 ```console
-$ git clone https://github.com/kuutamolabs/kuutamod/
-$ cd kuutamod
+$ git clone https://github.com/kuutamolabs/near-staking-knd/
+$ cd near-staking-knd
 $ nix develop .#
 ```
 
@@ -45,7 +46,7 @@ Currently we are testing `kuutamod` only on Linux.
 1. Download kuutamod i.e. with [git](https://git-scm.com/downloads)
 
 ```colsole
-$ git clone https://github.com/kuutamolabs/kuutamod/
+$ git clone https://github.com/kuutamolabs/near-staking-knd/
 ```
 
 2. For building, `rustc` and `cargo` are needed depending on the

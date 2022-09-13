@@ -1,6 +1,6 @@
-# kuutamod
+# Near staking knd (kuutamo node distribution)
 
-kuutamod is a distributed supervisor for neard that implements failover for
+This project provides a distributed supervisor for neard that implements failover for
 [NEAR validators](https://near.org/validators/). NEAR is an application
 platform built on top of the NEAR protocol blockchain. Validator nodes, run by
 the community, provide computational resources to the NEAR network and collect
@@ -44,4 +44,4 @@ change significantly.
 
 ---
 kuutamolabs  
-[GitHub](https://github.com/kuutamolabs/kuutamod) | [Matrix](https://matrix.to/#/#kuutamo-chat:kuutamo.chat)
+[GitHub](https://github.com/kuutamolabs/near-staking-knd) | [Matrix](https://matrix.to/#/#kuutamo-chat:kuutamo.chat)
