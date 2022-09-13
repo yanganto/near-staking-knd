@@ -31,9 +31,9 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
-    kuutamod.url = "github:kuutamolabs/kuutamod";
+    near-staking-knd.url = "github:kuutamolabs/near-staking-knd";
   };
-  outputs = { self, nixpkgs, kuutamod }: {
+  outputs = { self, nixpkgs, near-staking-knd }: {
     nixosConfigurations.validator = nixpkgs.lib.nixosSystem {
       # Our neard package is currently only tested on x86_64-linux.
       system = "x86_64-linux";
@@ -43,10 +43,10 @@
         # Optional: This adds a our binary cache so you don't have to compile neard/kuutamod yourself.
         # The binary cache module, won't be effective on the first run of nixos-rebuild, but you can specify it also via command line like this:
         # $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
-        self.inputs.kuutamod.nixosModules.kuutamo-binary-cache
+        near-staking-knd.nixosModules.kuutamo-binary-cache
 
-        kuutamod.nixosModules.neard-testnet
-        kuutamod.nixosModules.kuutamod
+        near-staking-knd.nixosModules.neard-testnet
+        near-staking-knd.nixosModules.kuutamod
       ];
     };
   };
@@ -99,7 +99,7 @@ If you are wanting to use the binary cache:
 ```console
 $ nixos-rebuild boot --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
 ```
-If not, and you want compile neard and kuutamod on the machine (remember to comment out this line in `flake.nix`  `self.inputs.kuutamod.nixosModules.kuutamo-binary-cache`):
+If not, and you want compile neard and kuutamod on the machine (remember to comment out this line in `flake.nix`  `near-staking-knd.nixosModules.kuutamo-binary-cache`):
 
 ```console
 $ nixos-rebuild boot --flake /etc/nixos#validator
@@ -136,8 +136,8 @@ Run the following command but replace
 
 ```console
 $ export NEAR_ENV=testnet
-$ nix run github:kuutamoaps/kuutamod#near-cli generate-key kuutamo-test_kuutamo.pool.f863973.m0
-$ nix run github:kuutamoaps/kuutamod#near-cli generate-key node_key
+$ nix run github:kuutamoaps/near-staking-knd#near-cli generate-key kuutamo-test_kuutamo.pool.f863973.m0
+$ nix run github:kuutamoaps/near-staking-knd#near-cli generate-key node_key
 ```
 
 You then must edit these files and change `private_key` to `secret_key`.
@@ -188,8 +188,8 @@ Jul 17 21:43:50 river kuutamod[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: 
 ---
 #### Next Steps
 
-- You can add more nodes to create an active/passive ha cluster. See [this section](https://github.com/kuutamolabs/kuutamod/blob/main/docs/run-main-test-shard.md#multi-node-kuutamo-cluster) for more information. 
+- You can add more nodes to create an active/passive ha cluster. See [this section](https://github.com/kuutamolabs/near-staking-knd/blob/main/docs/run-main-test-shard.md#multi-node-kuutamo-cluster) for more information. 
 
 ---
 kuutamolabs  
-[GitHub](https://github.com/kuutamolabs/kuutamod) | [Matrix](https://matrix.to/#/#kuutamo-chat:kuutamo.chat)
+[GitHub](https://github.com/kuutamolabs/near-staking-knd) | [Matrix](https://matrix.to/#/#kuutamo-chat:kuutamo.chat)

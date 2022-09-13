@@ -32,7 +32,7 @@ and you will get all dependencies needed by running `nix develop` from the sourc
 of kuutamod
 
 ```console
-$ git clone https://github.com/kuutamolabs/kuutamod
+$ git clone https://github.com/kuutamolabs/near-staking-knd
 $ nix --extra-experimental-features "nix-command flakes" develop
 ```
 
