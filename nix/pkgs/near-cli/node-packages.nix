@@ -265,13 +265,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-18.7.17" = {
+    "@types/node-18.7.18" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "18.7.17";
+      version = "18.7.18";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-18.7.17.tgz";
-        sha512 = "0UyfUnt02zIuqp7yC8RYtDkp/vo8bFaQ13KkSEvUAohPOAlnVNbj5Fi3fgPSuwzakS+EvvnnZ4x9y7i6ASaSPQ==";
+        url = "https://registry.npmjs.org/@types/node/-/node-18.7.18.tgz";
+        sha512 = "m+6nTEOadJZuTPkKR/SYK3A2d7FZrgElol9UP1Kae90VVU4a6mxnPuLiIW1m4Cq4gZ/nWb9GrdVXJCoCazDAbg==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -1039,13 +1039,13 @@ let
         sha512 = "lNaHNVymajmk0OJMBn8fVUAU1BtDeKIqKoVhk4xAALB57aALg6b4W0MfJ/cUE0g9YBXy5XhSlPIpYIJ7HaY/3Q==";
       };
     };
-    "follow-redirects-1.15.1" = {
+    "follow-redirects-1.15.2" = {
       name = "follow-redirects";
       packageName = "follow-redirects";
-      version = "1.15.1";
+      version = "1.15.2";
       src = fetchurl {
-        url = "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.1.tgz";
-        sha512 = "yLAMQs+k0b2m7cVxpS1VKJVvoz7SS9Td1zss3XRwXj+ZDH00RJgnuLx7E44wx02kQLrdM3aOOy+FpzS7+8OizA==";
+        url = "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.2.tgz";
+        sha512 = "VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==";
       };
     };
     "form-data-4.0.0" = {
@@ -2728,7 +2728,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-18.7.17"
+      sources."@types/node-18.7.18"
       sources."@types/stack-utils-2.0.1"
       sources."@types/yargs-16.0.4"
       sources."@types/yargs-parser-21.0.0"
@@ -2822,7 +2822,7 @@ in
       sources."file-uri-to-path-1.0.0"
       sources."fill-range-7.0.1"
       sources."flagged-respawn-1.0.1"
-      sources."follow-redirects-1.15.1"
+      sources."follow-redirects-1.15.2"
       sources."form-data-4.0.0"
       sources."fs-constants-1.0.0"
       sources."fs.realpath-1.0.0"
