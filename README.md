@@ -1,4 +1,4 @@
-# Near staking knd (kuutamo node distribution)
+# NEAR staking knd (kuutamo node distribution)
 
 This project provides a distributed supervisor for neard that implements failover for
 [NEAR validators](https://near.org/validators/). NEAR is an application
