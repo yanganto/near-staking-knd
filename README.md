@@ -34,8 +34,9 @@ change significantly.
 
 - Tutorials:
   - [Build and install from source](docs/build.md)
-  - [Run kuutamod on a localnet](docs/run-localnet.md)
-  - [Run kuutamod on mainnet|localnet|shardnet](docs/run-main-test-shard.md)
+  - [Runon a localnet](docs/run-localnet.md)
+  - [Run on testnet / mainnet](docs/run-main-test-shard.md)
+  - [Quickstart Lab - testnet on AWS](docs/testnet-on-aws-lab.md)
   <!-- TODO - [Monitoring](docs/monitoring.md) -->
 - References:
   - [Configuration](docs/configuration.md)
