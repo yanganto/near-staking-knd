@@ -8,7 +8,7 @@ jobs:
   updateNeardConfig:
     strategy:
       matrix:
-        network: [mainnet, testnet, shardnet]
+        network: [mainnet, testnet]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -16,7 +16,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN_FOR_CI }}
       - name: Upgrade neard configuration
         run: |
-          curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/config.json > nix/modules/neard/${{matrix.network}}/config.json
+          curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/config.json | jq 'setpath(["telemetry", "endpoints"]; [])' | nix/modules/neard/${{matrix.network}}/config.json
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v4
@@ -44,7 +44,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN_FOR_CI }}
       - name: Upgrade neard configuration
         run: |
-          curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/genesis.json > nix/modules/neard/${{matrix.network}}/genesis.json
+          curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/genesis.json | jq 'setpath(["telemetry", "endpoints"]; [])' > nix/modules/neard/${{matrix.network}}/genesis.json
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v4
