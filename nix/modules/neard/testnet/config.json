@@ -20,9 +20,7 @@
     }
   },
   "telemetry": {
-    "endpoints": [
-      "https://explorer.testnet.near.org/api/nodes"
-    ]
+    "endpoints": []
   },
   "network": {
     "addr": "0.0.0.0:24567",
