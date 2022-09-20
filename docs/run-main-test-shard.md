@@ -1,4 +1,4 @@
-# Running on `mainnet`, `testnet`, or `shardnet`
+# Running on `mainnet` or `testnet`
 
 ## Single node kuutamod
 
@@ -47,7 +47,6 @@ the nixos modules from it into your configuration.nix.
         # These are the modules provided by our flake
         near-staking-knd.nixosModules.neard-testnet
         # or if you want to join other networks, use one of these as needed.
-        # near-staking-knd.nixosModules.neard-shardnet
         # near-staking-knd.nixosModules.neard-mainnet
         near-staking-knd.nixosModules.kuutamod
       ];
@@ -78,13 +77,6 @@ In this case, the full s3 backup URL (to be used in the config below, as
 
 For `mainnet` replace the word `testnet` in the urls above.
 
-### shardnet
-For `shardnet`, there's another (unversioned) bucket, so there's no need to set
-the timestamp manually.
-
-If you use `near-staking-knd.nixosModules.neard-shardnet` in your config above, it'll
-automatically use the unversioned snapshot.
-
 ---
 
 Create a new file called `kuutamod.nix` next to your `configuration.nix` in `/etc/nixos/`.
@@ -102,7 +94,7 @@ Add the following configuration to the `/etc/nixos/kuutamod.nix` file:
   services.consul.interface.bind = "enp24s0f0";
   services.consul.extraConfig.bootstrap_expect = 1;
 
-  # This is the URL we calculated above. Remove/comment out both if on `shardnet`:
+  # This is the URL we calculated above.
   kuutamo.neard.s3.dataBackupDirectory = "s3://near-protocol-public/backups/testnet/rpc/2022-07-15T11:00:30Z";
   # kuutamo.neard.s3.dataBackupDirectory = "s3://near-protocol-public/backups/mainnet/rpc/2022-07-15T11:00:31Z";
 
@@ -141,46 +133,31 @@ kuutamod.
 The next step is to generate and install the active validator key and validator
 node key.
 
+
+
 Run the following command but replace
-`kuutamo-test_kuutamo.shardnet.pool.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>
+`kuutamo-test_kuutamo.poolv1.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet>
 
 ```console
-$ export NEAR_ENV=<mainnet|testnet|shardnet>
-$ nix run github:kuutamoaps/near-staking-knd#near-cli generate-key kuutamo-test_kuutamo.shardnet.pool.near
+$ export NEAR_ENV=<mainnet|testnet>
+$ nix run github:kuutamoaps/near-staking-knd#near-cli generate-key kuutamo-test_kuutamo.poolv1.near
 $ nix run github:kuutamoaps/near-staking-knd#near-cli generate-key node_key
 ```
 
 You then must edit these files and change `private_key` to `secret_key`.
 
 ```console
-$ nano ~/.near-credentials/<mainnet|testnet|shardnet>/kuutamo-test_kuutamo.shardnet.pool.near.json
-$ nano ~/.near-credentials/<mainnet|testnet|shardnet>/node_key.json
+$ nano ~/.near-credentials/<mainnet|testnet>/kuutamo-test_kuutamo.poolv1.near.json
+$ nano ~/.near-credentials/<mainnet|testnet>/node_key.json
 ```
 
 You can then install them like this (but replace
-`kuutamo-test_kuutamo.shardnet.pool.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet|shardnet>):
+`kuutamo-test_kuutamo.poolv1.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet>):
 
 ```console
-$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet|shardnet>/kuutamo-test_kuutamo.shardnet.pool.near.json /var/lib/secrets/validator_key.json
-$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet|shardnet>/node_key.json /var/lib/secrets/node_key.json
+$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet>/kuutamo-test_kuutamo.poolv1.near.json /var/lib/secrets/validator_key.json
+$ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet>/node_key.json /var/lib/secrets/node_key.json
 ```
-
-<!--
----
-#### SHIM [2022-08-16]
-Our neard init does not download genesis -- to-fix
-Temp fix, manually download the `genesis.json` following commands below:
-
-```console
-$ cd /var/lib/neard
-$ wget https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/shardnet/genesis.json.xz -o genesis.json.xz
-$ nix-shell -p xz
-$ [nix-shell] $ unxz genesis.json.xz
-$ [nix-shell] $ exit
-$
-```
----
--->
 
 You will now need to run `systemctl restart kuutamod` so that it picks up the keys. If everything
 went well, you should be able to reach kuutamod's prometheus exporter url:
