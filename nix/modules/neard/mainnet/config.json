@@ -23,9 +23,7 @@
     }
   },
   "telemetry": {
-    "endpoints": [
-      "https://explorer.mainnet.near.org/api/nodes"
-    ]
+    "endpoints": []
   },
   "network": {
     "addr": "0.0.0.0:24567",
