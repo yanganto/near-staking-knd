@@ -4,7 +4,7 @@ let
   generic = pkgs.callPackage ./generic.nix { };
 in
 generic {
-  version = "1.29.0-rc.3";
-  sha256 = "sha256-7cUri06ZVMzXEe3VQfYSD1igLoqo21gShPsgj/ZtatQ=";
-  cargoSha256 = "sha256-+7hxw4YkICLJdatKSnoISSrD7InAo47Y4SYUOs4+uAU=";
+  version = "1.29.0-rc.4";
+  sha256 = "sha256-LyvI3gn9alD3+LmUMPLreQ0Bm8P+RjF96tGVX3B2epk=";
+  cargoSha256 = "sha256-4CHQN0jBErlU64+e6V4QUCO5qQ1ajPNaxvxMCheLO8Y=";
 }
