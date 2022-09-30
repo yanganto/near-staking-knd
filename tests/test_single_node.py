@@ -51,6 +51,7 @@ def test_single_node(
         KUUTAMO_VALIDATOR_NETWORK_ADDR=f"127.0.0.1:{validator_port}",
         KUUTAMO_VOTER_NETWORK_ADDR=f"127.0.0.1:{voter_port}",
         KUUTAMO_VALIDATOR_KEY=str(validator_key),
+        KUUTAMO_PUBLIC_ADDRESSES="127.0.0.1,::1",
         KUUTAMO_VALIDATOR_NODE_KEY=str(validator_node_key),
         KUUTAMO_VOTER_NODE_KEY=str(voter_node_key),
         KUUTAMO_NEARD_HOME=str(neard_home),
@@ -74,7 +75,7 @@ def test_single_node(
                 break
             time.sleep(0.1)
 
-        # Should start on voter port.
+        # Should use validator port.
         wait_for_port("127.0.0.1", validator_port)
         assert_key_equal(validator_node_key, neard_home / "node_key.json")
         assert_key_equal(validator_key, neard_home / "validator_key.json")

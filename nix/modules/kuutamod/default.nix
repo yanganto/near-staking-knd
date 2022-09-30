@@ -53,6 +53,14 @@ in
         Whether to open ports used by neard
       '';
     };
+    publicAddresses = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = ''
+        Comma-seperated list of ip addresses to be written to neard configuration on which the validator is *directly* reachable.
+        Kuutamod will add the configured validator node key and port number of this node to these addresses.
+      '';
+    };
   };
 
   imports = [
@@ -101,7 +109,8 @@ in
           "KUUTAMO_VOTER_NODE_KEY=/var/lib/neard/voter_node_key.json"
           "KUUTAMO_VALIDATOR_KEY=${cfg.validatorKeyFile}"
           "KUUTAMO_VALIDATOR_NODE_KEY=${cfg.validatorNodeKeyFile}"
-        ] ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}";
+        ] ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}"
+        ++ lib.optional (cfg.publicAddresses != [ ]) "KUUTAMO_PUBLIC_ADDRESSES=${lib.concatStringsSep "," cfg.publicAddresses}";
 
         RuntimeDirectory = "kuutamod";
 

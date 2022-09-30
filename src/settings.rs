@@ -1,9 +1,8 @@
 //! Read settings for kuutamod
 
-use crate::near_config::read_near_config;
+use crate::near_config::{read_near_config, NearKey};
 use anyhow::{bail, Context, Result};
 use clap::Parser;
-use nix::unistd::{access, AccessFlags};
 use std::fs;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::path::{Path, PathBuf};
@@ -56,6 +55,12 @@ pub struct Settings {
     /// The neard node key that we will pass to neard, when kuutamod becomes validator
     #[clap(long, default_value = "", env = "KUUTAMO_VALIDATOR_NODE_KEY")]
     pub validator_node_key: PathBuf,
+
+    /// The public key of the node key that we will write in the public address
+    /// of our neard configuration when kuutamod becomes validator
+    #[clap(skip)]
+    pub validator_node_public_key: String,
+
     /// The address neard will listen, when beeing a validator
     #[clap(
         long,
@@ -73,12 +78,18 @@ pub struct Settings {
         env = "KUUTAMO_VOTER_NETWORK_ADDR"
     )]
     pub voter_network_addr: SocketAddr,
+
+    /// Comma-seperated list of ip addresses to be written to neard configuration on which the validator is *directly* reachable.
+    /// Kuutamod will add the configured validator node key and port number of this node to these addresses.
+    #[clap(long, env = "KUUTAMO_PUBLIC_ADDRESSES", value_delimiter = ',')]
+    pub public_addresses: Vec<IpAddr>,
+
     /// Bootnodes passed to neard
     #[clap(long, env = "KUUTAMO_NEARD_BOOTNODES")]
     pub near_boot_nodes: Option<String>,
 }
 
-fn get_near_key(key: &str, val: &mut PathBuf, credential_filename: &str) -> Result<()> {
+fn get_near_key(key: &str, val: &mut PathBuf, credential_filename: &str) -> Result<String> {
     if val == Path::new("") {
         // Use systemd's LoadCredential environment variable, if it exits:
         // TODO: replace this with KUUTAMO_NEAR_VALIDATOR_FILE=%d/validator_key.json in systemd's Environment after the next systemd upgrade:
@@ -97,10 +108,9 @@ fn get_near_key(key: &str, val: &mut PathBuf, credential_filename: &str) -> Resu
     *val = fs::canonicalize(&val)
         .with_context(|| format!("cannot resolve path for {}", val.display()))?;
 
-    access(val, AccessFlags::R_OK | AccessFlags::F_OK)
-        .with_context(|| format!("cannot open {} as a file", val.display()))?;
+    let key = NearKey::read_from_file(val).context("failed to read near key")?;
 
-    Ok(())
+    Ok(key.public_key)
 }
 
 /// Read and returns settings from environment variables and the filesystem
@@ -112,7 +122,7 @@ pub fn parse_settings() -> Result<Settings> {
         &mut settings.validator_key,
         "validator_key.json",
     )?;
-    get_near_key(
+    settings.validator_node_public_key = get_near_key(
         "--validator-node-key",
         &mut settings.validator_node_key,
         "validator_node_key.json",
