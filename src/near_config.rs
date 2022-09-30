@@ -1,10 +1,11 @@
 //! Module for parsing neard config and keys
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::fs::{self, File};
-use std::net::SocketAddr;
+use std::io::Write;
+use std::net::{IpAddr, SocketAddr};
 use std::path::Path;
 
 /// A key used neard i.e. node key, validator key etc
@@ -60,8 +61,14 @@ pub fn read_near_config<P: AsRef<Path>>(path: P) -> Result<NearConfig> {
     Ok(NearConfig { rpc_addr })
 }
 
-/// Update RPC and network port in existing neard configuration
-pub fn update_near_network_addr<P: AsRef<Path>>(path: P, addr: &SocketAddr) -> Result<()> {
+/// Update public addresses, RPC and network port in existing neard configuration
+pub fn update_neard_config<P: AsRef<Path>>(
+    path: P,
+    public_ips: &[IpAddr],
+    port: u16,
+    node_key: &str,
+    listen_addr: &SocketAddr,
+) -> Result<()> {
     let content = fs::read_to_string(path.as_ref())
         .with_context(|| format!("cannot read {}", path.as_ref().display()))?;
     let mut current_config: Value = serde_json::from_str(&content)
@@ -71,12 +78,40 @@ pub fn update_near_network_addr<P: AsRef<Path>>(path: P, addr: &SocketAddr) -> R
         .get_mut("network")
         .and_then(|o| o.get_mut("addr"))
     {
-        *o = json!(addr);
+        *o = json!(listen_addr);
+    }
+    match current_config.get_mut("network") {
+        Some(serde_json::Value::Object(map)) => {
+            let public_addrs = public_ips
+                .iter()
+                .map(|ip| {
+                    if ip.is_ipv6() {
+                        format!("{}@[{}]:{}", node_key, ip, port)
+                    } else {
+                        format!("{}@{}:{}", node_key, ip, port)
+                    }
+                })
+                .collect::<Vec<_>>();
+            map.insert("public_addrs".to_string(), json!(public_addrs));
+        }
+        None => {
+            bail!("no network section found in neard configuration");
+        }
+        val => {
+            bail!(
+                "network section found in neard configuration but an Map but {:?}",
+                val
+            );
+        }
     }
 
-    let file = File::create(path.as_ref())?;
-    serde_json::to_writer(file, &current_config)
-        .with_context(|| format!("failed to write to {}", path.as_ref().display()))?;
+    let mut file = File::create(path.as_ref())?;
+    file.write_all(
+        serde_json::to_string_pretty(&current_config)
+            .context("failed to serialize neard configuration")?
+            .as_bytes(),
+    )
+    .with_context(|| format!("failed to write to {}", path.as_ref().display()))?;
 
     Ok(())
 }

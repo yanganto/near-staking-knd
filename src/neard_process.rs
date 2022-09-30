@@ -1,6 +1,6 @@
 //! Setups neard in validator or voter mode
 
-use crate::near_config::update_near_network_addr;
+use crate::near_config::update_neard_config;
 use crate::proc::{graceful_stop_neard, run_neard};
 use crate::settings::Settings;
 use anyhow::{Context, Result};
@@ -52,8 +52,11 @@ pub fn setup_validator(settings: &Settings) -> Result<NeardProcess> {
     )
     .context("failed to set validator node key")?;
 
-    update_near_network_addr(
+    update_neard_config(
         settings.neard_home.join("config.json"),
+        &settings.public_addresses,
+        settings.validator_network_addr.port(),
+        &settings.validator_node_public_key,
         &settings.validator_network_addr,
     )
     .context("failed to update network addr in near config")?;
@@ -79,8 +82,12 @@ pub fn setup_voter(settings: &Settings) -> Result<NeardProcess> {
     )
     .context("failed to set validator node key")?;
 
-    update_near_network_addr(
+    // We set the public address to an empty list as it is not broadcasted to the network if we are not validating
+    update_neard_config(
         settings.neard_home.join("config.json"),
+        &[],
+        0,
+        "",
         &settings.voter_network_addr,
     )
     .context("failed to update network addr in near config")?;
