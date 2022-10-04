@@ -101,14 +101,16 @@ struct StateMachine {
 }
 
 fn get_leader_metadata(node_id: &str) -> Result<HashMap<&'static str, String>> {
-    let mut buf = [0u8; 64];
-    let hostname_cstr = unistd::gethostname(&mut buf).context("Failed getting hostname")?;
-    let hostname = hostname_cstr
-        .to_str()
-        .context("Hostname wasn't valid UTF-8")?;
+    let hostname_cstr = unistd::gethostname().context("Failed getting hostname")?;
+    let hostname = match hostname_cstr.into_string() {
+        Ok(v) => v,
+        Err(e) => {
+            bail!("Hostname wasn't valid UTF-8: {:?}", e);
+        }
+    };
 
     let mut metadata: HashMap<&str, String> = HashMap::new();
-    metadata.insert("Hostname", hostname.into());
+    metadata.insert("Hostname", hostname);
     metadata.insert("NodeId", node_id.into());
     Ok(metadata)
 }
