@@ -5,13 +5,13 @@
     let
       makeTest = import (pkgs.path + "/nixos/tests/make-test-python.nix");
 
-      makeTest' = test: makeTest test {
+      makeTest' = test: (makeTest test {
         inherit pkgs;
         inherit (pkgs) system;
         specialArgs = self.lib.flakeSpecialArgs {
           inherit (pkgs) system;
         };
-      };
+      }).test;
     in
     {
       checks = {
