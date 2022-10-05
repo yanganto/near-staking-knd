@@ -101,6 +101,9 @@ in
       "fs.nr_open" = "1000000";
     };
 
+    # not strictly needed but useful for debugging i.e. finding out what neard version we deployed and some subcommands of neard
+    environment.systemPackages = [ cfg.package ];
+
     systemd.services.neard = {
       enable = config.kuutamo.neard.enable;
       wantedBy = [ "multi-user.target" ];
