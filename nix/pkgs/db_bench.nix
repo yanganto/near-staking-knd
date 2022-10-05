@@ -1,8 +1,10 @@
-{ stdenv, rocksdb, gflags, jemalloc, lib }:
+{ stdenv, rocksdb, gflags, jemalloc, lib, removeReferencesTo }:
 
 stdenv.mkDerivation rec {
-  pname = "db_bench";
-  inherit (rocksdb) version src nativeBuildInputs propagatedBuildInputs;
+  pname = "rocksdb-tools";
+  inherit (rocksdb) version src propagatedBuildInputs;
+
+  nativeBuildInputs = rocksdb.nativeBuildInputs ++ [ removeReferencesTo ];
 
   cmakeFlags = [
     "-DPORTABLE=1"
@@ -19,7 +21,7 @@ stdenv.mkDerivation rec {
     "-DWITH_GFLAGS=1"
     "-DUSE_RTTI=1"
     "-DROCKSDB_INSTALL_ON_WINDOWS=YES" # harmless elsewhere
-    "-DROCKSDB_BUILD_SHARED=0"
+    "-DROCKSDB_BUILD_SHARED=1"
     (lib.optional (stdenv.hostPlatform.isx86 && stdenv.hostPlatform.isLinux) "-DFORCE_SSE42=1")
   ];
 
@@ -29,9 +31,19 @@ stdenv.mkDerivation rec {
 
   installPhase = ''
     runHook preInstall
+    mkdir -p $out/lib
+    for f in librocksdb.so*; do
+      cp -a $f $out/lib
+    done
+    install -D ./tools/sst_dump -m755 $out/bin/sst_dump
     install -D ./db_bench -m755 $out/bin/db_bench
+
+    # remove rpath references to /build
+    sed -i -e "s!/build/source!/XXXXXXXXXXXX!" $out/bin/*
+
     runHook postInstall
   '';
+  NIX_LDFLAGS = "-rpath ${placeholder "out"}/lib";
 
   meta = with stdenv.lib; {
     description = "RocksDB benchmark";
