@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-18.8.1" = {
+    "@types/node-18.8.2" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "18.8.1";
+      version = "18.8.2";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-18.8.1.tgz";
-        sha512 = "vuYaNuEIbOYLTLUAJh50ezEbvxrD43iby+lpUA2aa148Nh5kX/AVO/9m1Ahmbux2iU5uxJTNF9g2Y+31uml7RQ==";
+        url = "https://registry.npmjs.org/@types/node/-/node-18.8.2.tgz";
+        sha512 = "cRMwIgdDN43GO4xMWAfJAecYn8wV4JbsOGHNfNUIDiuYkUYAR5ec4Rj7IO2SAhFPEfpPtLtUTbbny/TCT7aDwA==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -2146,13 +2146,13 @@ let
         sha512 = "b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==";
       };
     };
-    "semver-7.3.7" = {
+    "semver-7.3.8" = {
       name = "semver";
       packageName = "semver";
-      version = "7.3.7";
+      version = "7.3.8";
       src = fetchurl {
-        url = "https://registry.npmjs.org/semver/-/semver-7.3.7.tgz";
-        sha512 = "QlYTucUYOews+WeEujDoEGziz4K6c47V/Bd+LjSSYcA94p+DmINdf7ncaUinThfvZyu13lN9OY1XDxt8C0Tw0g==";
+        url = "https://registry.npmjs.org/semver/-/semver-7.3.8.tgz";
+        sha512 = "NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==";
       };
     };
     "semver-diff-3.1.1" = {
@@ -2715,7 +2715,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-18.8.1"
+      sources."@types/node-18.8.2"
       sources."@types/stack-utils-2.0.1"
       sources."@types/yargs-16.0.4"
       sources."@types/yargs-parser-21.0.0"
@@ -2960,7 +2960,7 @@ in
       sources."ripemd160-2.0.2"
       sources."rxjs-6.6.7"
       sources."safe-buffer-5.2.1"
-      sources."semver-7.3.7"
+      sources."semver-7.3.8"
       (sources."semver-diff-3.1.1" // {
         dependencies = [
           sources."semver-6.3.0"
