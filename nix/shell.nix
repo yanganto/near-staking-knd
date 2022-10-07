@@ -31,6 +31,7 @@
             pkgs.just
             pkgs.jq
             self'.packages.near-cli
+            self'.packages.rocksdb-tools
             pkgs.nix-update
 
             # for tests
