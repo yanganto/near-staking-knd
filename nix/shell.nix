@@ -33,6 +33,8 @@
             self'.packages.near-cli
             self'.packages.rocksdb-tools
             pkgs.nix-update
+            pkgs.fio
+            pkgs.numactl
 
             # for tests
             pkgs.mypy

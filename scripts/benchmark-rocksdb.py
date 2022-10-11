@@ -41,15 +41,21 @@
 # threads.
 NUM_IO_THREADS = 8
 
+# =~ 170 GB, This is not in the same size as neard, but we also access the
+# database uniform randomly rather than a zipfli distribution.
+DB_KEY_NUM = int(5e7)
+
 import os
 import sys
 import subprocess
 import argparse
 import shutil
 import resource
+import json
 from typing import IO, Any, Union, Callable, List, Dict, Optional, Text
 from shlex import quote
 from pathlib import Path
+from enum import Enum
 import io
 from dataclasses import dataclass
 
@@ -146,10 +152,11 @@ def db_bench(opts: DbBenchOptions) -> None:
         "--compaction_style=1",
         "--num_levels=4",
         "--disable_auto_compactions=1",
+        f"--num={opts.num_keys}",
         "--benchmarks=fillseqdeterministic",
     ]
     print(f"Initialize rocksdb at {opts.db_path} for benchmark")
-    # run(seed_db)
+    run(seed_db)
 
     # FIXME zipfli distributions would be likely better
     readwhilewriting = common_cmd + [
@@ -178,10 +185,10 @@ def parse_args() -> DbBenchOptions:
     parser = argparse.ArgumentParser()
     parser.add_argument("--db-path", help="Path to database directory", required=True)
     parser.add_argument(
-        "--num-keys", help="Number of keys to insert into database", default=int(10e6)
+        "--num-keys", help="Number of keys to insert into database", default=DB_KEY_NUM
     )
     parser.add_argument(
-        "--duration", help="Benchmark duration in seconds", default=int(10)
+        "--duration", help="Benchmark duration in seconds", default=int(60)
     )
     # 9 mbyte/s is what we measured as top throughput in mainnet on 2022-10-07
     parser.add_argument(
@@ -191,7 +198,8 @@ def parse_args() -> DbBenchOptions:
     )
     args = parser.parse_args()
     return DbBenchOptions(
-        db_path=args.db_path,
+        # put rocksdb in subdirectory, so we can just delete it afterwards.
+        db_path=Path(args.db_path) / "db",
         num_keys=args.num_keys,
         duration=args.duration,
         write_rate_limit=args.write_rate_limit,
@@ -205,12 +213,138 @@ def increase_open_file_limit() -> None:
         resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
 
 
+# for debugging
+QUICK = False
+FIO_RAMPUP = 10
+FIO_RUNTIME = FIO_RAMPUP + 120
+# Since we are using direct i/o here, we don't need to a super large file here.
+# It just needs to be big enough to exceed the RAM / caches of our NVME drives.
+FIO_SIZE = 100  # filesize in GB
+if QUICK:
+    FIO_RAMPUP = 2
+    FIO_RUNTIME = FIO_RAMPUP + 8
+    FIO_SIZE = 10
+
+
+@dataclass
+class FioResult:
+    read_mean: float
+    read_stddev: float
+    write_mean: float
+    write_stddev: float
+
+
+class Rw(Enum):
+    r = 1
+    w = 2
+    rw = 3
+
+
+def fio(
+    path: Path,
+    random: bool = False,
+    rw: Rw = Rw.r,
+    iops: bool = False,
+) -> FioResult:
+    """
+    inspired by https://docs.oracle.com/en-us/iaas/Content/Block/References/samplefiocommandslinux.htm
+    @param random: random vs sequential
+    @param iops: return iops vs bandwidth
+    @return (read_mean, stddev, write_mean, stdev) in kiB/s
+    """
+    cmd = []
+
+    # Bind to CPUs to make benchmark more reproducible
+    # FIXME: Currently assume we have at least 4 physical cpus
+    cmd += [
+        "numactl",
+        "-C",
+        "0-4",
+    ]
+    cmd += ["fio"]
+
+    cmd += [f"--filename={path}/fio-file", f"--size={FIO_SIZE}GB", "--direct=1"]
+
+    if rw == Rw.r and random:
+        cmd += ["--rw=randread"]
+    if rw == Rw.w and random:
+        cmd += ["--rw=randwrite"]
+    elif rw == Rw.rw and random:
+        # fio/examples adds rwmixread=60 and rwmixwrite=40 here
+        cmd += ["--rw=randrw"]
+    elif rw == Rw.r and not random:
+        cmd += ["--rw=read"]
+    elif rw == Rw.w and not random:
+        cmd += ["--rw=write"]
+    elif rw == Rw.rw and not random:
+        cmd += ["--rw=readwrite"]
+
+    # Is io_uring the best?
+    if iops:
+        # 4k is also our key size in rocksdb
+        # iodepth=32 to keep enough in-flight data
+        cmd += ["--bs=4k", "--ioengine=io_uring", "--iodepth=32", "--numjobs=4"]
+    else:
+        cmd += ["--bs=256k", "--ioengine=io_uring", "--iodepth=16", "--numjobs=1"]
+
+    cmd += [
+        f"--runtime={FIO_RUNTIME}",
+        f"--ramp_time={FIO_RAMPUP}",
+        "--time_based",
+        "--group_reporting",
+        "--name=generic_name",
+        "--eta-newline=1",
+    ]
+
+    cmd += ["--output-format=json"]
+
+    term = run(cmd, check=True, stdout=subprocess.PIPE)
+
+    out = term.stdout
+    j = json.loads(out)
+    read = j["jobs"][0]["read"]
+    write = j["jobs"][0]["write"]
+
+    if iops:
+        print(
+            "IOPS: read",
+            read["iops_mean"],
+            read["iops_stddev"],
+            "write",
+            write["iops_mean"],
+            write["iops_stddev"],
+        )
+        return FioResult(
+            read["iops_mean"],
+            read["iops_stddev"],
+            write["iops_mean"],
+            write["iops_stddev"],
+        )
+    else:
+        print("Bandwidth read", float(read["bw_mean"]) / 1024 / 1024, "GB/s")
+        print("Bandwidth write", float(write["bw_mean"]) / 1024 / 1024, "GB/s")
+        return FioResult(
+            read["bw_mean"], read["bw_dev"], write["bw_mean"], write["bw_dev"]
+        )
+
+
 def main() -> None:
     opts = parse_args()
     if shutil.which("db_bench") is None:
         die("db_bench executable not found")
-    increase_open_file_limit()
-    db_bench(opts)
+    if shutil.which("fio") is None:
+        die("fio executable not found")
+
+    fio(opts.db_path, True, Rw.r, True)
+    # if shutil.which("smartctl") is None:
+    #    die("smartctl executable not found")
+
+    # sudo smartctl --all /dev/sdb
+    # increase_open_file_limit()
+    # try:
+    #    db_bench(opts)
+    # finally:
+    #    shutil.rmtree(opts.db_path)
 
 
 if __name__ == "__main__":
