@@ -47,11 +47,14 @@ DB_KEY_NUM = int(5e7)
 
 import os
 import sys
+import re
+import signal
 import subprocess
 import argparse
 import shutil
 import resource
 import json
+from tempfile import NamedTemporaryFile
 from typing import IO, Any, Union, Callable, List, Dict, Optional, Text
 from shlex import quote
 from pathlib import Path
@@ -230,8 +233,13 @@ if QUICK:
 class FioResult:
     read_mean: float
     read_stddev: float
+    # completion latency
+    read_latency_mean: float
+    read_latency_stddev: float
     write_mean: float
     write_stddev: float
+    write_latency_mean: float
+    write_latency_stddev: float
 
 
 class Rw(Enum):
@@ -283,9 +291,10 @@ def fio(
     if iops:
         # 4k is also our key size in rocksdb
         # iodepth=32 to keep enough in-flight data
+        # 2 CPUs is currently not enough to saturate NVMEs
         cmd += ["--bs=4k", "--ioengine=io_uring", "--iodepth=32", "--numjobs=4"]
     else:
-        cmd += ["--bs=256k", "--ioengine=io_uring", "--iodepth=16", "--numjobs=1"]
+        cmd += ["--bs=256k", "--ioengine=io_uring", "--iodepth=16", "--numjobs=4"]
 
     cmd += [
         f"--runtime={FIO_RUNTIME}",
@@ -307,25 +316,57 @@ def fio(
 
     if iops:
         print(
-            "IOPS: read",
-            read["iops_mean"],
-            read["iops_stddev"],
-            "write",
-            write["iops_mean"],
-            write["iops_stddev"],
+            f"IOPS: read {read['iops_mean']:.2f}±{read['iops_stddev']:.2f}, "
+            f"lat {read['clat_ns']['mean']/10e3:.2f}±{read['clat_ns']['stddev']/10e3:.2f}μs "
+            "/ "
+            f"write {write['iops_mean']:.2f}±{write['iops_stddev']:.2f}, "
+            f"lat {write['clat_ns']['mean']/10e3:.2f}±{write['clat_ns']['stddev']/10e3:.2f}μs"
         )
         return FioResult(
             read["iops_mean"],
             read["iops_stddev"],
+            read["clat_ns"]["mean"],
+            read["clat_ns"]["stddev"],
             write["iops_mean"],
             write["iops_stddev"],
+            read["clat_ns"]["mean"],
+            read["clat_ns"]["stddev"],
         )
     else:
         print("Bandwidth read", float(read["bw_mean"]) / 1024 / 1024, "GB/s")
         print("Bandwidth write", float(write["bw_mean"]) / 1024 / 1024, "GB/s")
         return FioResult(
-            read["bw_mean"], read["bw_dev"], write["bw_mean"], write["bw_dev"]
+            read["bw_mean"],
+            read["bw_dev"],
+            read["clat_ns"]["mean"],
+            read["clat_ns"]["stddev"],
+            write["bw_mean"],
+            write["bw_dev"],
+            read["clat_ns"]["mean"],
+            read["clat_ns"]["stddev"],
         )
+
+
+def xmrig() -> float:
+    regex = re.compile(r".*benchmark finished in (\d+\.\d+) seconds \((\d+\.\d+) h/s\).*")
+    result = []
+    with subprocess.Popen(
+        ["xmrig", "--bench=5M", "--no-color"],
+        stdout=subprocess.PIPE,
+        text=True,
+    ) as p:
+        try:
+          assert p.stdout is not None
+          for line in p.stdout:
+              print(line, end="")
+              m = regex.match(line)
+              if m is not None:
+                  _ = float(m.group(1))
+                  hash_rate = float(m.group(2))
+                  return hash_rate
+        finally:
+            p.kill()
+        print("Could not get a benchmark result from xmrig. Check the logs above")
 
 
 def main() -> None:
@@ -334,17 +375,25 @@ def main() -> None:
         die("db_bench executable not found")
     if shutil.which("fio") is None:
         die("fio executable not found")
-
-    fio(opts.db_path, True, Rw.r, True)
-    # if shutil.which("smartctl") is None:
+    #if shutil.which("smartctl") is None:
     #    die("smartctl executable not found")
+    if shutil.which("xmrig") is None:
+        die("xmrig executable not found")
 
-    # sudo smartctl --all /dev/sdb
-    # increase_open_file_limit()
-    # try:
+    #rand_read_only = fio(opts.db_path, True, Rw.r, True)
+    #rand_read_write = fio(opts.db_path, True, Rw.rw, True)
+    #seq_read_only = fio(opts.db_path, False, Rw.r, False)
+    #seq_read_write = fio(opts.db_path, False, Rw.rw, False)
+
+    ## sudo smartctl --all /dev/sdb
+    #increase_open_file_limit()
+    #try:
     #    db_bench(opts)
-    # finally:
+    #finally:
     #    shutil.rmtree(opts.db_path)
+
+    # Stress-test system, we can compare the hash rate with https://xmrig.com/benchmark
+    hashrate = xmrig()
 
 
 if __name__ == "__main__":

@@ -33,8 +33,11 @@
             self'.packages.near-cli
             self'.packages.rocksdb-tools
             pkgs.nix-update
-            pkgs.fio
-            pkgs.numactl
+
+            # Benchmark tools
+            #pkgs.fio
+            #pkgs.numactl
+            #pkgs.xmrig
 
             # for tests
             pkgs.mypy
