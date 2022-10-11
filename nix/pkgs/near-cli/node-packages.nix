@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-18.8.3" = {
+    "@types/node-18.8.4" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "18.8.3";
+      version = "18.8.4";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-18.8.3.tgz";
-        sha512 = "0os9vz6BpGwxGe9LOhgP/ncvYN5Tx1fNcd2TM3rD/aCGBkysb+ZWpXEocG24h6ZzOi13+VB8HndAQFezsSOw1w==";
+        url = "https://registry.npmjs.org/@types/node/-/node-18.8.4.tgz";
+        sha512 = "WdlVphvfR/GJCLEMbNA8lJ0lhFNBj4SW3O+O5/cEGw9oYrv0al9zTwuQsq+myDUXgNx2jgBynoVgZ2MMJ6pbow==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -1660,13 +1660,13 @@ let
         sha512 = "J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==";
       };
     };
-    "minimist-1.2.6" = {
+    "minimist-1.2.7" = {
       name = "minimist";
       packageName = "minimist";
-      version = "1.2.6";
+      version = "1.2.7";
       src = fetchurl {
-        url = "https://registry.npmjs.org/minimist/-/minimist-1.2.6.tgz";
-        sha512 = "Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==";
+        url = "https://registry.npmjs.org/minimist/-/minimist-1.2.7.tgz";
+        sha512 = "bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==";
       };
     };
     "mkdirp-classic-0.5.3" = {
@@ -2715,7 +2715,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-18.8.3"
+      sources."@types/node-18.8.4"
       sources."@types/stack-utils-2.0.1"
       sources."@types/yargs-16.0.4"
       sources."@types/yargs-parser-21.0.0"
@@ -2892,7 +2892,7 @@ in
       sources."mime-types-2.1.35"
       sources."mimic-response-1.0.1"
       sources."minimatch-3.1.2"
-      sources."minimist-1.2.6"
+      sources."minimist-1.2.7"
       sources."mkdirp-classic-0.5.3"
       sources."ms-2.1.3"
       sources."mustache-4.2.0"
