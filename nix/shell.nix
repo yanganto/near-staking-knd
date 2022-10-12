@@ -31,7 +31,6 @@
             pkgs.just
             pkgs.jq
             self'.packages.near-cli
-            self'.packages.rocksdb-tools
             pkgs.nix-update
 
             # Benchmark tools
@@ -66,7 +65,6 @@
           ]
           ++ self'.packages.kuutamod.buildInputs;
         CORE_CONTRACTS = self.inputs.core-contracts;
-        AWS_PROFILE = "mfa";
         nativeBuildInputs = self'.packages.kuutamod.nativeBuildInputs;
         passthru = {
           inherit formatters;
