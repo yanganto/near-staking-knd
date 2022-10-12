@@ -38,6 +38,8 @@
             #pkgs.fio
             #pkgs.numactl
             #pkgs.xmrig
+            #pkgs.hwloc
+            #(pkgs.inxi.override { withRecommends = true; })
 
             # for tests
             pkgs.mypy

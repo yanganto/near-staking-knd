@@ -48,19 +48,18 @@ DB_KEY_NUM = int(5e7)
 import os
 import sys
 import re
-import signal
 import subprocess
 import argparse
 import shutil
 import resource
 import json
-from tempfile import NamedTemporaryFile
-from typing import IO, Any, Union, Callable, List, Dict, Optional, Text
+from typing import IO, Any, Union, Callable, List, Dict, Optional, Text, NoReturn
 from shlex import quote
 from pathlib import Path
 from enum import Enum
 import io
 from dataclasses import dataclass
+import dataclasses
 
 _FILE = Union[None, int, IO[Any]]
 
@@ -135,13 +134,83 @@ def run(
 
 @dataclass
 class DbBenchOptions:
+    report_path: Path
     db_path: Path
     num_keys: int
     write_rate_limit: int
     duration: int
 
 
-def db_bench(opts: DbBenchOptions) -> None:
+def die(msg: str) -> NoReturn:
+    print(msg, file=sys.stderr)
+    sys.exit(1)
+
+
+def parse_args() -> DbBenchOptions:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--report-path", help="Path to report file", default="report.json"
+    )
+    parser.add_argument("--db-path", help="Path to database directory", required=True)
+    parser.add_argument(
+        "--num-keys", help="Number of keys to insert into database", default=DB_KEY_NUM
+    )
+    parser.add_argument(
+        "--duration", help="Benchmark duration in seconds", default=int(60)
+    )
+    # 9 mbyte/s is what we measured as top throughput in mainnet on 2022-10-07
+    parser.add_argument(
+        "--write-rate-limit",
+        help="Number of byte/s to write while reading",
+        default=int(9e6),
+    )
+    args = parser.parse_args()
+    return DbBenchOptions(
+        report_path=Path(args.report_path),
+        # put rocksdb in subdirectory, so we can just delete it afterwards.
+        db_path=Path(args.db_path) / "db",
+        num_keys=args.num_keys,
+        duration=args.duration,
+        write_rate_limit=args.write_rate_limit,
+    )
+
+
+@dataclass
+class DbBenchResult:
+    micro_second_per_op: float
+    ops_per_second: float
+    duration: float
+    operations: int
+    bandwith_mb: float
+    found: int
+    searched: int
+    raw_output: str
+
+
+def parse_db_bench_output(profile_name: str, bench_output: str) -> DbBenchResult:
+    for line in bench_output.splitlines():
+        if line.startswith(f"{profile_name} :"):
+            # >>> "readwhilewriting :       5.951 micros/op 1343424 ops/sec 60.090 seconds 80726992 operations;   73.6 MB/s (155288 of 10114999 found)".split()
+            # ['readwhilewriting', ':', '5.951', 'micros/op', '1343424', 'ops/sec', '60.090', 'seconds', '80726992', 'operations;', '73.6', 'MB/s', '(155288', 'of', '10114999', 'found)']
+            # [0                 , 1  , 2      , 3          , 4        , 5        , 6       , 7        , 8         , 9            , 10    , 11   ,  12       , 13  , 14        , 15      ]
+            columns = line.split()
+            assert (
+                len(columns) == 16
+            ), f"Rocksdb benchmark output line has not expected number of columns: expected: 16, got: {len(columns)}\n{line}"
+            return DbBenchResult(
+                micro_second_per_op=float(columns[2]),
+                ops_per_second=float(columns[4]),
+                duration=float(columns[6]),
+                operations=int(columns[8]),
+                bandwith_mb=float(columns[10]),
+                found=int(columns[12].strip("(")),
+                searched=int(columns[14]),
+                raw_output=bench_output,
+            )
+    die(f"Did not find the benchmark results in db_bench output: {bench_output}\n")
+
+
+def _db_bench(opts: DbBenchOptions) -> DbBenchResult:
     common_cmd = [
         "db_bench",
         f"--db={opts.db_path}",
@@ -159,7 +228,7 @@ def db_bench(opts: DbBenchOptions) -> None:
         "--benchmarks=fillseqdeterministic",
     ]
     print(f"Initialize rocksdb at {opts.db_path} for benchmark")
-    run(seed_db)
+    proc = run(seed_db, stdout=subprocess.PIPE)
 
     # FIXME zipfli distributions would be likely better
     readwhilewriting = common_cmd + [
@@ -176,37 +245,16 @@ def db_bench(opts: DbBenchOptions) -> None:
         "--compression_type=zstd",
     ]
     print("rocksdb readwhilewriting benchmark")
-    run(readwhilewriting)
+    proc = run(readwhilewriting, stdout=subprocess.PIPE)
+    return parse_db_bench_output("readwhilewriting", proc.stdout)
 
 
-def die(msg: str) -> None:
-    print(msg, file=sys.stderr)
-    sys.exit(1)
-
-
-def parse_args() -> DbBenchOptions:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--db-path", help="Path to database directory", required=True)
-    parser.add_argument(
-        "--num-keys", help="Number of keys to insert into database", default=DB_KEY_NUM
-    )
-    parser.add_argument(
-        "--duration", help="Benchmark duration in seconds", default=int(60)
-    )
-    # 9 mbyte/s is what we measured as top throughput in mainnet on 2022-10-07
-    parser.add_argument(
-        "--write-rate-limit",
-        help="Number of byte/s to write while reading",
-        default=int(9e6),
-    )
-    args = parser.parse_args()
-    return DbBenchOptions(
-        # put rocksdb in subdirectory, so we can just delete it afterwards.
-        db_path=Path(args.db_path) / "db",
-        num_keys=args.num_keys,
-        duration=args.duration,
-        write_rate_limit=args.write_rate_limit,
-    )
+def db_bench(opts: DbBenchOptions) -> DbBenchResult:
+    increase_open_file_limit()
+    try:
+        return _db_bench(opts)
+    finally:
+        shutil.rmtree(opts.db_path)
 
 
 def increase_open_file_limit() -> None:
@@ -262,13 +310,6 @@ def fio(
     """
     cmd = []
 
-    # Bind to CPUs to make benchmark more reproducible
-    # FIXME: Currently assume we have at least 4 physical cpus
-    cmd += [
-        "numactl",
-        "-C",
-        "0-4",
-    ]
     cmd += ["fio"]
 
     cmd += [f"--filename={path}/fio-file", f"--size={FIO_SIZE}GB", "--direct=1"]
@@ -347,53 +388,135 @@ def fio(
         )
 
 
+# Stress-test system, we can compare the hash rate with https://xmrig.com/benchmark
 def xmrig() -> float:
-    regex = re.compile(r".*benchmark finished in (\d+\.\d+) seconds \((\d+\.\d+) h/s\).*")
-    result = []
+    regex = re.compile(
+        r".*benchmark finished in (\d+\.\d+) seconds \((\d+\.\d+) h/s\).*"
+    )
     with subprocess.Popen(
         ["xmrig", "--bench=5M", "--no-color"],
         stdout=subprocess.PIPE,
         text=True,
     ) as p:
         try:
-          assert p.stdout is not None
-          for line in p.stdout:
-              print(line, end="")
-              m = regex.match(line)
-              if m is not None:
-                  _ = float(m.group(1))
-                  hash_rate = float(m.group(2))
-                  return hash_rate
+            assert p.stdout is not None
+            for line in p.stdout:
+                print(line, end="")
+                m = regex.match(line)
+                if m is not None:
+                    _ = float(m.group(1))
+                    hash_rate = float(m.group(2))
+                    return hash_rate
         finally:
             p.kill()
-        print("Could not get a benchmark result from xmrig. Check the logs above")
+        print(
+            "Could not get a benchmark result from xmrig. Check the logs above",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
+def inxi() -> str:
+    p = run(
+        ["inxi", "-F", "-a", "-i", "--slots", "-xxx", "-c0", "-Z", "-i", "-m"],
+        stdout=subprocess.PIPE,
+    )
+    print(p.stdout)
+    return p.stdout
+
+
+def lstopo() -> str:
+    # lstopo --if xml -i /tmp/foo.xml --of svg /tmp/foo.svg
+    return run(
+        ["lstopo", "--of", "xml"],
+        stdout=subprocess.PIPE,
+    ).stdout
+
+
+def check_program(name: str) -> None:
+    if shutil.which(name) is None:
+        die(f"{name} executable not found")
+
+
+def read_report(path: Path) -> dict[str, str]:
+    stats: dict[str, str] = {}
+    if not os.path.exists(path):
+        return stats
+    with open(path) as f:
+        p = json.load(f)
+        stats.update(p)
+        return stats
+
+
+class EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        return super().default(o)
+
+
+def write_report(path: Path, stats: Dict[str, str]) -> None:
+    path.parent.mkdir(exist_ok=True, parents=True)
+    with open(path, "w") as f:
+        json.dump(stats, f, indent=4, sort_keys=True, cls=EnhancedJSONEncoder)
+
+
+class Report:
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self.data = read_report(self.path)
+
+    def __enter__(self) -> "Report":
+        return self
+
+    def run_benchmark(self, name: str, benchmark: Callable[[], Any]) -> None:
+        if self.data.get(name):
+            info(f"skip {name}")
+            return
+
+        info(f"### run {name} ###")
+
+        self.data[name] = benchmark()
+        write_report(self.path, self.data)
+
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        write_report(self.path, self.data)
+
+
+def iperf():
+    # "lon.speedtest.clouvider.net" "5200-5209" "Clouvider" "London, UK (10G)" "IPv4|IPv6" "ping.online.net" "5200-5209" "Online.net" "Paris, FR (10G)" "IPv4" "ping6.online.net" "5200-5209" "Online.net" "Paris, FR (10G)" "IPv6" "nyc.speedtest.clouvider.net" "5200-5209" "Clouvider" "NYC, NY, US (10G)" "IPv4|IPv6"  # pass
+    pass
 
 
 def main() -> None:
     opts = parse_args()
-    if shutil.which("db_bench") is None:
-        die("db_bench executable not found")
-    if shutil.which("fio") is None:
-        die("fio executable not found")
-    #if shutil.which("smartctl") is None:
-    #    die("smartctl executable not found")
-    if shutil.which("xmrig") is None:
-        die("xmrig executable not found")
+    check_program("db_bench")
+    check_program("fio")
+    check_program("inxi")
+    check_program("xmrig")
+    check_program("lstopo")
+    check_program("inxi")
 
-    #rand_read_only = fio(opts.db_path, True, Rw.r, True)
-    #rand_read_write = fio(opts.db_path, True, Rw.rw, True)
-    #seq_read_only = fio(opts.db_path, False, Rw.r, False)
-    #seq_read_write = fio(opts.db_path, False, Rw.rw, False)
+    if os.geteuid() != 0:
+        die("This script needs to be executed as root")
 
-    ## sudo smartctl --all /dev/sdb
-    #increase_open_file_limit()
-    #try:
-    #    db_bench(opts)
-    #finally:
-    #    shutil.rmtree(opts.db_path)
-
-    # Stress-test system, we can compare the hash rate with https://xmrig.com/benchmark
-    hashrate = xmrig()
+    with Report(opts.report_path) as report:
+        report.run_benchmark("inxi", inxi)
+        report.run_benchmark("lstopo", lstopo)
+        report.run_benchmark("xmrig", xmrig)
+        report.run_benchmark(
+            "fio-rand-read-only", lambda: fio(opts.db_path, True, Rw.r, True)
+        )
+        report.run_benchmark(
+            "fio-rand-read-write", lambda: fio(opts.db_path, True, Rw.rw, True)
+        )
+        report.run_benchmark(
+            "fio-seq-read-only", lambda: fio(opts.db_path, False, Rw.r, False)
+        )
+        report.run_benchmark(
+            "fio-seq-read-write", lambda: fio(opts.db_path, False, Rw.rw, False)
+        )
+        report.run_benchmark("db_bench", lambda: db_bench(opts))
 
 
 if __name__ == "__main__":
