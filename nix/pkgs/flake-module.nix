@@ -9,8 +9,6 @@
 
       kuutamod = pkgs.callPackage ./kuutamod.nix { };
 
-      rocksdb-tools = pkgs.callPackage ./rocksdb-tools.nix { };
-
       # passthru as convinience for the CI.
       nix-update = pkgs.nix-update;
 

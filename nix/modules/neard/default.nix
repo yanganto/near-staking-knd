@@ -104,8 +104,6 @@ in
     # not strictly needed but useful for debugging i.e. finding out what neard version we deployed and some subcommands of neard
     environment.systemPackages = [
       cfg.package
-      # sst_dump is required for neard's db stats tool
-      (pkgs.callPackage ../../pkgs/rocksdb-tools.nix { })
     ];
 
     systemd.services.neard = {

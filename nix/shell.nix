@@ -33,6 +33,13 @@
             self'.packages.near-cli
             pkgs.nix-update
 
+            # Benchmark tools
+            #pkgs.fio
+            #pkgs.numactl
+            #pkgs.xmrig
+            #pkgs.hwloc
+            #(pkgs.inxi.override { withRecommends = true; })
+
             # for tests
             pkgs.mypy
             (pkgs.python3.withPackages (ps: [
@@ -58,7 +65,6 @@
           ]
           ++ self'.packages.kuutamod.buildInputs;
         CORE_CONTRACTS = self.inputs.core-contracts;
-        AWS_PROFILE = "mfa";
         nativeBuildInputs = self'.packages.kuutamod.nativeBuildInputs;
         passthru = {
           inherit formatters;
