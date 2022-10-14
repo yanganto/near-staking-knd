@@ -8,6 +8,7 @@
 , lib
 , stdenv
 , autoPatchelfHook
+, darwin
 }:
 
 { version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ] }:
@@ -62,7 +63,7 @@ rustPlatform.buildRustPackage rec {
   buildInputs = [
     zlib
     openssl
-  ];
+  ] ++ lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.DiskArbitration;
 
   nativeBuildInputs = [
     pkg-config
