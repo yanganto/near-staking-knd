@@ -2,7 +2,8 @@ builds:
  exclude: []
  include:
  - '*.x86_64-linux.*'
- - 'packages.aarch64-darwin.*'
+ # TODO: fix near-cli build
+ #- 'packages.aarch64-darwin.*'
  - defaultPackage.x86_64-linux
  - devShell.x86_64-linux
  - nixosConfigurations.*
