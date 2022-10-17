@@ -26,7 +26,7 @@ To avoid having two active validators running at the same time, kuutamod uses
 
 ## Status: beta
 
-kuutamod is continously tested and also used in production for validators.
+kuutamod is continuously tested and also used in production for validators.
 However `kuutamod`'s interface is still under active development and might
 change significantly.
 
@@ -34,7 +34,7 @@ change significantly.
 
 - Tutorials:
   - [Build and install from source](docs/build.md)
-  - [Runon a localnet](docs/run-localnet.md)
+  - [Run on a localnet](docs/run-localnet.md)
   - [Run on testnet / mainnet](docs/run-main-test-shard.md)
   - [Quickstart Lab - testnet on AWS](docs/testnet-on-aws-lab.md)
   <!-- TODO - [Monitoring](docs/monitoring.md) -->
