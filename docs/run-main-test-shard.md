@@ -136,7 +136,7 @@ node key.
 
 
 Run the following command but replace
-`kuutamo-test_kuutamo.poolv1.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet>
+`kuutamo-test_kuutamo.poolv1.near`, with your own pool id, and delete as appropriate where you see <mainnet|testnet>
 
 ```console
 $ export NEAR_ENV=<mainnet|testnet>
@@ -152,7 +152,7 @@ $ nano ~/.near-credentials/<mainnet|testnet>/node_key.json
 ```
 
 You can then install them like this (but replace
-`kuutamo-test_kuutamo.poolv1.near`, with your own pool id, and delete as approprate where you see <mainnet|testnet>):
+`kuutamo-test_kuutamo.poolv1.near`, with your own pool id, and delete as appropriate where you see <mainnet|testnet>):
 
 ```console
 $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet>/kuutamo-test_kuutamo.poolv1.near.json /var/lib/secrets/validator_key.json

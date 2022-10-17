@@ -16,7 +16,7 @@ are kept in sync with the network for faster failover.
 
 In case the active validator crashes or it becomes unavailable the session lock
 is released and an passive node can become validator. Kuutamod itself also
-constently performs healtchecks on neard and will initiate a failover itself in
+constantly performs healtchecks on neard and will initiate a failover itself in
 case it detect failures.
 
 ![Failover scenario](failover.png)
