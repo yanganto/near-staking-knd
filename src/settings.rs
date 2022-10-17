@@ -50,10 +50,10 @@ pub struct Settings {
     #[clap(skip = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 80))]
     pub near_rpc_addr: SocketAddr,
     /// The neard validator key that we will pass to neard, when kuutamod becomes validator
-    #[clap(long, default_value = "", env = "KUUTAMO_VALIDATOR_KEY")]
+    #[clap(long, default_value = ".", env = "KUUTAMO_VALIDATOR_KEY")]
     pub validator_key: PathBuf,
     /// The neard node key that we will pass to neard, when kuutamod becomes validator
-    #[clap(long, default_value = "", env = "KUUTAMO_VALIDATOR_NODE_KEY")]
+    #[clap(long, default_value = ".", env = "KUUTAMO_VALIDATOR_NODE_KEY")]
     pub validator_node_key: PathBuf,
 
     /// The public key of the node key that we will write in the public address
@@ -69,7 +69,7 @@ pub struct Settings {
     )]
     pub validator_network_addr: SocketAddr,
     /// The neard node key that we will pass to neard, when kuutamod is not a validator
-    #[clap(long, default_value = "", env = "KUUTAMO_VOTER_NODE_KEY")]
+    #[clap(long, default_value = ".", env = "KUUTAMO_VOTER_NODE_KEY")]
     pub voter_node_key: PathBuf,
     /// The address neard will listen, when kuutamod is not a validator. At least the port should be different from `validator_network_addr`
     #[clap(
