@@ -93,7 +93,7 @@ pub fn setup_voter(settings: &Settings) -> Result<NeardProcess> {
     .context("failed to update network addr in near config")?;
 
     let process = run_neard(&settings.neard_home, &settings.near_boot_nodes)
-        .context("Cannot start validator neard")?;
+        .context("Cannot start voter neard")?;
 
     Ok(NeardProcess {
         process,
