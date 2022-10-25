@@ -118,14 +118,15 @@ in
           "${pkgs.writeShellScript "kuutamod-schedule-reload" ''
           set -x
           touch /run/kuutamod/restart
-          # reload consul token file
-          kill -SIGUSR1 $MAINPID
 
           ${lib.optionalString (cfg.consulTokenFile != null) ''
             # We need those keys for kuutamoctl as root
             # We copy the token from the service here to make things like systemd's LoadCredential and secrets from vault work.
             install -m400 "${cfg.consulTokenFile}" /run/kuutamod/consul-token
           ''}
+
+          # reload consul token file
+          kill -SIGUSR1 $MAINPID
         ''}"
         ];
 
