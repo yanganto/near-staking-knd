@@ -1,15 +1,17 @@
 { fetchFromGitHub
+, fetchpatch
 , zlib
 , openssl
 , pkg-config
 , protobuf
+, rustPlatform
 , llvmPackages
 , lib
 , stdenv
 , autoPatchelfHook
 , darwin
 }:
-{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], neardRustPlatform }:
+{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], neardRustPlatform ? rustPlatform }:
 # based on https://github.com/ZentriaMC/neard-nix/blob/master/neardtynix
 neardRustPlatform.buildRustPackage rec {
   pname = "neard";
@@ -26,17 +28,27 @@ neardRustPlatform.buildRustPackage rec {
 
   inherit cargoSha256;
 
-  # On nixos the nix-daemon limits files to 4096 by default...
-  # In our tests we probably don't need more than that...
-  # However neard does not respect our store configuration in all cases.
-  # Also see https://github.com/near/nearcore/issues/6857
-  #
-  # This should be fixed in https://github.com/near/nearcore/pull/6858
-  patches = lib.optional (version == "1.28.1") ./0001-reduce-max_open_files-when-checking-version-v1.28.0.patch;
+  patches = [ ];
 
-  # Stateviewer has a test dependency on the wasm contracts.
-  # Since we are not building tests, we can skip those.
-  cargoPatches = [ ./0001-make-near-test-contracts-optional.patch ];
+  cargoPatches = [
+    # Stateviewer has a test dependency on the wasm contracts.
+    # Since we are not building tests, we can skip those.
+    ./0001-make-near-test-contracts-optional.patch
+
+    # - Expected shutdown
+    #   - https://github.com/near/nearcore/pull/7872
+    # - Maintenance RPC
+    #   - https://github.com/near/nearcore/pull/7887
+    (
+      lib.optional (lib.versionAtLeast version "1.30.0-rc4") (
+        fetchpatch {
+          name = "shutdown-patch-1.30.0-rc.4-p2";
+          url = "https://github.com/yanganto/nearcore/commit/247dcd71f601e4de8ff26109fdb16106a5c90b1b.patch";
+          sha256 = "sha256-vQXBLAvielXx/s+CyWuXMGHDjqHu7QULlR169DQwuTc=";
+        }
+      )
+    )
+  ];
 
   postPatch = ''
     substituteInPlace neard/build.rs \

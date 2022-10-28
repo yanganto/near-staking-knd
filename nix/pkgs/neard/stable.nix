@@ -1,15 +1,15 @@
-{ pkgs, buildPackages, rustPlatform, rustPackages_1_64 }:
+{ pkgs, buildPackages, rustToolchain_1_63 }:
 
 let
   generic = pkgs.callPackage ./generic.nix { };
   neardRustPlatform = pkgs.callPackage buildPackages.makeRustPlatform {
-    rustc = rustPackages_1_64.rustc;
-    cargo = rustPackages_1_64.cargo;
+    rustc = rustToolchain_1_63.rustc;
+    cargo = rustToolchain_1_63.cargo;
   };
 in
 generic {
-  version = "1.29.0";
-  sha256 = "sha256-TOZ6j4CaiOXmNn8kgVGP27SjvLDlGvabAA+PAEyFXIk=";
-  cargoSha256 = "sha256-LFYWkQY7UcFg0aImfS3cWGKviRdG+gP9Vv2QUZgxtsg=";
+  version = "1.30.0-rc.4";
+  sha256 = "sha256-0J6dJf/OJGL8avhIKIs1HlfsCi46B+Wv810qMQQtp3w=";
+  cargoSha256 = "sha256-wlMzFs+1y3oDwa8wr94AEhG3dlVxYiE8SbirgKWlmxk=";
   inherit neardRustPlatform;
 }
