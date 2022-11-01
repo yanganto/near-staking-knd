@@ -114,8 +114,8 @@ in
           ];
           ExecStartPre = [
             "+${pkgs.writeShellScript "neard-key-setup-setup" ''
-              install -m400 -o neard -g neard "$VALIDATOR_KEY" /var/lib/neard/node_key.json
-              install -m400 -o neard -g neard "$VALIDATOR_NODE_KEY" /var/lib/neard/validator_key.json
+              install -m400 -o neard -g neard "$VALIDATOR_KEY" /var/lib/neard/validator_key.json
+              install -m400 -o neard -g neard "$VALIDATOR_NODE_KEY" /var/lib/neard/node_key.json
             ''}"
           ];
         };
