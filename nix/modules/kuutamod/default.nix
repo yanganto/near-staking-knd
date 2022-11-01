@@ -115,7 +115,7 @@ in
         RuntimeDirectory = "kuutamod";
 
         ExecReload = [
-          "${pkgs.writeShellScript "kuutamod-schedule-reload" ''
+          "+${pkgs.writeShellScript "kuutamod-schedule-reload" ''
           set -x
           touch /run/kuutamod/restart
 
@@ -145,7 +145,7 @@ in
                 fi
               ''}"
             # we need to execute this as the neard user so we get access to private tmp
-          ] ++ lib.optional (cfg.consulTokenFile != null) "${pkgs.coreutils}/bin/install -m400 '${cfg.consulTokenFile}' /run/kuutamod/consul-token";
+          ] ++ lib.optional (cfg.consulTokenFile != null) "+${pkgs.coreutils}/bin/install -m400 '${cfg.consulTokenFile}' /run/kuutamod/consul-token";
         ExecStart = "${kuutamod}/bin/kuutamod";
       };
     };
