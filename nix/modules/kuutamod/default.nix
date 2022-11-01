@@ -88,10 +88,37 @@ in
     ];
 
     # this is useful for kuutamodctl
-    environment.variables = {
-      "KUUTAMO_ACCOUNT_ID" = cfg.accountId;
-    } // lib.optionalAttrs (cfg.consulTokenFile != null) {
-      "KUUTAMO_CONSUL_TOKEN_FILE" = "/run/kuutamod/consul-token";
+    environment.variables =
+      {
+        "KUUTAMO_ACCOUNT_ID" = cfg.accountId;
+      }
+      // lib.optionalAttrs (cfg.consulTokenFile != null) {
+        "KUUTAMO_CONSUL_TOKEN_FILE" = "/run/kuutamod/consul-token";
+      };
+
+    # If failover / kuutamod fails for what ever reason, this service allows to
+    # start neard manually.
+    # Do NOT start this service if any kuutamod for this validator key is
+    # signing or else it will result in double-signing
+    # This service assumes that configuration is already mostly implace i.e. a
+    # neard backup and neard's config.json
+    systemd.services.neard-manual = {
+      inherit (config.systemd.services.neard) path;
+
+      serviceConfig =
+        config.systemd.services.neard.serviceConfig
+        // {
+          Environment = [
+            "VALIDATOR_KEY=${cfg.validatorKeyFile}"
+            "VALIDATOR_NODE_KEY=${cfg.validatorNodeKeyFile}"
+          ];
+          ExecStartPre = [
+            "+${pkgs.writeShellScript "neard-key-setup-setup" ''
+              install -m400 -o neard -g neard "$VALIDATOR_KEY" /var/lib/neard/node_key.json
+              install -m400 -o neard -g neard "$VALIDATOR_NODE_KEY" /var/lib/neard/validator_key.json
+            ''}"
+          ];
+        };
     };
 
     systemd.services.kuutamod = {
@@ -101,54 +128,58 @@ in
 
       inherit (config.systemd.services.neard) path;
 
-      serviceConfig = config.systemd.services.neard.serviceConfig // {
-        Environment = [
-          "KUUTAMO_NEARD_HOME=/var/lib/neard"
-          "KUUTAMO_NODE_ID=${cfg.nodeId}"
-          "KUUTAMO_ACCOUNT_ID=${cfg.accountId}"
-          "KUUTAMO_VOTER_NODE_KEY=/var/lib/neard/voter_node_key.json"
-          "KUUTAMO_VALIDATOR_KEY=${cfg.validatorKeyFile}"
-          "KUUTAMO_VALIDATOR_NODE_KEY=${cfg.validatorNodeKeyFile}"
-        ] ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}"
-        ++ lib.optional (cfg.publicAddresses != [ ]) "KUUTAMO_PUBLIC_ADDRESSES=${lib.concatStringsSep "," cfg.publicAddresses}";
+      serviceConfig =
+        config.systemd.services.neard.serviceConfig
+        // {
+          Environment =
+            [
+              "KUUTAMO_NEARD_HOME=/var/lib/neard"
+              "KUUTAMO_NODE_ID=${cfg.nodeId}"
+              "KUUTAMO_ACCOUNT_ID=${cfg.accountId}"
+              "KUUTAMO_VOTER_NODE_KEY=/var/lib/neard/voter_node_key.json"
+              "KUUTAMO_VALIDATOR_KEY=${cfg.validatorKeyFile}"
+              "KUUTAMO_VALIDATOR_NODE_KEY=${cfg.validatorNodeKeyFile}"
+            ]
+            ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}"
+            ++ lib.optional (cfg.publicAddresses != [ ]) "KUUTAMO_PUBLIC_ADDRESSES=${lib.concatStringsSep "," cfg.publicAddresses}";
 
-        RuntimeDirectory = "kuutamod";
+          RuntimeDirectory = "kuutamod";
 
-        ExecReload = [
-          "+${pkgs.writeShellScript "kuutamod-schedule-reload" ''
-          set -x
-          touch /run/kuutamod/restart
+          ExecReload = [
+            "+${pkgs.writeShellScript "kuutamod-schedule-reload" ''
+              set -x
+              touch /run/kuutamod/restart
 
-          ${lib.optionalString (cfg.consulTokenFile != null) ''
-            # We need those keys for kuutamoctl as root
-            # We copy the token from the service here to make things like systemd's LoadCredential and secrets from vault work.
-            install -m400 "${cfg.consulTokenFile}" /run/kuutamod/consul-token
-          ''}
+              ${lib.optionalString (cfg.consulTokenFile != null) ''
+                # We need those keys for kuutamoctl as root
+                # We copy the token from the service here to make things like systemd's LoadCredential and secrets from vault work.
+                install -m400 "${cfg.consulTokenFile}" /run/kuutamod/consul-token
+              ''}
 
-          # reload consul token file
-          kill -SIGUSR1 $MAINPID
-        ''}"
-        ];
+              # reload consul token file
+              kill -SIGUSR1 $MAINPID
+            ''}"
+          ];
 
-        # If neard goes out-of-memory, we want to keep kuutamod running.
-        OOMPolicy = "continue";
+          # If neard goes out-of-memory, we want to keep kuutamod running.
+          OOMPolicy = "continue";
 
-        # this script is run as root
-        ExecStartPre =
-          lib.optional (cfg.consulTokenFile != null) "+${pkgs.coreutils}/bin/install -m400 '${cfg.consulTokenFile}' /run/kuutamod/consul-token"
+          # this script is run as root
+          ExecStartPre =
+            lib.optional (cfg.consulTokenFile != null) "+${pkgs.coreutils}/bin/install -m400 '${cfg.consulTokenFile}' /run/kuutamod/consul-token"
             ++ config.systemd.services.neard.serviceConfig.ExecStartPre
             ++ [
-            "+${pkgs.writeShellScript "kuutamod-setup" ''
+              "+${pkgs.writeShellScript "kuutamod-setup" ''
                 set -eux -o pipefail
                 # Generate voter node key
                 if [[ ! -f /var/lib/neard/voter_node_key.json ]]; then
                   mv /var/lib/neard/node_key.json /var/lib/neard/voter_node_key.json
                 fi
               ''}"
-            # we need to execute this as the neard user so we get access to private tmp
-          ];
-        ExecStart = "${kuutamod}/bin/kuutamod";
-      };
+              # we need to execute this as the neard user so we get access to private tmp
+            ];
+          ExecStart = "${kuutamod}/bin/kuutamod";
+        };
     };
 
     networking.firewall.allowedTCPPorts = lib.optionals cfg.openFirewall [

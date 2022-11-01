@@ -40,5 +40,14 @@ makeTest' {
     # check that node_key is set up, but not validator key
     server.succeed("[[ ! -f /var/lib/neard/validator_key.json ]]")
     server.succeed("[[ -f /var/lib/neard/node_key.json ]]")
+
+    server.succeed("systemctl stop kuutamod")
+    server.fail("curl --silent http://127.0.0.1:3030/metrics")
+    server.succeed("! systemctl is-active neard-manual")
+    server.succeed("systemctl start neard-manual")
+    # neard prometheus endpoint
+    server.wait_until_succeeds("curl --silent http://127.0.0.1:3030/metrics")
+    server.succeed("[[ -f /var/lib/neard/validator_key.json ]]")
+    server.succeed("[[ -f /var/lib/neard/node_key.json ]]")
   '';
 }
