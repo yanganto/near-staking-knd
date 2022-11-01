@@ -11,7 +11,7 @@ anyhow = "1.0.66"
 tokio = { version = "1.21.2", features = ["full"] }
 futures-util = "0.3.25"
 hyper = { version = "0.14.20", features = [ "server" ] }
-prometheus = "0.13.2"
+prometheus = "0.13.3"
 lazy_static = "1.4.0"
 nix = "0.25.0"
 serde = { version = "1.0.147", features = ["derive"] }
