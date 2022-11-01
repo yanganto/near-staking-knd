@@ -135,7 +135,8 @@ in
 
         # this script is run as root
         ExecStartPre =
-          config.systemd.services.neard.serviceConfig.ExecStartPre
+          lib.optional (cfg.consulTokenFile != null) "+${pkgs.coreutils}/bin/install -m400 '${cfg.consulTokenFile}' /run/kuutamod/consul-token"
+            ++ config.systemd.services.neard.serviceConfig.ExecStartPre
             ++ [
             "+${pkgs.writeShellScript "kuutamod-setup" ''
                 set -eux -o pipefail
@@ -145,7 +146,7 @@ in
                 fi
               ''}"
             # we need to execute this as the neard user so we get access to private tmp
-          ] ++ lib.optional (cfg.consulTokenFile != null) "+${pkgs.coreutils}/bin/install -m400 '${cfg.consulTokenFile}' /run/kuutamod/consul-token";
+          ];
         ExecStart = "${kuutamod}/bin/kuutamod";
       };
     };
