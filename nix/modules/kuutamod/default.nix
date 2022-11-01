@@ -153,7 +153,7 @@ in
               ${lib.optionalString (cfg.consulTokenFile != null) ''
                 # We need those keys for kuutamoctl as root
                 # We copy the token from the service here to make things like systemd's LoadCredential and secrets from vault work.
-                install -m400 "${cfg.consulTokenFile}" /run/kuutamod/consul-token
+                install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kuutamod/consul-token
               ''}
 
               # reload consul token file
@@ -166,7 +166,10 @@ in
 
           # this script is run as root
           ExecStartPre =
-            lib.optional (cfg.consulTokenFile != null) "+${pkgs.coreutils}/bin/install -m400 '${cfg.consulTokenFile}' /run/kuutamod/consul-token"
+            lib.optional (cfg.consulTokenFile != null) "+${pkgs.writeShellScript "kuutamod-consul-token" ''
+              set -eux -o pipefail
+              install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kuutamod/consul-token
+            ''}"
             ++ config.systemd.services.neard.serviceConfig.ExecStartPre
             ++ [
               "+${pkgs.writeShellScript "kuutamod-setup" ''
