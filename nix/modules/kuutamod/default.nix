@@ -11,13 +11,13 @@ in
 {
   options.kuutamo.kuutamod = {
     validatorKeyFile = lib.mkOption {
-      type = lib.types.path;
+      type = (lib.types.either lib.types.path lib.types.str);
       description = ''
         A file which contains a public and private key for local account which belongs to the only local network validator (validator_key.json of the validator).
       '';
     };
     validatorNodeKeyFile = lib.mkOption {
-      type = lib.types.path;
+      type = (lib.types.either lib.types.path lib.types.str);
       description = ''
         A file which contains a public and private key for the validator node (node_key.json of the validator)
       '';
@@ -30,7 +30,7 @@ in
       '';
     };
     consulTokenFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
+      type = lib.types.nullOr (lib.types.either lib.types.path lib.types.str);
       default = null;
       description = ''
         File containing consul token file used for authenticating consul agent.
