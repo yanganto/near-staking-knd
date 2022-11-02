@@ -4,16 +4,14 @@
 , pkg-config
 , protobuf
 , llvmPackages
-, rustPlatform
 , lib
 , stdenv
 , autoPatchelfHook
 , darwin
 }:
-
-{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ] }:
-# based on https://github.com/ZentriaMC/neard-nix/blob/master/neard.nix
-rustPlatform.buildRustPackage rec {
+{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], neardRustPlatform }:
+# based on https://github.com/ZentriaMC/neard-nix/blob/master/neardtynix
+neardRustPlatform.buildRustPackage rec {
   pname = "neard";
   inherit version;
 
