@@ -5,11 +5,17 @@ use crate::proc::{graceful_stop_neard, run_neard};
 use crate::settings::Settings;
 use anyhow::{Context, Result};
 use log::warn;
+use near_primitives::types::BlockHeight;
+use nix::sys::signal::{self, Signal};
+use nix::unistd::Pid;
 use std::fs::remove_file;
 use std::io::ErrorKind;
 use std::os::unix::fs::symlink;
 use std::path::Path;
+use std::path::PathBuf;
 use std::process::ExitStatus;
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
 use tokio::process::Child;
 
 /// A neard validator process
@@ -117,6 +123,48 @@ impl NeardProcess {
     /// Wait for process to stop
     pub async fn wait(&mut self) -> std::result::Result<ExitStatus, std::io::Error> {
         self.process.wait().await
+    }
+
+    /// Get Pid of neard
+    pub fn pid(&self) -> Pid {
+        // FIXME: correctly handle unwrap here
+        let pid: i32 = self.process.id().unwrap().try_into().unwrap();
+        Pid::from_raw(pid)
+    }
+
+    /// Update dynamic config
+    /// NOTE: currently only expected shutdown in the config, so input parameter is only expected_shutdown
+    pub async fn update_dynamic_config(
+        pid: Pid,
+        dyn_config_path: &PathBuf,
+        expected_shutdown: BlockHeight,
+    ) -> Result<()> {
+        force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
+        let mut file = File::create(&dyn_config_path).await?;
+        file.write_all(format!("{{\"expected_shutdown\": {expected_shutdown:}}}").as_bytes())
+            .await?;
+        let mut result = signal::kill(pid, Signal::SIGHUP);
+        for i in 1..=3 {
+            if let Err(e) = result {
+                warn!("{i} time try send SIGHUP to neard({pid:?}): {e:?}");
+                result = signal::kill(pid, Signal::SIGHUP);
+            }
+        }
+        // TODO check dyn_config setup correctly, when this issue is fixed
+        // https://github.com/near/nearcore/issues/7990
+        Ok(result?)
+    }
+
+    /// Restart by sending terminate sigal without update `self.sent_kill` such that it will restart by kuutamod
+    pub async fn restart(pid: Pid) -> Result<()> {
+        let mut result = signal::kill(pid, Signal::SIGTERM);
+        for i in 1..=3 {
+            if result.is_err() {
+                result = signal::kill(pid, Signal::SIGTERM);
+            }
+            warn!("{i} time try send SIGTERM to neard({:?})", pid);
+        }
+        Ok(result?)
     }
 }
 

@@ -1,9 +1,26 @@
 //! Module to interact with the neard daemon
 
 use anyhow::{Context, Result};
-use near_primitives::views::StatusResponse;
-use reqwest::Client;
-use reqwest::Url;
+use near_primitives::{account::id::AccountId, types::BlockHeight, views::StatusResponse};
+use reqwest::{Client, Url};
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+use std::collections::HashMap;
+
+/// The result for maintenacne windows rpc
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct MaintenanceWindowRPCResult(pub Vec<(BlockHeight, BlockHeight)>);
+
+/// The rpc result for maintenacne windows rpc
+#[derive(Deserialize)]
+pub struct JsonRpcStatusResponse {
+    /// RPC version
+    pub jsonrpc: String,
+    /// id, may take care in future
+    pub id: String,
+    /// the result we care
+    pub result: MaintenanceWindowRPCResult,
+}
 
 /// A client implementing the neard status api
 #[derive(Debug)]
@@ -40,5 +57,36 @@ impl NeardClient {
             .context("Failed to get status")?;
 
         Ok(res.json::<StatusResponse>().await?)
+    }
+
+    fn rpc_request(method: &str, params: HashMap<String, serde_json::Value>) -> serde_json::Value {
+        json!({
+             "jsonrpc": "2.0",
+             "method": method,
+             "id": "dontcare",
+             "params": params,
+        })
+    }
+
+    /// Request maintenance windows
+    pub async fn maintenance_windows(
+        &self,
+        account_id: AccountId,
+    ) -> Result<MaintenanceWindowRPCResult> {
+        let mut params = HashMap::<String, serde_json::Value>::new();
+        params.insert("account_id".into(), account_id.as_str().into());
+        let res = self
+            .client
+            .post(self.url.clone())
+            .json(&Self::rpc_request(
+                "EXPERIMENTAL_maintenance_windows",
+                params,
+            ))
+            .send()
+            .await
+            .context("Failed to get maintenance windows")?;
+
+        let r: JsonRpcStatusResponse = res.json().await?;
+        Ok(r.result)
     }
 }

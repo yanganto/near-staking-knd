@@ -2,6 +2,7 @@
 
 //! a HA supervisor library for neard
 
+pub mod commands;
 pub mod consul_client;
 pub mod exit_signal_handler;
 pub mod leader_protocol;

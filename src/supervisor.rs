@@ -1,6 +1,7 @@
 //! Supervises neard and participate in consul leader election.
 //! The neard process of leader will get the validator key.
 
+use crate::commands::CommandHander;
 use crate::consul_client::{ConsulClient, ConsulError, ConsulSession};
 use crate::exit_signal_handler::ExitSignalHandler;
 use crate::leader_protocol::consul_leader_key;
@@ -49,8 +50,8 @@ const CONSUL_LEADER_TIMEOUT: Duration = Duration::from_secs(25);
 const NEARD_STATUS_FREQUENCY: Duration = Duration::from_secs(1);
 
 // When adding states also update `initialize_state_gauge`
-#[derive(PartialEq, Debug, Clone)]
-enum StateType {
+#[derive(PartialEq, Debug, Clone, Copy)]
+pub(crate) enum StateType {
     Startup,
     Syncing,
     Registering,
@@ -457,6 +458,8 @@ impl StateMachine {
         let mut next_renewal = time::Instant::now().add(CONSUL_SESSION_RENEWAL);
         let mut session_expired = time::Instant::now().add(CONSUL_LEADER_TIMEOUT);
         let mut neard_status = NeardStatus::new();
+        let mut command_handler =
+            CommandHander::new(&self.inner, &self.settings, Some(validator.pid()))?;
 
         loop {
             tokio::select! {
@@ -523,6 +526,11 @@ impl StateMachine {
                     self.consul_session = Some(session.into());
                     return Ok(StateType::Voting)
                 }
+                res = command_handler.listen() => {
+                    if let Ok(Some(new_state)) = res {
+                        return Ok(new_state)
+                    }
+                }
             }
         }
     }
@@ -557,7 +565,7 @@ impl StateMachine {
             info!("state changed: {:?} -> {:?}", self.inner, new_state)
         }
         self.inner = new_state;
-        Ok(self.inner.clone())
+        Ok(self.inner)
     }
 }
 

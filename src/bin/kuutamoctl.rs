@@ -4,6 +4,7 @@
 
 use anyhow::{Context, Result};
 use clap::Parser;
+use kuutamod::commands::{Command, KuutamodClient};
 use kuutamod::{consul_client::ConsulClient, leader_protocol::consul_leader_key};
 use serde_json::to_string_pretty;
 use std::fs;
@@ -27,15 +28,14 @@ struct Args {
     #[clap(long, action, help = "output in json format")]
     json: bool,
 
+    /// Kuutamod control socket to interact with
+    #[clap(long, env = "KUUTAMO_CONTROL_SOCKET")]
+    pub control_socket: Option<PathBuf>,
+
     #[clap(subcommand)]
-    action: Action,
+    action: Command,
 }
 
-#[derive(clap::Subcommand)]
-enum Action {
-    /// Show the current voted validator
-    ActiveValidator,
-}
 const ACCOUNT_ID: &str = "KUUTAMO_ACCOUNT_ID";
 
 async fn show_active_validator(args: &Args) -> Result<i32> {
@@ -99,8 +99,30 @@ async fn show_active_validator(args: &Args) -> Result<i32> {
 #[tokio::main]
 pub async fn main() -> Result<()> {
     let args = Args::parse();
+    let kuutamo_client = if let Some(ref control_socket) = args.control_socket {
+        match KuutamodClient::new(control_socket).await {
+            Ok(client) => Some(client),
+            Err(e) => {
+                eprintln!("Fail to open control socket: {e:?}");
+                std::process::exit(1);
+            }
+        }
+    } else {
+        None
+    };
     let exit_code = match args.action {
-        Action::ActiveValidator => show_active_validator(&args).await?,
+        Command::ActiveValidator => show_active_validator(&args).await?,
+        Command::MaintenanceShutdown => match kuutamo_client
+            .expect("`--control-socket` required for kuutamod command")
+            .send(args.action)
+            .await
+        {
+            Ok(()) => 0,
+            Err(e) => {
+                eprintln!("send error {e:?}");
+                3
+            }
+        },
     };
     std::process::exit(exit_code);
 }
