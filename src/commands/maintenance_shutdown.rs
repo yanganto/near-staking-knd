@@ -58,7 +58,7 @@ pub(crate) async fn execute(
             Some(p),
         ) => {
             NeardProcess::restart(p).await?;
-            info!("No need wait maintenss window, neard restarting");
+            info!("Neard is not a validator. No need wait maintenance window, neard restarting");
             Ok(None)
         }
         (Ok(_), None) => {
