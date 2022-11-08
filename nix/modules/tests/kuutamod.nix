@@ -1,10 +1,10 @@
-{ makeTest' }:
+{ makeTest', nixosModules }:
 makeTest' {
   name = "single-node-kuutamod";
   nodes.server = { lib, ... }: {
     imports = [
-      ../neard/mainnet
-      ../kuutamod
+      nixosModules.kuutamod
+      nixosModules.neard-mainnet
     ];
 
     services.consul.interface.bind = "eth0";

@@ -1,11 +1,12 @@
 { makeTest'
+, nixosModules
 }:
 makeTest'
 {
   name = "neard";
   nodes.server = { lib, ... }: {
     imports = [
-      ../neard/mainnet
+      nixosModules.neard-mainnet
     ];
   };
 
