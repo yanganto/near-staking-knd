@@ -386,6 +386,11 @@ impl StateMachine {
         let mut next_renewal = time::Instant::now().add(CONSUL_SESSION_RENEWAL);
         let mut next_acquire = time::Instant::now();
         let mut neard_status = NeardStatus::new();
+        let mut command_handler = CommandHander::new(
+            &self.inner,
+            &self.settings,
+            self.neard_process.as_ref().map(|p| p.pid()),
+        )?;
 
         loop {
             tokio::select! {
@@ -422,6 +427,11 @@ impl StateMachine {
                     } else {
                         next_renewal = time::Instant::now().add(CONSUL_SESSION_RENEWAL);
                     };
+                }
+                res = command_handler.listen() => {
+                    if let Ok(Some(new_state)) = res {
+                        return Ok(new_state)
+                    }
                 }
             }
         }

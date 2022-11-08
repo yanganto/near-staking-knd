@@ -64,7 +64,8 @@ impl<'a> CommandHander<'a> {
     /// Excute and change StateType if needed
     pub async fn command_excutor(&self, cmd: &Command) -> Result<Option<StateType>> {
         match (self.current_state, cmd) {
-            (StateType::Validating, Command::MaintenanceShutdown) => {
+            (StateType::Validating, Command::MaintenanceShutdown)
+            | (StateType::Voting, Command::MaintenanceShutdown) => {
                 let b = maintenance_shutdown::execute(
                     self.near_rpc_port,
                     self.neard_process_id,
