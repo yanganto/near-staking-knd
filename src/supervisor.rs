@@ -389,7 +389,7 @@ impl StateMachine {
         let mut command_handler = CommandHander::new(
             &self.inner,
             &self.settings,
-            self.neard_process.as_ref().map(|p| p.pid()),
+            self.neard_process.as_ref().and_then(|p| p.pid()),
         )?;
 
         loop {
@@ -468,8 +468,7 @@ impl StateMachine {
         let mut next_renewal = time::Instant::now().add(CONSUL_SESSION_RENEWAL);
         let mut session_expired = time::Instant::now().add(CONSUL_LEADER_TIMEOUT);
         let mut neard_status = NeardStatus::new();
-        let mut command_handler =
-            CommandHander::new(&self.inner, &self.settings, Some(validator.pid()))?;
+        let mut command_handler = CommandHander::new(&self.inner, &self.settings, validator.pid())?;
 
         loop {
             tokio::select! {

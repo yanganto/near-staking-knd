@@ -126,10 +126,13 @@ impl NeardProcess {
     }
 
     /// Get Pid of neard
-    pub fn pid(&self) -> Pid {
-        // FIXME: correctly handle unwrap here
-        let pid: i32 = self.process.id().unwrap().try_into().unwrap();
-        Pid::from_raw(pid)
+    pub fn pid(&self) -> Option<Pid> {
+        if let Some(pid) = self.process.id() {
+            if let Ok(i) = pid.try_into() {
+                return Some(Pid::from_raw(i));
+            }
+        }
+        None
     }
 
     /// Update dynamic config
