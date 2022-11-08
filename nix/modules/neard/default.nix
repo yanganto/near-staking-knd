@@ -22,7 +22,6 @@ in
     };
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.callPackage ../../pkgs/neard/stable.nix { };
       defaultText = lib.literalExpression "pkgs.neard";
       description = "The neard package to use in our service";
     };

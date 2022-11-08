@@ -9,7 +9,12 @@
           ./neard/testnet
         ];
       };
-      neard-mainnet = ./neard/mainnet;
+      neard-mainnet = { pkgs, lib, ... }: {
+        kuutamo.neard.package = lib.mkDefault self.packages.${pkgs.system}.neard;
+        imports = [
+          ./neard/mainnet
+        ];
+      };
       kuutamo-binary-cache = ./binary-cache;
       kuutamod = ./kuutamod;
       default = self.nixosModules.kuutamod;
