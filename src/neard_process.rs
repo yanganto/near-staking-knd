@@ -141,16 +141,13 @@ impl NeardProcess {
     ) -> Result<()> {
         force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
         let mut file = File::create(&dyn_config_path).await?;
-        let dynamicConfig = json!({
-          "expected_shutdown": expected_shutdown
-        });
-        file.write_all(dynamicConfig.to_string().as_bytes()).await?;
+        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
+        file.write_all(dynamic_config.to_string().as_bytes())
+            .await?;
         let mut result = signal::kill(pid, Signal::SIGHUP);
-        for i in 1..=3 {
-            if let Err(e) = result {
-                warn!("{i} time try send SIGHUP to neard({pid:?}): {e:?}");
-                result = signal::kill(pid, Signal::SIGHUP);
-            }
+        if let Err(e) = result {
+            warn!("Try send SIGHUP to neard({pid:?}): {e:?}");
+            result = signal::kill(pid, Signal::SIGHUP);
         }
         // TODO check dyn_config setup correctly, when this issue is fixed
         // https://github.com/near/nearcore/issues/7990
@@ -160,12 +157,10 @@ impl NeardProcess {
     /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
     pub async fn restart(pid: Pid) -> Result<()> {
         let mut result = signal::kill(pid, Signal::SIGTERM);
-        for i in 1..=3 {
-            if result.is_err() {
-                result = signal::kill(pid, Signal::SIGTERM);
-            }
-            warn!("{i} time try send SIGTERM to neard({:?})", pid);
+        if result.is_err() {
+            result = signal::kill(pid, Signal::SIGTERM);
         }
+        warn!("Try send SIGTERM to neard({:?})", pid);
         Ok(result?)
     }
 }
