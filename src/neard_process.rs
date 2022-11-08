@@ -157,7 +157,7 @@ impl NeardProcess {
         Ok(result?)
     }
 
-    /// Restart by sending terminate sigal without update `self.sent_kill` such that it will restart by kuutamod
+    /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
     pub async fn restart(pid: Pid) -> Result<()> {
         let mut result = signal::kill(pid, Signal::SIGTERM);
         for i in 1..=3 {
