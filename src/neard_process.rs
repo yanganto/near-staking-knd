@@ -141,8 +141,10 @@ impl NeardProcess {
     ) -> Result<()> {
         force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
         let mut file = File::create(&dyn_config_path).await?;
-        file.write_all(format!("{{\"expected_shutdown\": {expected_shutdown:}}}").as_bytes())
-            .await?;
+        let dynamicConfig = json!({
+          "expected_shutdown": expected_shutdown
+        });
+        file.write_all(dynamicConfig.to_string().as_bytes()).await?;
         let mut result = signal::kill(pid, Signal::SIGHUP);
         for i in 1..=3 {
             if let Err(e) = result {
