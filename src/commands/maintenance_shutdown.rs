@@ -62,7 +62,7 @@ pub(crate) async fn execute(
             Ok(None)
         }
         (Ok(_), None) => {
-            info!("Neard non-existing, may restarting by kuttamod, please wait");
+            info!("Neard non-existing, may restarting by kuutamod, please wait");
             Ok(None)
         }
     }
