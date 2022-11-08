@@ -7,6 +7,9 @@ use near_primitives::views::StatusResponse;
 use nix::unistd::Pid;
 use std::path::PathBuf;
 
+/// The minimum window size for maintenance we need, else we will ignore the small windows
+static MINIMUN_MAINTENANCE: u64 = 60;
+
 /// Book maintenance shutdown and return the block height the shutdown neard will shutdown or None
 /// If there is no window in current epoch for it will raise error, such that we can base on error
 /// and retry it on next epoch
@@ -42,7 +45,12 @@ pub(crate) async fn execute(
 
             let expect_shutdown_at = largest_window_start.map(|b| b + 2); // shutdown on final block
             if let Some(expect_shutdown_at) = expect_shutdown_at {
-                NeardProcess::update_dynamic_config(p, dyn_config_path, expect_shutdown_at).await?;
+                if largest_window_length >= MINIMUN_MAINTENANCE {
+                    NeardProcess::update_dynamic_config(p, dyn_config_path, expect_shutdown_at)
+                        .await?;
+                } else {
+                    bail!("Current maintenance windows in current epoch are too small , please wait for next");
+                }
             } else {
                 // TODO need to disscuss
                 bail!("Neard have no maintenance window in current epoch, please wait");
