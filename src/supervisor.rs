@@ -474,7 +474,7 @@ impl StateMachine {
             tokio::select! {
                 res = validator.process().wait() => {
                     match res {
-                        Ok(res) => warn!("Neard finished unexpectly with {}", res),
+                        Ok(res) => info!("Neard shutdown with {}", res),  // maintenance shutdown
                         Err(err) => warn!("Cannot get status of neard process {}", err),
                     }
                     drop(validator);

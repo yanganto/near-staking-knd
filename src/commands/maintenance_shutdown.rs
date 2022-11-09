@@ -7,7 +7,7 @@ use near_primitives::views::StatusResponse;
 use nix::unistd::Pid;
 use std::path::PathBuf;
 
-/// The minimum window size for maintenance we need, else we will ignore the small windows
+/// The default minimum window length for maintenance we need, else we will ignore the small windows
 static MINIMUN_MAINTENANCE: u64 = 60;
 
 /// Book maintenance shutdown and return the block height the shutdown neard will shutdown or None
@@ -17,6 +17,7 @@ pub(crate) async fn execute(
     near_rpc_port: u16,
     pid: Option<Pid>,
     dyn_config_path: &PathBuf,
+    minimum_length: Option<u64>,
 ) -> Result<Option<BlockHeight>> {
     let neard_client = NeardClient::new(&format!("http://127.0.0.1:{}", near_rpc_port))?;
     match (neard_client.status().await, pid) {
@@ -45,7 +46,7 @@ pub(crate) async fn execute(
 
             let expect_shutdown_at = largest_window_start.map(|b| b + 2); // shutdown on final block
             if let Some(expect_shutdown_at) = expect_shutdown_at {
-                if largest_window_length >= MINIMUN_MAINTENANCE {
+                if largest_window_length >= minimum_length.unwrap_or(MINIMUN_MAINTENANCE) {
                     NeardProcess::update_dynamic_config(p, dyn_config_path, expect_shutdown_at)
                         .await?;
                 } else {

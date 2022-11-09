@@ -22,7 +22,10 @@ use tokio_stream::wrappers::UnixListenerStream;
 #[derive(clap::Subcommand, PartialEq, Serialize, Deserialize, Debug, Clone)]
 pub enum Command {
     /// Setup a maintenance window and restart, will not change the state
-    MaintenanceShutdown,
+    MaintenanceShutdown {
+        /// Specify the minimum length in blockheight for the maintenance shutdown
+        minimum_length: Option<u64>,
+    },
 
     /// Show the current voted validator
     ActiveValidator,
@@ -64,18 +67,19 @@ impl<'a> CommandHander<'a> {
     /// Excute and change StateType if needed
     pub async fn command_excutor(&self, cmd: &Command) -> Result<Option<StateType>> {
         match (self.current_state, cmd) {
-            (StateType::Validating, Command::MaintenanceShutdown)
-            | (StateType::Voting, Command::MaintenanceShutdown) => {
+            (StateType::Validating, Command::MaintenanceShutdown { minimum_length })
+            | (StateType::Voting, Command::MaintenanceShutdown { minimum_length }) => {
                 let b = maintenance_shutdown::execute(
                     self.near_rpc_port,
                     self.neard_process_id,
                     &self.dynamic_conf_path,
+                    *minimum_length,
                 )
                 .await?;
                 info!("will maintenance shutdown at {b:?}");
                 Ok(None)
             }
-            (_, Command::MaintenanceShutdown) => {
+            (_, Command::MaintenanceShutdown { .. }) => {
                 warn!("maintenance shutdown only accept in Validating state");
                 Ok(None)
             }

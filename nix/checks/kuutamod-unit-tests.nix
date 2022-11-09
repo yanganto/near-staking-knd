@@ -8,5 +8,6 @@ stdenv.mkDerivation {
     pytest -s .
   '';
   KUUTAMOD_BIN = "${kuutamod}/bin";
+  NEARD_VERSION = "${neard.version}";
   installPhase = "touch $out";
 }

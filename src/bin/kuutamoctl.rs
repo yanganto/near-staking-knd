@@ -112,7 +112,7 @@ pub async fn main() -> Result<()> {
     };
     let exit_code = match args.action {
         Command::ActiveValidator => show_active_validator(&args).await?,
-        Command::MaintenanceShutdown => match kuutamo_client
+        Command::MaintenanceShutdown { .. } => match kuutamo_client
             .expect("`--control-socket` required for kuutamod command")
             .send(args.action)
             .await
