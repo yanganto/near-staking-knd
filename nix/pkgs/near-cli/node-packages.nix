@@ -2254,13 +2254,13 @@ let
         sha512 = "g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==";
       };
     };
-    "stack-utils-2.0.5" = {
+    "stack-utils-2.0.6" = {
       name = "stack-utils";
       packageName = "stack-utils";
-      version = "2.0.5";
+      version = "2.0.6";
       src = fetchurl {
-        url = "https://registry.npmjs.org/stack-utils/-/stack-utils-2.0.5.tgz";
-        sha512 = "xrQcmYhOsn/1kX+Vraq+7j4oE2j/6BFscZ0etmYg81xuM8Gq0022Pxb8+IqgOFUIaxHs0KaSb7T1+OegiNrNFA==";
+        url = "https://registry.npmjs.org/stack-utils/-/stack-utils-2.0.6.tgz";
+        sha512 = "XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==";
       };
     };
     "statuses-1.5.0" = {
@@ -3008,7 +3008,7 @@ in
         ];
       })
       sources."slash-3.0.0"
-      (sources."stack-utils-2.0.5" // {
+      (sources."stack-utils-2.0.6" // {
         dependencies = [
           sources."escape-string-regexp-2.0.0"
         ];
