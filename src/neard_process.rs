@@ -12,7 +12,6 @@ use std::fs::remove_file;
 use std::io::ErrorKind;
 use std::os::unix::fs::symlink;
 use std::path::Path;
-use std::path::PathBuf;
 use std::process::ExitStatus;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -139,9 +138,10 @@ impl NeardProcess {
     /// NOTE: currently only expected shutdown in the config, so input parameter is only expected_shutdown
     pub async fn update_dynamic_config(
         pid: Pid,
-        dyn_config_path: &PathBuf,
+        neard_home: &Path,
         expected_shutdown: BlockHeight,
     ) -> Result<()> {
+        let dyn_config_path = neard_home.join("dyn_config.json");
         force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
         let mut file = File::create(&dyn_config_path).await?;
         let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });

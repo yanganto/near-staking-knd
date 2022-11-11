@@ -71,7 +71,7 @@ impl NeardClient {
     /// Request maintenance windows
     pub async fn maintenance_windows(
         &self,
-        account_id: AccountId,
+        account_id: &AccountId,
     ) -> Result<MaintenanceWindowRPCResult> {
         let mut params = HashMap::<String, serde_json::Value>::new();
         params.insert("account_id".into(), account_id.as_str().into());

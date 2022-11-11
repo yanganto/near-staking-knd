@@ -1,29 +1,33 @@
 //! Supervises neard and participate in consul leader election.
 //! The neard process of leader will get the validator key.
 
-use crate::commands::CommandHander;
+//use crate::commands::CommandHandler;
 use crate::consul_client::{ConsulClient, ConsulError, ConsulSession};
 use crate::exit_signal_handler::ExitSignalHandler;
+use crate::ipc::Request;
 use crate::leader_protocol::consul_leader_key;
 use crate::near_client::NeardClient;
 use crate::neard_process::{setup_validator, setup_voter, NeardProcess};
-use crate::oom_score;
 use crate::scoped_consul_session::ScopedConsulSession;
 use crate::settings::Settings;
+use crate::{ipc, oom_score};
 use anyhow::bail;
 use anyhow::{Context, Result};
 use futures_util::FutureExt;
 use lazy_static::lazy_static;
 use log::{info, warn};
+use near_primitives::types::{AccountId, BlockHeight};
 use near_primitives::views::StatusResponse;
-use nix::unistd;
+use nix::unistd::{self, Pid};
 use prometheus::{register_int_gauge_vec, IntGaugeVec};
 use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::ops::Add;
+use std::path::Path;
 use std::sync::Arc;
 use std::{fmt, fs};
 use tokio::signal::unix::{signal, Signal, SignalKind};
+use tokio::sync::mpsc::Receiver;
 use tokio::time::{self, Duration, Instant};
 
 lazy_static! {
@@ -99,6 +103,7 @@ struct StateMachine {
     reload_signal: Signal,
     leader_metadata: HashMap<&'static str, String>,
     leader_key: String,
+    request_chan: Receiver<ipc::Request>,
 }
 
 fn get_leader_metadata(node_id: &str) -> Result<HashMap<&'static str, String>> {
@@ -117,7 +122,7 @@ fn get_leader_metadata(node_id: &str) -> Result<HashMap<&'static str, String>> {
 }
 
 impl StateMachine {
-    pub fn new(settings: &Settings) -> Result<StateMachine> {
+    pub fn new(settings: &Settings, request_chan: Receiver<ipc::Request>) -> Result<StateMachine> {
         Ok(StateMachine {
             inner: StateType::Startup,
             settings: settings.clone(),
@@ -139,6 +144,7 @@ impl StateMachine {
             leader_metadata: get_leader_metadata(&settings.node_id)
                 .context("Failed to construct leader metadata")?,
             leader_key: consul_leader_key(&settings.account_id),
+            request_chan,
         })
     }
 }
@@ -263,6 +269,91 @@ fn reload_configuration(settings: &mut Settings, consul_client: &ConsulClient) -
     Ok(())
 }
 
+async fn schedule_maintenance_shutdown(
+    near_rpc_port: u16,
+    pid: Pid,
+    near_home: &Path,
+    account_id: &AccountId,
+    minimum_length: Option<u64>,
+) -> Result<Option<BlockHeight>> {
+    let neard_client = NeardClient::new(&format!("http://127.0.0.1:{}", near_rpc_port))?;
+    let windows = neard_client.maintenance_windows(account_id).await?;
+    let expect_shutdown_at = if let Some(minimum_length) = minimum_length {
+        match windows
+            .0
+            .iter()
+            .find(|window| window.1 - window.0 > minimum_length)
+        {
+            Some(window) => Some(window.0 + 2),
+            None => {
+                bail!(
+                    "Neard has no maintenance window of size ({}) in current epoch, please wait",
+                    minimum_length
+                );
+            }
+        }
+    } else {
+        None
+    };
+
+    if let Some(expect_shutdown_at) = expect_shutdown_at {
+        NeardProcess::update_dynamic_config(pid, near_home, expect_shutdown_at).await?;
+    }
+
+    Ok(expect_shutdown_at)
+}
+
+// validator_pid should be only set if we are in validator state
+async fn handle_request(
+    req: Option<Request>,
+    near_rpc_port: u16,
+    near_home: &Path,
+    account_id: &AccountId,
+    validator_pid: Option<Pid>,
+) -> Option<StateType> {
+    let req = match req {
+        None => {
+            warn!("CommandServer has been closed, exiting");
+            return Some(StateType::Shutdown);
+        }
+        Some(req) => req,
+    };
+    match req {
+        ipc::Request::MaintenanceShutdown(window, resp_chan) => {
+            if let Some(pid) = validator_pid {
+                let res = schedule_maintenance_shutdown(
+                    near_rpc_port,
+                    pid,
+                    near_home,
+                    account_id,
+                    window,
+                );
+                if let Err(e) = resp_chan
+                    .send(ipc::MaintenanceShutdownResponse {
+                        shutdown_at_blockheight: res.await,
+                    })
+                    .await
+                {
+                    warn!("Failed to respond to ipc request: {}", e);
+                };
+                return None;
+            } else {
+                if let Err(e) = resp_chan
+                    .send(ipc::MaintenanceShutdownResponse {
+                        shutdown_at_blockheight: Ok(None),
+                    })
+                    .await
+                {
+                    warn!("Failed to respond to ipc request: {}", e);
+                };
+                // If we are already in startup phase, this would not actually trigger a
+                // restart... which should be fine.
+                return Some(StateType::Startup);
+            }
+        }
+    }
+}
+
 impl StateMachine {
     async fn handle_startup(&mut self) -> Result<StateType> {
         // give up after three times
@@ -302,6 +393,11 @@ impl StateMachine {
                     _ = self.reload_signal.recv() => {
                         reload_configuration(&mut self.settings, &self.consul_client)?
                     }
+                    req = self.request_chan.recv() => {
+                        if let Some(new_state) = handle_request(req, self.settings.near_rpc_addr.port(), &self.settings.neard_home, &self.settings.account_id, None).await {
+                            return Ok(new_state);
+                        };
+                    }
                 }
             }
         }
@@ -340,6 +436,11 @@ impl StateMachine {
                         }
                     }
                 }
+                req = self.request_chan.recv() => {
+                    if let Some(new_state) = handle_request(req, self.settings.near_rpc_addr.port(), &self.settings.neard_home, &self.settings.account_id, None).await {
+                        return Ok(new_state);
+                    };
+                }
             }
         }
     }
@@ -369,6 +470,11 @@ impl StateMachine {
                         return Ok(StateType::Voting)
                     }
                 }
+                req = self.request_chan.recv() => {
+                    if let Some(new_state) = handle_request(req, self.settings.near_rpc_addr.port(), &self.settings.neard_home, &self.settings.account_id, None).await {
+                        return Ok(new_state);
+                    };
+                }
             }
         }
     }
@@ -386,11 +492,6 @@ impl StateMachine {
         let mut next_renewal = time::Instant::now().add(CONSUL_SESSION_RENEWAL);
         let mut next_acquire = time::Instant::now();
         let mut neard_status = NeardStatus::new();
-        let mut command_handler = CommandHander::new(
-            &self.inner,
-            &self.settings,
-            self.neard_process.as_ref().and_then(|p| p.pid()),
-        )?;
 
         loop {
             tokio::select! {
@@ -428,10 +529,10 @@ impl StateMachine {
                         next_renewal = time::Instant::now().add(CONSUL_SESSION_RENEWAL);
                     };
                 }
-                res = command_handler.listen() => {
-                    if let Ok(Some(new_state)) = res {
-                        return Ok(new_state)
-                    }
+                req = self.request_chan.recv() => {
+                    if let Some(new_state) = handle_request(req, self.settings.near_rpc_addr.port(), &self.settings.neard_home, &self.settings.account_id, None).await {
+                        return Ok(new_state);
+                    };
                 }
             }
         }
@@ -468,7 +569,6 @@ impl StateMachine {
         let mut next_renewal = time::Instant::now().add(CONSUL_SESSION_RENEWAL);
         let mut session_expired = time::Instant::now().add(CONSUL_LEADER_TIMEOUT);
         let mut neard_status = NeardStatus::new();
-        let mut command_handler = CommandHander::new(&self.inner, &self.settings, validator.pid())?;
 
         loop {
             tokio::select! {
@@ -535,10 +635,10 @@ impl StateMachine {
                     self.consul_session = Some(session.into());
                     return Ok(StateType::Voting)
                 }
-                res = command_handler.listen() => {
-                    if let Ok(Some(new_state)) = res {
-                        return Ok(new_state)
-                    }
+                req = self.request_chan.recv() => {
+                    if let Some(new_state) = handle_request(req, self.settings.near_rpc_addr.port(), &self.settings.neard_home, &self.settings.account_id, None).await {
+                        return Ok(new_state);
+                    };
                 }
             }
         }
@@ -579,13 +679,17 @@ impl StateMachine {
 }
 
 /// Runs neard and participate in consul leader election
-pub async fn run_supervisor(settings: &Arc<Settings>) -> Result<()> {
+pub async fn run_supervisor(
+    settings: &Arc<Settings>,
+    request_chan: Receiver<ipc::Request>,
+) -> Result<()> {
     initialize_state_gauge();
 
     oom_score::adjust_oom_score(oom_score::KUUTAMOD_OOM_SCORE)
         .context("cannot adjust oom score")?;
 
-    let mut state = StateMachine::new(settings).context("Failed to initialize state machine")?;
+    let mut state =
+        StateMachine::new(settings, request_chan).context("Failed to initialize state machine")?;
 
     while state.next().await? != StateType::Shutdown {}
     Ok(())
