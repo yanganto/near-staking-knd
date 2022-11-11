@@ -31,7 +31,7 @@ pub enum Command {
     ActiveValidator,
 }
 
-/// Command handler help to listen command and excute command and return new state if needed
+/// Command handler help to listen command and execute command and return new state if needed
 pub(crate) struct CommandHander<'a> {
     current_state: &'a StateType,
     dynamic_conf_path: PathBuf,
@@ -64,8 +64,8 @@ impl<'a> CommandHander<'a> {
         })
     }
 
-    /// Excute and change StateType if needed
-    pub async fn command_excutor(&self, cmd: &Command) -> Result<Option<StateType>> {
+    /// Execute and change StateType if needed
+    pub async fn command_executor(&self, cmd: &Command) -> Result<Option<StateType>> {
         match (self.current_state, cmd) {
             (StateType::Validating, Command::MaintenanceShutdown { minimum_length })
             | (StateType::Voting, Command::MaintenanceShutdown { minimum_length }) => {
@@ -87,7 +87,7 @@ impl<'a> CommandHander<'a> {
         }
     }
 
-    /// Read control socket and excute command, return new state if needed
+    /// Read control socket and execute command, return new state if needed
     pub async fn listen(&mut self) -> Result<Option<StateType>> {
         if let Some(Ok(stream)) = self.ctl_socket.next().await {
             let ready = stream
@@ -104,7 +104,7 @@ impl<'a> CommandHander<'a> {
                             }
                         };
                         if let Ok(cmd) = serde_json::from_str::<Command>(input) {
-                            match self.command_excutor(&cmd).await {
+                            match self.command_executor(&cmd).await {
                                 Ok(s) => Ok(s),
                                 Err(e) => {
                                     bail!("excute cmd: {cmd:?} fail: {e:}");
