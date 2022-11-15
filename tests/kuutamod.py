@@ -2,10 +2,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from subprocess import Popen
-import subprocess
-import time
 from typing import Optional
 import http.client
+import json
+import subprocess
+import time
 
 from command import Command
 from consul import Consul
@@ -30,6 +31,7 @@ class Kuutamod:
     exporter_port: int
     validator_port: int
     voter_port: int
+    rpc_port: int
     node_id: str
     control_socket: Path
     neard_home: Path
@@ -65,6 +67,7 @@ class Kuutamod:
             KUUTAMO_NEARD_BOOTNODES=near_network.boostrap_node,
             RUST_BACKTRACE="1",
         )
+        config = json.load(open(neard_home / "config.json"))
         proc = command.run([str(kuutamod)], extra_env=env)
         wait_for_port("127.0.0.1", exporter_port)
 
@@ -77,6 +80,7 @@ class Kuutamod:
             control_socket=neard_home / "kuutamod.ctl",
             neard_home=neard_home,
             command=command,
+            rpc_port=int(config["rpc"]["addr"].split(":")[-1]),
         )
 
     def neard_pid(self) -> Optional[int]:
@@ -98,8 +102,12 @@ class Kuutamod:
         return None
 
     def metrics(self) -> dict:
-        """Query the prometheus metrics for neard which managed by the kuutamod"""
+        """Query the prometheus metrics for kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
+
+    def neard_metrics(self) -> dict:
+        """Query the prometheus metrics for neard which managed by the kuutamod"""
+        return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
 
     def wait_validator_port(self) -> None:
         """Wait validator port"""
@@ -139,12 +147,12 @@ class Kuutamod:
             return False
 
     def execute_command(self, *args: str) -> None:
-        """Send command to Kuutamod with 3 times retry"""
+        """Send command to Kuutamod with 5 times retry"""
         global kuutamoctl
 
         assert kuutamoctl is not None, "please set_kuutamoctl before send_command"
 
-        for i in range(3):
+        for i in range(5):
             proc = self.command.run(
                 [str(kuutamoctl), "--control-socket", str(self.control_socket), *args],
                 stdout=subprocess.PIPE,

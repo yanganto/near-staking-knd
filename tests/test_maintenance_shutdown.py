@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 import os
 import json
 import subprocess
@@ -11,7 +12,6 @@ from command import Command
 from consul import Consul
 from kuutamod import Kuutamod, set_kuutamoctl
 from ports import Ports
-from prometheus import query_prometheus_endpoint
 from setup_localnet import NearNetwork
 from typing import Any, List
 from note import note, Section
@@ -55,7 +55,7 @@ def test_maintenance_shutdown(
     with Section("leader election"):
         while leader is None:
             for idx, k in enumerate(kuutamods):
-                res = query_prometheus_endpoint("127.0.0.1", k.exporter_port)
+                res = k.metrics()
                 if res.get('kuutamod_state{type="Validating"}') == "1":
                     note(f"leader is kuutamo{idx}")
                     leader = kuutamods[idx]
@@ -115,6 +115,23 @@ def test_maintenance_shutdown(
             "maintenance-shutdown",
             "1",  # Use one block window for maintenance shutdown in test
         )
+
+        for i in range(5):
+            time.sleep(1)
+            try:
+                res = leader.neard_metrics()
+                if (
+                    res.get("near_block_expected_shutdown") is not None
+                    or res.get("near_dynamic_config_changes") is not None
+                ):
+                    break
+            except ConnectionRefusedError:
+                continue
+        else:
+            assert (
+                res.get("near_block_expected_shutdown") is not None
+                or res.get("near_dynamic_config_changes") is not None
+            )
 
         note("checking on leader restart and keep producing block")
         check = 0

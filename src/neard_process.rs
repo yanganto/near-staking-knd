@@ -152,8 +152,6 @@ impl NeardProcess {
             warn!("Try send SIGHUP to neard({pid:?}): {e:?}");
             result = signal::kill(pid, Signal::SIGHUP);
         }
-        // TODO check dyn_config setup correctly, when this issue is fixed
-        // https://github.com/near/nearcore/issues/7990
         Ok(result?)
     }
 
