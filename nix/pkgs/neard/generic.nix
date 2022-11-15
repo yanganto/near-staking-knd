@@ -43,8 +43,8 @@ neardRustPlatform.buildRustPackage rec {
       lib.optional (version == "1.29.0") (
         fetchpatch {
           name = "shutdown-patch-1.29.0-patch";
-          url = "https://github.com/yanganto/nearcore/commit/d9a766b1012d7a924fe0ec03d6ae10710630635e.patch";
-          sha256 = "sha256-SqxoOuvEQY+ezHLPZqyGUVgYxi2Eb8Itas8KJkhG0mU=";
+          url = "https://github.com/yanganto/nearcore/commit/3cbda4f02910a16c996656ea511cdca5a320d662.patch";
+          sha256 = "sha256-nqTrUFw0I9NH0BYiZWgoKq4V4BIqQ+FY1ltlPFN74eg=";
         }
       )
     )
@@ -57,8 +57,8 @@ neardRustPlatform.buildRustPackage rec {
       lib.optional (version == "1.30.0-rc4") (
         fetchpatch {
           name = "shutdown-patch-1.30.0-rc.4-p2";
-          url = "https://github.com/yanganto/nearcore/commit/51c3b34ce28f92d3b0d78e63bda3b6a4bbad78c4.patch";
-          sha256 = "sha256-qTOKNuYVzI9JBC6kQ4NYTZ/zFJ/lwrqwjPL9Q1u/88k=";
+          url = "https://github.com/yanganto/nearcore/commit/500ec141a79b75911f4e0badb407082f7f4dc37f.patch";
+          sha256 = "sha256-X4hU9rqHQ9gcT2rQaKhY9o3flVZDO2w7gM8s6GQBHec=";
         }
       )
     )
