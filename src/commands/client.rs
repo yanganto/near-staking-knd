@@ -32,7 +32,12 @@ impl CommandClient {
     /// Get active validator
     pub async fn active_validator(&self) -> Result<Option<Validator>> {
         let url = Uri::new(&self.socket_path, "/active_validator").into();
-        let res = Client::unix().get(url).await?;
+        let res = Client::unix().get(url).await.with_context(|| {
+            format!(
+                "failed to connect to kuutamod via {}",
+                self.socket_path.display()
+            )
+        })?;
         let code = res.status();
         if !code.is_success() {
             let resp: ApiResponse = parse_response(res)
