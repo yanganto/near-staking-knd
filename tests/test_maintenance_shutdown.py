@@ -35,7 +35,6 @@ def test_maintenance_shutdown(
     near_network: NearNetwork,
     ports: Ports,
 ) -> None:
-    set_kuutamoctl(kuutamoctl)
 
     kuutamods = []
     for idx in range(2):
@@ -46,6 +45,7 @@ def test_maintenance_shutdown(
                 ports=ports,
                 near_network=near_network,
                 command=command,
+                kuutamoctl=kuutamoctl
                 consul=consul,
             )
         )

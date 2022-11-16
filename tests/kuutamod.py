@@ -16,14 +16,6 @@ from setup_localnet import NearNetwork
 from prometheus import query_prometheus_endpoint
 
 
-kuutamoctl: Optional[Path] = None
-
-
-def set_kuutamoctl(path: Path) -> None:
-    """Set up kuutamo ctl"""
-    global kuutamoctl
-    kuutamoctl = path
-
 
 @dataclass
 class Kuutamod:
@@ -36,6 +28,7 @@ class Kuutamod:
     control_socket: Path
     neard_home: Path
     command: Command
+    kuutamoctl: Path
 
     @classmethod
     def run(
@@ -46,6 +39,7 @@ class Kuutamod:
         command: Command,
         ports: Ports,
         near_network: NearNetwork,
+        kuutamoctl: Path,
     ) -> Kuutamod:
         exporter_port = ports.allocate(3)
         validator_port = exporter_port + 1
@@ -81,6 +75,7 @@ class Kuutamod:
             neard_home=neard_home,
             command=command,
             rpc_port=int(config["rpc"]["addr"].split(":")[-1]),
+            kuutamoctl=kuutamoctl
         )
 
     def neard_pid(self) -> Optional[int]:
@@ -146,19 +141,13 @@ class Kuutamod:
         else:
             return False
 
-    def execute_command(self, *args: str) -> None:
-        """Send command to Kuutamod with 5 times retry"""
-        global kuutamoctl
+    def execute_command(self, *args: str, check: bool=True) -> subprocess.Popen:
+        """Send command to Kuutamod"""
 
-        assert kuutamoctl is not None, "please set_kuutamoctl before send_command"
-
-        for i in range(5):
-            proc = self.command.run(
-                [str(kuutamoctl), "--control-socket", str(self.control_socket), *args],
-                stdout=subprocess.PIPE,
-            )
-            proc.wait()
-            if proc.returncode == 0:
-                return
-            time.sleep(i)
-        assert False
+        return subprocess.run(
+            [str(self.kuutamoctl), "--control-socket", str(self.control_socket), *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=check
+        )
