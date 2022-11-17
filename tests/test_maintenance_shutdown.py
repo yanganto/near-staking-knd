@@ -63,16 +63,8 @@ def test_maintenance_shutdown(
                     follower = kuutamods.pop()
                     break
                 time.sleep(0.1)
-        proc = command.run(
-            [
-                str(kuutamoctl),
-                "--json",
-                "--consul-url",
-                consul.consul_url,
-                "active-validator",
-            ],
-            stdout=subprocess.PIPE,
-        )
+
+        proc = leader.execute_command("--json", "active-validator")
         assert proc.stdout
         print(proc.stdout)
         data = json.load(proc.stdout)

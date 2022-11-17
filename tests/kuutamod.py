@@ -147,7 +147,6 @@ class Kuutamod:
         return subprocess.run(
             [str(self.kuutamoctl), "--control-socket", str(self.control_socket), *args],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             text=True,
             check=check
         )
