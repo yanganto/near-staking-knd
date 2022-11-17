@@ -14,9 +14,15 @@
       }).test;
     in
     {
-      checks = {
-        kuutamod = import ./kuutamod.nix { inherit makeTest'; };
-        neard = import ./neard.nix { inherit makeTest'; };
+      checks = lib.optionalAttrs (pkgs.stdenv.isLinux) {
+        kuutamod = import ./kuutamod.nix {
+          inherit makeTest';
+          inherit (self) nixosModules;
+        };
+        neard = import ./neard.nix {
+          inherit makeTest';
+          inherit (self) nixosModules;
+        };
       };
     };
 }

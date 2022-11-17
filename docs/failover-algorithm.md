@@ -74,3 +74,10 @@ sequenceDiagram
     Validating->>Startup: Neard stops
     Validating->>Voting: Session cannot be renewed for 20 seconds
 ```
+
+## Command
+
+The command could change the state, each command will match current state and base on the result of execution to change a new state.
+Currently, the command control socket only open in Voting and Validating states.
+
+- `MaintenanceShutdown`: try to shutdown neard in maintenance window in Voting or Validating and not change the original state, after shutdown the neard will be restarted.

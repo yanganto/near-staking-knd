@@ -5,11 +5,16 @@ use crate::proc::{graceful_stop_neard, run_neard};
 use crate::settings::Settings;
 use anyhow::{Context, Result};
 use log::warn;
+use near_primitives::types::BlockHeight;
+use nix::sys::signal::{self, Signal};
+use nix::unistd::Pid;
 use std::fs::remove_file;
 use std::io::ErrorKind;
 use std::os::unix::fs::symlink;
 use std::path::Path;
 use std::process::ExitStatus;
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
 use tokio::process::Child;
 
 /// A neard validator process
@@ -117,6 +122,47 @@ impl NeardProcess {
     /// Wait for process to stop
     pub async fn wait(&mut self) -> std::result::Result<ExitStatus, std::io::Error> {
         self.process.wait().await
+    }
+
+    /// Get Pid of neard
+    pub fn pid(&self) -> Option<Pid> {
+        if let Some(pid) = self.process.id() {
+            if let Ok(i) = pid.try_into() {
+                return Some(Pid::from_raw(i));
+            }
+        }
+        None
+    }
+
+    /// Update dynamic config
+    /// NOTE: currently only expected shutdown in the config, so input parameter is only expected_shutdown
+    pub async fn update_dynamic_config(
+        pid: Pid,
+        neard_home: &Path,
+        expected_shutdown: BlockHeight,
+    ) -> Result<()> {
+        let dyn_config_path = neard_home.join("dyn_config.json");
+        force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
+        let mut file = File::create(&dyn_config_path).await?;
+        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
+        file.write_all(dynamic_config.to_string().as_bytes())
+            .await?;
+        let mut result = signal::kill(pid, Signal::SIGHUP);
+        if let Err(e) = result {
+            warn!("Try send SIGHUP to neard({pid:?}): {e:?}");
+            result = signal::kill(pid, Signal::SIGHUP);
+        }
+        Ok(result?)
+    }
+
+    /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
+    pub async fn restart(pid: Pid) -> Result<()> {
+        let mut result = signal::kill(pid, Signal::SIGTERM);
+        if result.is_err() {
+            result = signal::kill(pid, Signal::SIGTERM);
+        }
+        warn!("Try send SIGTERM to neard({:?})", pid);
+        Ok(result?)
     }
 }
 

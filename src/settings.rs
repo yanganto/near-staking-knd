@@ -3,6 +3,7 @@
 use crate::near_config::{read_near_config, NearKey};
 use anyhow::{bail, Context, Result};
 use clap::Parser;
+use near_primitives::types::AccountId;
 use std::fs;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::path::{Path, PathBuf};
@@ -35,7 +36,7 @@ pub struct Settings {
     /// leadership in consul. It should be the same for all nodes that share the
     /// same validator key
     #[clap(long, default_value = "default", env = "KUUTAMO_ACCOUNT_ID")]
-    pub account_id: String,
+    pub account_id: AccountId,
     /// The exporter address, that kuutamod will listen to: format: ip:host
     #[clap(
         long,
@@ -87,6 +88,14 @@ pub struct Settings {
     /// Bootnodes passed to neard
     #[clap(long, env = "KUUTAMO_NEARD_BOOTNODES")]
     pub near_boot_nodes: Option<String>,
+
+    /// Unix socket path where kuutamod will listen for remote control commands
+    #[clap(
+        long,
+        default_value = "/var/lib/neard/kuutamod.sock",
+        env = "KUUTAMO_CONTROL_SOCKET"
+    )]
+    pub control_socket: PathBuf,
 }
 
 fn get_near_key(key: &str, val: &mut PathBuf, credential_filename: &str) -> Result<String> {
@@ -145,6 +154,7 @@ pub fn parse_settings() -> Result<Settings> {
     let config_path = &settings.neard_home.join("config.json");
     let config = read_near_config(config_path).context("failed to parse near config")?;
     settings.near_rpc_addr = config.rpc_addr;
+    settings.control_socket = settings.neard_home.join("kuutamod.sock");
 
     Ok(settings)
 }

@@ -1,4 +1,4 @@
-# Debug nixos test interactivly, i.e. `just debug-test single-node-neard`
+# Debug nixos test interactivly, i.e. `just debug-test kuutamod`
 debug-test TEST:
   nix build ../../../#checks.x86_64-linux.{{TEST}}.driver -L
   # Now type start_all() to launch all virtual machines

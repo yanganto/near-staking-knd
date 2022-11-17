@@ -6,6 +6,8 @@
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
   inputs.core-contracts.url = "github:near/core-contracts";
   inputs.core-contracts.flake = false;
+  inputs.fenix.url = "github:nix-community/fenix";
+  inputs.fenix.inputs.nixpkgs.follows = "nixpkgs";
 
   nixConfig.extra-substituters = [
     "https://cache.garnix.io"
@@ -14,7 +16,7 @@
     "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
   ];
 
-  outputs = { self, flake-parts, ... }:
+  outputs = { self, flake-parts, nixpkgs, fenix, ... }:
     flake-parts.lib.mkFlake { inherit self; } {
       imports = [
         ./nix/pkgs/flake-module.nix
