@@ -1129,13 +1129,13 @@ let
         sha512 = "nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==";
       };
     };
-    "global-dirs-3.0.0" = {
+    "global-dirs-3.0.1" = {
       name = "global-dirs";
       packageName = "global-dirs";
-      version = "3.0.0";
+      version = "3.0.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/global-dirs/-/global-dirs-3.0.0.tgz";
-        sha512 = "v8ho2DS5RiCjftj1nD9NmnfaOzTdud7RRnVd9kFNOjqZbISlx5DQ+OrTkywgd0dIt7oFCvKetZSHoHcP3sDdiA==";
+        url = "https://registry.npmjs.org/global-dirs/-/global-dirs-3.0.1.tgz";
+        sha512 = "NBcGGFbBA9s1VzD41QXDG+3++t9Mn5t1FpLdhESY6oKY4gYTFpX4wO3sqGUa0Srjtbfj3szX0RnemmrVRUdULA==";
       };
     };
     "got-9.6.0" = {
@@ -2853,7 +2853,7 @@ in
       sources."get-stream-4.1.0"
       sources."github-from-package-0.0.0"
       sources."glob-7.2.3"
-      sources."global-dirs-3.0.0"
+      sources."global-dirs-3.0.1"
       sources."got-9.6.0"
       sources."graceful-fs-4.2.10"
       sources."has-flag-4.0.0"
