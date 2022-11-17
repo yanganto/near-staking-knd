@@ -27,15 +27,13 @@ stop neard in case kuutamod is killed.
 
 ### Requirements
 
-It is expected that this guide is being followed on a OS you are familiar with.
-
 Install the nix package manager (as described [here](https://nix.dev/tutorials/install-nix)),
 and you will get all dependencies needed by running `nix develop` from the source directory
 of kuutamod
 
 ```console
-$ git clone https://github.com/kuutamolabs/kuutamod
-$ nix develop
+$ git clone https://github.com/kuutamolabs/near-staking-knd
+$ nix --extra-experimental-features "nix-command flakes" develop
 ```
 
 Note: If you don't use nix you will need the following executables in your `$PATH`.
