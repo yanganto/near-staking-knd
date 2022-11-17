@@ -40,7 +40,7 @@ neardRustPlatform.buildRustPackage rec {
     # - Maintenance RPC
     #   - https://github.com/near/nearcore/pull/7887
     (
-      lib.optional (version == "1.29.0") (
+      lib.optional (lib.versionOlder version "1.30.0-rc.4") (
         fetchpatch {
           name = "shutdown-patch-1.29.0-patch";
           url = "https://github.com/yanganto/nearcore/commit/3cbda4f02910a16c996656ea511cdca5a320d662.patch";
@@ -54,7 +54,7 @@ neardRustPlatform.buildRustPackage rec {
     # - Maintenance RPC
     #   - https://github.com/near/nearcore/pull/7887
     (
-      lib.optional (version == "1.30.0-rc4") (
+      lib.optional (lib.versionAtLeast version "1.30.0-rc4") (
         fetchpatch {
           name = "shutdown-patch-1.30.0-rc.4-p2";
           url = "https://github.com/yanganto/nearcore/commit/500ec141a79b75911f4e0badb407082f7f4dc37f.patch";
