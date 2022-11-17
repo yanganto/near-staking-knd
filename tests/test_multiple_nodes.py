@@ -4,7 +4,6 @@ from pathlib import Path
 from signal import SIGKILL
 import json
 import os
-import subprocess
 import time
 
 from command import Command
@@ -33,6 +32,7 @@ def test_multiple_nodes(
                 near_network=near_network,
                 command=command,
                 consul=consul,
+                kuutamoctl=kuutamoctl,
             )
         )
     leader = None
@@ -48,21 +48,11 @@ def test_multiple_nodes(
                 follower = kuutamods.pop()
                 break
             time.sleep(0.1)
-    proc = command.run(
-        [
-            str(kuutamoctl),
-            "--json",
-            "--consul-url",
-            consul.consul_url,
-            "active-validator",
-        ],
-        stdout=subprocess.PIPE,
-    )
+    proc = leader.execute_command("--json", "active-validator")
     assert proc.stdout
     print(proc.stdout)
-    data = json.load(proc.stdout)
+    data = json.loads(proc.stdout)
     assert data.get("ID")
-    assert proc.wait() == 0
     assert follower is not None
 
     # Check if neard processes use correct specified ports

@@ -20,7 +20,8 @@ where
     T: Display,
 {
     warn!("server error '{}' on {}:{}", msg, file!(), line!());
-    let res = serde_json::to_string_pretty(&json!({"status": 500, "message": format!("{}", msg)}));
+    let res = serde_json::to_vec(&json!({"status": 500, "message": format!("{}", msg)}));
+    // FIXME: Set header: Content-Type: application/json
     let mut resp: Response<Body> = Response::default();
 
     // The builder interface requires unwrap, which I don't like
@@ -51,6 +52,7 @@ static NOTFOUND: &[u8] = br#"{"status": 404, "message": "Not Found"}"#;
 
 /// HTTP status code 404
 fn not_found() -> Response<Body> {
+    // FIXME: Set header: Content-Type: application/json
     let mut resp: Response<Body> = Response::default();
     *resp.status_mut() = StatusCode::NOT_FOUND;
     *resp.body_mut() = Body::from(NOTFOUND);
@@ -67,8 +69,9 @@ struct CommandServer {
 }
 
 fn json_response<T: Serialize>(obj: T) -> Response<Body> {
-    match serde_json::to_string_pretty(&obj) {
+    match serde_json::to_vec(&obj) {
         Err(e) => server_error(e),
+        // FIXME: Set header: Content-Type: application/json
         Ok(v) => Response::new(Body::from(v)),
     }
 }
@@ -77,7 +80,8 @@ async fn json_request<T: DeserializeOwned>(mut req: Request<Body>) -> Result<T> 
     let body = hyper::body::to_bytes(req.body_mut())
         .await
         .context("error receiving body")?;
-    Ok(serde_json::from_slice(&body).context("error converting from json")?)
+    let output: T = serde_json::from_slice(&body).context("error converting from json")?;
+    Ok(output)
 }
 
 impl CommandServer {
@@ -129,10 +133,7 @@ impl CommandServer {
     }
     async fn handle_active_validator(&self) -> hyper::Result<Response<Body>> {
         let validator =
-            active_validator(&self.account_id, &self.consul_url, &self.consul_token_path)
-                .await
-                .and_then(|v| Ok(serde_json::to_string_pretty(&v)?));
-
+            active_validator(&self.account_id, &self.consul_url, &self.consul_token_path).await;
         Ok(json_response(ok_or_500!(validator)))
     }
 }

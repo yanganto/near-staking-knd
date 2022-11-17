@@ -90,7 +90,11 @@ pub struct Settings {
     pub near_boot_nodes: Option<String>,
 
     /// Unix socket path where kuutamod will listen for remote control commands
-    #[clap(skip)]
+    #[clap(
+        long,
+        default_value = "/var/lib/neard/kuutamod.sock",
+        env = "KUUTAMO_CONTROL_SOCKET"
+    )]
     pub control_socket: PathBuf,
 }
 

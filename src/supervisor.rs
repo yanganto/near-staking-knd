@@ -336,7 +336,7 @@ async fn handle_request(
                 {
                     warn!("Failed to respond to ipc request: {}", e);
                 };
-                return None;
+                None
             } else {
                 if let Err(e) = resp_chan
                     .send(ipc::MaintenanceShutdownResponse {
@@ -348,7 +348,7 @@ async fn handle_request(
                 };
                 // If we are already in startup phase, this would not actually trigger a
                 // restart... which should be fine.
-                return Some(StateType::Startup);
+                Some(StateType::Startup)
             }
         }
     }

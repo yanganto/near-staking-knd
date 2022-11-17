@@ -5,7 +5,6 @@
 use anyhow::{Context, Result};
 use clap::Parser;
 use kuutamod::commands::CommandClient;
-use serde_json::to_string_pretty;
 use std::path::PathBuf;
 
 /// Subcommand to run
@@ -44,7 +43,7 @@ async fn show_active_validator(kuutamo_client: &CommandClient, args: &Args) -> R
     if args.json {
         println!(
             "{}",
-            to_string_pretty(&validator).context("Failed to serialize json")?
+            serde_json::to_string(&validator).context("Failed to serialize json")?
         );
     } else {
         match validator {

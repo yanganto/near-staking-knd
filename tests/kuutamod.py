@@ -16,7 +16,6 @@ from setup_localnet import NearNetwork
 from prometheus import query_prometheus_endpoint
 
 
-
 @dataclass
 class Kuutamod:
     proc: Popen
@@ -48,6 +47,7 @@ class Kuutamod:
         validator_node_key = near_network.home / "node3" / "node_key.json"
         voter_node_key = neard_home / "voter_node_key.json"
         node_id = str(neard_home.name)
+        control_socket = neard_home / "kuutamod.sock"
         env = dict(
             KUUTAMO_CONSUL_URL=f"http://127.0.0.1:{consul.http_port}",
             KUUTAMO_NODE_ID=str(neard_home.name),
@@ -59,6 +59,7 @@ class Kuutamod:
             KUUTAMO_VOTER_NODE_KEY=str(voter_node_key),
             KUUTAMO_NEARD_HOME=str(neard_home),
             KUUTAMO_NEARD_BOOTNODES=near_network.boostrap_node,
+            KUUTAMO_CONTROL_SOCKET=str(control_socket),
             RUST_BACKTRACE="1",
         )
         config = json.load(open(neard_home / "config.json"))
@@ -71,11 +72,11 @@ class Kuutamod:
             node_id=node_id,
             validator_port=validator_port,
             voter_port=voter_port,
-            control_socket=neard_home / "kuutamod.ctl",
+            control_socket=control_socket,
             neard_home=neard_home,
             command=command,
             rpc_port=int(config["rpc"]["addr"].split(":")[-1]),
-            kuutamoctl=kuutamoctl
+            kuutamoctl=kuutamoctl,
         )
 
     def neard_pid(self) -> Optional[int]:
@@ -141,12 +142,14 @@ class Kuutamod:
         else:
             return False
 
-    def execute_command(self, *args: str, check: bool=True) -> subprocess.Popen:
+    def execute_command(
+        self, *args: str, check: bool = True
+    ) -> subprocess.CompletedProcess[str]:
         """Send command to Kuutamod"""
 
         return subprocess.run(
             [str(self.kuutamoctl), "--control-socket", str(self.control_socket), *args],
             stdout=subprocess.PIPE,
             text=True,
-            check=check
+            check=check,
         )
