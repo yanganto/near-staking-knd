@@ -59,7 +59,7 @@ neardRustPlatform.buildRustPackage rec {
         fetchpatch {
           name = "shutdown-patch-1.30.0-rc.4-p2";
           url = "https://github.com/yanganto/nearcore/commit/500ec141a79b75911f4e0badb407082f7f4dc37f.patch";
-          sha256 = "sha256-X4hU9rqHQ9gcT2rQaKhY9o3flVZDO2w7gM8s6GQBHec=";
+          sha256 = "sha256-xFHGp9ELXrF2vuklNeioR/SpXrxEUZEJ97VGoozaGvY=";
         }
       )
     )
