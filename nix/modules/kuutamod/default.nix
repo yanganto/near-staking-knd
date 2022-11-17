@@ -164,6 +164,9 @@ in
           # If neard goes out-of-memory, we want to keep kuutamod running.
           OOMPolicy = "continue";
 
+          # in addition to ipv4/ipv6 we also need unix sockets
+          RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" ];
+
           # this script is run as root
           ExecStartPre =
             lib.optional (cfg.consulTokenFile != null) "+${pkgs.writeShellScript "kuutamod-consul-token" ''
