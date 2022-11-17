@@ -4,8 +4,8 @@ let
   generic = pkgs.callPackage ./generic.nix { };
 in
 generic {
-  version = "1.30.0-rc.4";
-  sha256 = "sha256-0J6dJf/OJGL8avhIKIs1HlfsCi46B+Wv810qMQQtp3w=";
-  cargoSha256 = "sha256-X4hU9rqHQ9gcT2rQaKhY9o3flVZDO2w7gM8s6GQBHec=";
+  version = "1.29.1";
+  sha256 = "sha256-TmmGLrDpNOfadOIwmG7XRgI89XQjaqIavxCEE2plumc=";
+  cargoSha256 = "sha256-I/bcn3BYzk26cHWz9e1PuEz7hUjbvIw1R9YAE9cNaEs=";
   neardRustPlatform = rustPlatform; # unstable using the latest stable rust
 }
