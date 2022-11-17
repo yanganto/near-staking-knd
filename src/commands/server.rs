@@ -159,7 +159,12 @@ pub async fn spawn_control_server(settings: &Settings, tx: Sender<ipc::Request>)
         }
     });
     let s = Server::bind_unix(&server.control_socket)
-        .context("failed to bind unix socket")?
+        .with_context(|| {
+            format!(
+                "failed to bind unix socket '{}'",
+                server.control_socket.display()
+            )
+        })?
         .serve(make_service);
 
     println!("Listening on unix://{}", server.control_socket.display());
