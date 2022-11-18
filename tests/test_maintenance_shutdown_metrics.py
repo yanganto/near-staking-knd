@@ -51,8 +51,7 @@ def test_maintenance_shutdown_metrics(
         new_pid = leader.neard_pid()
         assert new_pid == pid
 
-        for i in range(3):
-            time.sleep(3)
+        for i in range(90):
             try:
                 res = leader.neard_metrics()
                 if (
@@ -61,7 +60,8 @@ def test_maintenance_shutdown_metrics(
                 ):
                     break
             except ConnectionRefusedError:
-                continue
+                pass
+            time.sleep(0.1)
         else:
             assert (
                 res.get("near_block_expected_shutdown") == "1000"
