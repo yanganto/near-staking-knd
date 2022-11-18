@@ -40,7 +40,7 @@ def test_multiple_nodes(
     # wait for leader election to take place
     while leader is None:
         for idx, k in enumerate(kuutamods):
-            res = k.metrics()
+            res = k.metrics(starting=True)
             print(idx, res)
             if res.get('kuutamod_state{type="Validating"}') == "1":
                 leader = kuutamods[idx]

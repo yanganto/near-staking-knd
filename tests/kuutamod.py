@@ -97,12 +97,24 @@ class Kuutamod:
             time.sleep(i)
         return None
 
-    def metrics(self) -> dict:
-        """Query the prometheus metrics for kuutamod"""
+    def metrics(self, starting: bool = False) -> dict:
+        """Query the prometheus metrics for kuutamod, and will retry in 30 second if staring flag set"""
+        for i in range(300):
+            try:
+                return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
+            except ConnectionRefusedError:
+                pass
+            time.sleep(0.1)
         return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
 
-    def neard_metrics(self) -> dict:
-        """Query the prometheus metrics for neard which managed by the kuutamod"""
+    def neard_metrics(self, starting: bool = False) -> dict:
+        """Query the prometheus metrics for neard which managed by the kuutamod, and will retry in 30 second if staring flag set"""
+        for i in range(300):
+            try:
+                return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
+            except ConnectionRefusedError:
+                pass
+            time.sleep(0.1)
         return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
 
     def wait_validator_port(self) -> None:
