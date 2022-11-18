@@ -25,7 +25,7 @@ def work_with_neard_versions(
     )
 
 
-@work_with_neard_versions(["1.29.0"])
+@work_with_neard_versions(["1.29.1"])
 def test_maintenance_shutdown(
     kuutamod: Path,
     kuutamoctl: Path,
