@@ -63,6 +63,9 @@ def test_multiple_nodes(
     follower_res = follower.metrics()
     assert follower_res['kuutamod_state{type="Validating"}'] == "0"
 
+    assert leader.check_blocking()
+    assert follower.check_blocking()
+
     print("##### test crash ######")
     pid = leader.neard_pid()
     assert pid is not None
@@ -76,6 +79,8 @@ def test_multiple_nodes(
         time.sleep(0.1)
     duration = time.perf_counter() - start
     print(f"------------- Failover took {duration}s ---------------")
+    assert follower.check_blocking()
+    assert leader.check_blocking()
     leader, follower = follower, leader
 
     while True:
@@ -98,3 +103,4 @@ def test_multiple_nodes(
     duration = time.perf_counter() - start
     print(f"------------- Failover took {duration}s ---------------")
     leader.wait()
+    assert follower.check_blocking()
