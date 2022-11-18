@@ -54,7 +54,7 @@ def test_maintenance_shutdown(
     with Section("leader election"):
         while leader is None:
             for idx, k in enumerate(kuutamods):
-                res = k.metrics(starting=True)
+                res = k.metrics()
                 if res.get('kuutamod_state{type="Validating"}') == "1":
                     note(f"leader is kuutamo{idx}")
                     leader = kuutamods[idx]

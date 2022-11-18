@@ -2,7 +2,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from subprocess import Popen
-from typing import Optional
 import http.client
 import json
 import subprocess
@@ -12,8 +11,42 @@ from command import Command
 from consul import Consul
 from network import wait_for_port
 from ports import Ports
+from typing import Any, Callable, TypeVar, Optional, cast
 from setup_localnet import NearNetwork
 from prometheus import query_prometheus_endpoint
+
+
+FuncT = TypeVar("FuncT", bound=Callable[..., Any])
+
+
+def retry(
+    times: int, exceptions: tuple[Any], delay: float = 0.1
+) -> Callable[[FuncT], FuncT]:
+    """
+    Retry Decorator
+    Retries the wrapped function/method `times` times if the exceptions listed
+    in ``exceptions`` are thrown
+    :param times: The number of times to repeat the wrapped function/method
+    :param Exceptions: Tuple of exceptions that trigger a retry attempt
+    :param delay: how long to wait between retries
+    """
+
+    def decorator(func: FuncT) -> FuncT:
+        def newfn(*args: list[Any], **kwargs: dict[str, Any]) -> Any:
+            attempt = 0
+            while attempt < times:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    attempt += 1
+                    if attempt >= times:
+                        raise e
+                time.sleep(delay)
+            return func(*args, **kwargs)
+
+        return cast(FuncT, newfn)
+
+    return cast(Callable[[FuncT], FuncT], decorator)
 
 
 @dataclass
@@ -79,42 +112,25 @@ class Kuutamod:
             kuutamoctl=kuutamoctl,
         )
 
+    @retry(30, (ConnectionRefusedError,))
     def neard_pid(self) -> Optional[int]:
         """Query pid for neard which managed by the kuutamod with 3 times retry"""
-        for i in range(3):
-            try:
-                conn = http.client.HTTPConnection("127.0.0.1", self.exporter_port)
-                conn.request("GET", "/neard-pid")
-                response = conn.getresponse()
-                body = response.read().decode("utf-8")
-                if body == "":
-                    return None
-                return int(body)
-            except ConnectionRefusedError:
-                if i == 2:
-                    raise ConnectionRefusedError
-                pass
-            time.sleep(i)
-        return None
+        conn = http.client.HTTPConnection("127.0.0.1", self.exporter_port)
+        conn.request("GET", "/neard-pid")
+        response = conn.getresponse()
+        body = response.read().decode("utf-8")
+        if body == "":
+            return None
+        return int(body)
 
-    def metrics(self, starting: bool = False) -> dict:
-        """Query the prometheus metrics for kuutamod, and will retry in 30 second if staring flag set"""
-        for i in range(300):
-            try:
-                return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
-            except ConnectionRefusedError:
-                pass
-            time.sleep(0.1)
+    @retry(300, (ConnectionRefusedError,))
+    def metrics(self) -> dict:
+        """Query the prometheus metrics for kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
 
-    def neard_metrics(self, starting: bool = False) -> dict:
-        """Query the prometheus metrics for neard which managed by the kuutamod, and will retry in 30 second if staring flag set"""
-        for i in range(300):
-            try:
-                return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
-            except ConnectionRefusedError:
-                pass
-            time.sleep(0.1)
+    @retry(300, (ConnectionRefusedError,))
+    def neard_metrics(self) -> dict:
+        """Query the prometheus metrics for neard which managed by the kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
 
     def wait_validator_port(self) -> None:
