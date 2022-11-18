@@ -275,11 +275,17 @@ async fn schedule_maintenance_shutdown(
     near_home: &Path,
     account_id: &AccountId,
     minimum_length: Option<u64>,
+    shutdown_window: Option<u64>,
 ) -> Result<Option<BlockHeight>> {
     let neard_client = NeardClient::new(&format!("http://127.0.0.1:{}", near_rpc_port))?;
-    let windows = neard_client.maintenance_windows(account_id).await?;
-    let expect_shutdown_at = if let Some(minimum_length) = minimum_length {
-        match windows
+    let expect_shutdown_at = match (minimum_length, shutdown_window) {
+        (Some(_), Some(_)) => {
+            bail!("We can not guarantee minimum maintenance window for a specified shutdown block height");
+        }
+        (None, Some(w)) => Some(w),
+        (Some(minimum_length), None) => match neard_client
+            .maintenance_windows(account_id)
+            .await?
             .0
             .iter()
             .find(|window| window.1 - window.0 > minimum_length)
@@ -291,11 +297,9 @@ async fn schedule_maintenance_shutdown(
                     minimum_length
                 );
             }
-        }
-    } else {
-        None
+        },
+        (None, None) => None,
     };
-
     if let Some(expect_shutdown_at) = expect_shutdown_at {
         NeardProcess::update_dynamic_config(pid, near_home, expect_shutdown_at).await?;
     }
@@ -319,14 +323,15 @@ async fn handle_request(
         Some(req) => req,
     };
     match req {
-        ipc::Request::MaintenanceShutdown(window, resp_chan) => {
+        ipc::Request::MaintenanceShutdown(window_length, shutdown_at, resp_chan) => {
             if let Some(pid) = validator_pid {
                 let res = schedule_maintenance_shutdown(
                     near_rpc_port,
                     pid,
                     near_home,
                     account_id,
-                    window,
+                    window_length,
+                    shutdown_at,
                 );
                 if let Err(e) = resp_chan
                     .send(ipc::MaintenanceShutdownResponse {
@@ -563,6 +568,7 @@ impl StateMachine {
                     return Err(e);
                 }
             };
+        let pid = validator.pid();
 
         let mut on_startup = true;
         let mut continous_errors = 0;
@@ -636,7 +642,7 @@ impl StateMachine {
                     return Ok(StateType::Voting)
                 }
                 req = self.request_chan.recv() => {
-                    if let Some(new_state) = handle_request(req, self.settings.near_rpc_addr.port(), &self.settings.neard_home, &self.settings.account_id, None).await {
+                    if let Some(new_state) = handle_request(req, self.settings.near_rpc_addr.port(), &self.settings.neard_home, &self.settings.account_id, pid).await {
                         return Ok(new_state);
                     };
                 }

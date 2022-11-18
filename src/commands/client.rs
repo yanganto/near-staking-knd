@@ -57,10 +57,17 @@ impl CommandClient {
     }
 
     /// Initiatiate or cancel maintenance shutdown
-    pub async fn maintenance_shutdown(&self, minimum_length: Option<u64>) -> Result<()> {
+    pub async fn maintenance_shutdown(
+        &self,
+        minimum_length: Option<u64>,
+        shutdown_at: Option<u64>,
+    ) -> Result<()> {
         let url = hyperlocal::Uri::new(&self.socket_path, "/maintainance_shutdown");
 
-        let body = serde_json::to_string(&MaintenanceShutdown { minimum_length })?;
+        let body = serde_json::to_string(&MaintenanceShutdown {
+            minimum_length,
+            shutdown_at,
+        })?;
         let req = Request::builder()
             .method(Method::POST)
             .uri(url)
