@@ -31,9 +31,13 @@ def test_maintenance_shutdown_metrics(
 
     with Section("Wait leader validating"):
         while True:
-            res = leader.metrics()
-            if res.get('kuutamod_state{type="Validating"}') == "1":
-                break
+            try:
+
+                res = leader.metrics()
+                if res.get('kuutamod_state{type="Validating"}') == "1":
+                    break
+            except ConnectionRefusedError:
+                pass
             time.sleep(0.1)
         leader.wait_validator_port()
 
