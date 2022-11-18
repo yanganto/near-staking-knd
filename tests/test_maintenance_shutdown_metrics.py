@@ -34,7 +34,7 @@ def test_maintenance_shutdown_metrics(
             res = leader.metrics()
             if res.get('kuutamod_state{type="Validating"}') == "1":
                 break
-            time.sleep(1)
+            time.sleep(0.1)
         leader.wait_validator_port()
 
     # Book a far away block height, so we can check on metric before shutdown
