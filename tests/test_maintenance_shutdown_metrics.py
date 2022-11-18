@@ -52,7 +52,7 @@ def test_maintenance_shutdown_metrics(
         assert new_pid == pid
 
         for i in range(3):
-            time.sleep(1)
+            time.sleep(3)
             try:
                 res = leader.neard_metrics()
                 if (
