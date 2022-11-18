@@ -2,7 +2,7 @@
 
 #![deny(missing_docs)]
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use clap::Parser;
 use kuutamod::commands::CommandClient;
 use std::path::PathBuf;
@@ -15,6 +15,11 @@ pub enum Command {
     MaintenanceShutdown {
         /// Specify the minimum length in blockheight for the maintenance shutdown
         minimum_length: Option<u64>,
+
+        /// Specify the block height to shutdown at, and will not check on it in maintenance window or
+        /// not.
+        #[arg(long)]
+        shutdown_at: Option<u64>,
     },
     /// Show the current voted validator
     ActiveValidator,
@@ -61,8 +66,17 @@ pub async fn main() {
     let kuutamo_client = CommandClient::new(&args.control_socket);
     let res = match args.action {
         Command::ActiveValidator => show_active_validator(&kuutamo_client, &args).await,
-        Command::MaintenanceShutdown { minimum_length } => {
-            kuutamo_client.maintenance_shutdown(minimum_length).await
+        Command::MaintenanceShutdown {
+            minimum_length,
+            shutdown_at,
+        } => {
+            if minimum_length.is_some() && shutdown_at.is_some() {
+                Err(anyhow!("We can not guarantee minimum maintenance window for a specified shutdown block height"))
+            } else {
+                kuutamo_client
+                    .maintenance_shutdown(minimum_length, shutdown_at)
+                    .await
+            }
         }
     };
     if let Err(e) = res {

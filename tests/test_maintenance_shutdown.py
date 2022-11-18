@@ -115,24 +115,6 @@ def test_maintenance_shutdown(
         else:
             assert new_pid is not pid
 
-        # TODO check metric in other test, this will fail if the leader restart really quick
-        # for i in range(15):
-        #     time.sleep(1)
-        #     try:
-        #         res = leader.neard_metrics()
-        #         if (
-        #             res.get("near_block_expected_shutdown") is not None
-        #             or res.get("near_dynamic_config_changes") is not None
-        #         ):
-        #             break
-        #     except ConnectionRefusedError:
-        #         continue
-        # else:
-        #     assert (
-        #         res.get("near_block_expected_shutdown") is not None
-        #         or res.get("near_dynamic_config_changes") is not None
-        #     )
-
         note("checking on leader restart and keep producing block")
         check = 0
         while not leader.check_blocking():
