@@ -36,7 +36,7 @@ def test_maintenance_shutdown_metrics(
                 res = leader.metrics()
                 if res.get('kuutamod_state{type="Validating"}') == "1":
                     break
-            except ConnectionRefusedError:
+            except (ConnectionRefusedError, ConnectionResetError):
                 pass
             time.sleep(0.1)
         leader.wait_validator_port()
@@ -63,7 +63,7 @@ def test_maintenance_shutdown_metrics(
                     and res.get("near_dynamic_config_changes") == "1"
                 ):
                     break
-            except ConnectionRefusedError:
+            except (ConnectionRefusedError, ConnectionResetError):
                 pass
             time.sleep(0.1)
         else:

@@ -112,7 +112,7 @@ class Kuutamod:
             kuutamoctl=kuutamoctl,
         )
 
-    @retry(30, (ConnectionRefusedError,))
+    @retry(30, (ConnectionRefusedError, ConnectionResetError))
     def neard_pid(self) -> Optional[int]:
         """Query pid for neard which managed by the kuutamod with 3 times retry"""
         conn = http.client.HTTPConnection("127.0.0.1", self.exporter_port)
@@ -123,12 +123,12 @@ class Kuutamod:
             return None
         return int(body)
 
-    @retry(300, (ConnectionRefusedError,))
+    @retry(300, (ConnectionRefusedError, ConnectionResetError))
     def metrics(self) -> dict:
         """Query the prometheus metrics for kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
 
-    @retry(300, (ConnectionRefusedError,))
+    @retry(300, (ConnectionRefusedError, ConnectionResetError))
     def neard_metrics(self) -> dict:
         """Query the prometheus metrics for neard which managed by the kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
