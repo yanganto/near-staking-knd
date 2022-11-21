@@ -119,6 +119,6 @@ def test_maintenance_shutdown(
         check = 0
         while not leader.check_blocking():
             check += 1
-            if check > 3:
+            if check > 5:
                 note("leader did not restart correctly")
                 assert False
