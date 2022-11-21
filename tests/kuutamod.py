@@ -19,9 +19,7 @@ from prometheus import query_prometheus_endpoint
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 
-def retry(
-    times: int, exceptions: tuple[Any], delay: float = 0.1
-) -> Callable[[FuncT], FuncT]:
+def retry(times: int, exceptions: Any, delay: float = 0.1) -> Callable[[FuncT], FuncT]:
     """
     Retry Decorator
     Retries the wrapped function/method `times` times if the exceptions listed
