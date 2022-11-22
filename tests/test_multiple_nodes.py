@@ -21,6 +21,9 @@ def test_multiple_nodes(
     near_network: NearNetwork,
     ports: Ports,
 ) -> None:
+    # Uncomment this to save config and logs
+    # near_network.set_artifact_path("/tmp/test.tgz")
+
     # FIXME Just now we use the validator key of genesis node3 for our setup
     kuutamods = []
     for idx in range(2):

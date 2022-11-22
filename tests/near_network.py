@@ -41,3 +41,4 @@ def near_network(command: Command, ports: Ports) -> Iterator[NearNetwork]:
                     p.kill()
                 except IOError:
                     pass
+            near_network.save_artifacts()
