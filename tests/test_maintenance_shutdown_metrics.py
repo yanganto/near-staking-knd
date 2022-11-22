@@ -27,6 +27,7 @@ def test_maintenance_shutdown_metrics(
         command=command,
         kuutamoctl=kuutamoctl,
         consul=consul,
+        debug=False,
     )
 
     with Section("Wait leader validating"):

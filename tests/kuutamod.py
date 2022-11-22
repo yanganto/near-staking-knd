@@ -1,9 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
+from signal import SIGHUP
 from subprocess import Popen
 import http.client
 import json
+import os
 import subprocess
 import time
 
@@ -72,6 +74,7 @@ class Kuutamod:
         ports: Ports,
         near_network: NearNetwork,
         kuutamoctl: Path,
+        debug: bool,
     ) -> Kuutamod:
         exporter_port = ports.allocate(3)
         validator_port = exporter_port + 1
@@ -96,10 +99,17 @@ class Kuutamod:
             RUST_BACKTRACE="1",
         )
         config = json.load(open(neard_home / "config.json"))
-        proc = command.run([str(kuutamod)], extra_env=env)
+        if debug:
+            proc = command.run(
+                [str(kuutamod)],
+                extra_env=env,
+                stderr=open(neard_home / f"{neard_home.name}-debug.txt", "w"),
+            )
+        else:
+            proc = command.run([str(kuutamod)], extra_env=env)
         wait_for_port("127.0.0.1", exporter_port)
 
-        return cls(
+        instance = cls(
             proc=proc,
             exporter_port=exporter_port,
             node_id=node_id,
@@ -111,6 +121,9 @@ class Kuutamod:
             rpc_port=int(config["rpc"]["addr"].split(":")[-1]),
             kuutamoctl=kuutamoctl,
         )
+        if debug:
+            instance.enable_neard_debug()
+        return instance
 
     @retry(30, (ConnectionRefusedError,))
     def neard_pid(self) -> Optional[int]:
@@ -181,3 +194,10 @@ class Kuutamod:
             text=True,
             check=check,
         )
+
+    def enable_neard_debug(self) -> None:
+        pid = self.neard_pid()
+        assert pid is not None
+        with open(self.neard_home / "log_config.json", "w") as f:
+            f.write('{"verbose_module": ""}')
+        os.kill(pid, SIGHUP)
