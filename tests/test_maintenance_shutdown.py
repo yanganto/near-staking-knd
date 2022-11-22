@@ -46,6 +46,7 @@ def test_maintenance_shutdown(
                 command=command,
                 kuutamoctl=kuutamoctl,
                 consul=consul,
+                debug=False,
             )
         )
     leader = None

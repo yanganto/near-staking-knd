@@ -33,6 +33,7 @@ def test_multiple_nodes(
                 command=command,
                 consul=consul,
                 kuutamoctl=kuutamoctl,
+                debug=True,
             )
         )
     leader = None
