@@ -21,9 +21,7 @@ from prometheus import query_prometheus_endpoint
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 
-def retry(
-    times: int, exceptions: tuple[Any], delay: float = 0.1
-) -> Callable[[FuncT], FuncT]:
+def retry(times: int, exceptions: Any, delay: float = 0.1) -> Callable[[FuncT], FuncT]:
     """
     Retry Decorator
     Retries the wrapped function/method `times` times if the exceptions listed
@@ -125,7 +123,7 @@ class Kuutamod:
             instance.enable_neard_debug()
         return instance
 
-    @retry(30, (ConnectionRefusedError,))
+    @retry(30, (ConnectionRefusedError, ConnectionResetError))
     def neard_pid(self) -> Optional[int]:
         """Query pid for neard which managed by the kuutamod with 3 times retry"""
         conn = http.client.HTTPConnection("127.0.0.1", self.exporter_port)
@@ -136,12 +134,12 @@ class Kuutamod:
             return None
         return int(body)
 
-    @retry(300, (ConnectionRefusedError,))
+    @retry(300, (ConnectionRefusedError, ConnectionResetError))
     def metrics(self) -> dict:
         """Query the prometheus metrics for kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
 
-    @retry(300, (ConnectionRefusedError,))
+    @retry(300, (ConnectionRefusedError, ConnectionResetError))
     def neard_metrics(self) -> dict:
         """Query the prometheus metrics for neard which managed by the kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
