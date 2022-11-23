@@ -200,6 +200,9 @@ def setup_network_config(near_home: Path, start_port: int) -> NearNetwork:
             rpc_port = start_port + i * 2
             data["store"] = {"max_open_files": 512}
             data["rpc"]["addr"] = f"0.0.0.0:{rpc_port}"
+            # change to track_all_shards true after this issue solved
+            # https://github.com/near/nearcore/issues/4930
+            data["tracked_shards"] = [0]
             network = data["network"]
             network["addr"] = f"0.0.0.0:{rpc_port + 1}"
             # this makes debugging tests a bit more pleasent and less spammy
