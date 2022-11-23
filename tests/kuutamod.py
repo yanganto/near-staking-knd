@@ -1,9 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
+from signal import SIGHUP
 from subprocess import Popen
 import http.client
 import json
+import os
 import subprocess
 import time
 
@@ -19,9 +21,7 @@ from prometheus import query_prometheus_endpoint
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 
-def retry(
-    times: int, exceptions: tuple[Any], delay: float = 0.1
-) -> Callable[[FuncT], FuncT]:
+def retry(times: int, exceptions: Any, delay: float = 0.1) -> Callable[[FuncT], FuncT]:
     """
     Retry Decorator
     Retries the wrapped function/method `times` times if the exceptions listed
@@ -72,6 +72,7 @@ class Kuutamod:
         ports: Ports,
         near_network: NearNetwork,
         kuutamoctl: Path,
+        debug: bool,
     ) -> Kuutamod:
         exporter_port = ports.allocate(3)
         validator_port = exporter_port + 1
@@ -96,10 +97,17 @@ class Kuutamod:
             RUST_BACKTRACE="1",
         )
         config = json.load(open(neard_home / "config.json"))
-        proc = command.run([str(kuutamod)], extra_env=env)
+        if debug:
+            proc = command.run(
+                [str(kuutamod)],
+                extra_env=env,
+                stderr=open(neard_home / f"{neard_home.name}-debug.txt", "w"),
+            )
+        else:
+            proc = command.run([str(kuutamod)], extra_env=env)
         wait_for_port("127.0.0.1", exporter_port)
 
-        return cls(
+        instance = cls(
             proc=proc,
             exporter_port=exporter_port,
             node_id=node_id,
@@ -111,8 +119,11 @@ class Kuutamod:
             rpc_port=int(config["rpc"]["addr"].split(":")[-1]),
             kuutamoctl=kuutamoctl,
         )
+        if debug:
+            instance.enable_neard_debug()
+        return instance
 
-    @retry(30, (ConnectionRefusedError,))
+    @retry(30, (ConnectionRefusedError, ConnectionResetError))
     def neard_pid(self) -> Optional[int]:
         """Query pid for neard which managed by the kuutamod with 3 times retry"""
         conn = http.client.HTTPConnection("127.0.0.1", self.exporter_port)
@@ -123,12 +134,12 @@ class Kuutamod:
             return None
         return int(body)
 
-    @retry(300, (ConnectionRefusedError,))
+    @retry(300, (ConnectionRefusedError, ConnectionResetError))
     def metrics(self) -> dict:
         """Query the prometheus metrics for kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
 
-    @retry(300, (ConnectionRefusedError,))
+    @retry(300, (ConnectionRefusedError, ConnectionResetError))
     def neard_metrics(self) -> dict:
         """Query the prometheus metrics for neard which managed by the kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
@@ -149,26 +160,17 @@ class Kuutamod:
         """Wait kuutamod processes"""
         self.proc.wait()
 
-    def check_blocking(self) -> bool:
+    def network_produces_blocks(self) -> bool:
         """check Kuutamo node keep updating the block height"""
 
-        proc = self.command.run(
-            ["neard", "--home", str(self.neard_home), "view-state", "state"],
-            stdout=subprocess.PIPE,
-        )
-        assert proc.stdout is not None
-        block_height = int(proc.stdout.read().splitlines()[0].split(" ")[-1])
-        time.sleep(10)
-        proc = self.command.run(
-            ["neard", "--home", str(self.neard_home), "view-state", "state"],
-            stdout=subprocess.PIPE,
-        )
-        assert proc.stdout is not None
-        new_block_height = int(proc.stdout.read().splitlines()[0].split(" ")[-1] or 0)
-        if new_block_height >= block_height + 5:
-            return True
-        else:
-            return False
+        initial_height = int(self.neard_metrics()["near_block_height_head"])
+        for _ in range(600):
+            current_height = int(self.neard_metrics()["near_block_height_head"])
+            print(f"height: {current_height}")
+            if current_height >= initial_height + 2:
+                return True
+            time.sleep(3)
+        return False
 
     def execute_command(
         self, *args: str, check: bool = True
@@ -181,3 +183,10 @@ class Kuutamod:
             text=True,
             check=check,
         )
+
+    def enable_neard_debug(self) -> None:
+        pid = self.neard_pid()
+        assert pid is not None
+        with open(self.neard_home / "log_config.json", "w") as f:
+            f.write('{"verbose_module": ""}')
+        os.kill(pid, SIGHUP)

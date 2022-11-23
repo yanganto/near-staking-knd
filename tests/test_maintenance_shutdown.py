@@ -46,6 +46,7 @@ def test_maintenance_shutdown(
                 command=command,
                 kuutamoctl=kuutamoctl,
                 consul=consul,
+                debug=False,
             )
         )
     leader = None
@@ -116,9 +117,4 @@ def test_maintenance_shutdown(
             assert new_pid is not pid
 
         log_note("checking on leader restart and keep producing block")
-        check = 0
-        while not leader.check_blocking():
-            check += 1
-            if check > 3:
-                log_note("leader did not restart correctly")
-                assert False
+        assert leader.network_produces_blocks()
