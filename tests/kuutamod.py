@@ -160,26 +160,17 @@ class Kuutamod:
         """Wait kuutamod processes"""
         self.proc.wait()
 
-    def check_blocking(self) -> bool:
+    def network_produces_blocks(self) -> bool:
         """check Kuutamo node keep updating the block height"""
 
-        proc = self.command.run(
-            ["neard", "--home", str(self.neard_home), "view-state", "state"],
-            stdout=subprocess.PIPE,
-        )
-        assert proc.stdout is not None
-        block_height = int(proc.stdout.read().splitlines()[0].split(" ")[-1])
-        time.sleep(10)
-        proc = self.command.run(
-            ["neard", "--home", str(self.neard_home), "view-state", "state"],
-            stdout=subprocess.PIPE,
-        )
-        assert proc.stdout is not None
-        new_block_height = int(proc.stdout.read().splitlines()[0].split(" ")[-1] or 0)
-        if new_block_height >= block_height + 5:
-            return True
-        else:
-            return False
+        initial_height = int(self.neard_metrics()["near_block_height_head"])
+        for _ in range(600):
+            current_height = int(self.neard_metrics()["near_block_height_head"])
+            print(f"height: {current_height}")
+            if current_height >= initial_height + 2:
+                return True
+            time.sleep(3)
+        return False
 
     def execute_command(
         self, *args: str, check: bool = True
