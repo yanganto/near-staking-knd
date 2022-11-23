@@ -6,7 +6,7 @@ import time
 from command import Command
 from consul import Consul
 from kuutamod import Kuutamod
-from note import Section
+from log_utils import Section
 from ports import Ports
 from setup_localnet import NearNetwork
 

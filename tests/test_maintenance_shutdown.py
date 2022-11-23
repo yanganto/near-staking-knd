@@ -13,7 +13,7 @@ from kuutamod import Kuutamod
 from ports import Ports
 from setup_localnet import NearNetwork
 from typing import Any, List
-from note import note, Section
+from log_utils import log_note, Section
 
 
 def work_with_neard_versions(
@@ -56,7 +56,7 @@ def test_maintenance_shutdown(
             for idx, k in enumerate(kuutamods):
                 res = k.metrics()
                 if res.get('kuutamod_state{type="Validating"}') == "1":
-                    note(f"leader is kuutamo{idx}")
+                    log_note(f"leader is kuutamo{idx}")
                     leader = kuutamods[idx]
                     del kuutamods[idx]
                     follower = kuutamods.pop()
@@ -96,7 +96,7 @@ def test_maintenance_shutdown(
                 break
             time.sleep(0.1)
         duration = time.perf_counter() - start
-        note(f"follower restart time {duration}")
+        log_note(f"follower restart time {duration}")
 
     with Section("test maintenance shutdown on leader"):
         pid = leader.neard_pid()
@@ -115,10 +115,10 @@ def test_maintenance_shutdown(
         else:
             assert new_pid is not pid
 
-        note("checking on leader restart and keep producing block")
+        log_note("checking on leader restart and keep producing block")
         check = 0
         while not leader.check_blocking():
             check += 1
             if check > 3:
-                note("leader did not restart correctly")
+                log_note("leader did not restart correctly")
                 assert False

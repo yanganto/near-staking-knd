@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
-from note import note
+from log_utils import log_note
 
 
 _FILE = Union[None, int, IO[Any]]
@@ -177,7 +177,7 @@ class NearNetwork:
                 for f in files:
                     # NOTE: 'json' for config, 'txt' for neard log, 'log' for rocksdb log
                     if f.split(".")[-1] in ("json", "txt"):
-                        note(str(os.path.join(root, f)))
+                        log_note(str(os.path.join(root, f)))
                         tarball.add(os.path.join(root, f))
             tarball.close()
 
