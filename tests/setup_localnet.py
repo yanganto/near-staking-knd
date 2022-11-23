@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 
+from dataclasses import dataclass
+from pathlib import Path
+from shlex import quote
+from typing import IO, Any, Callable, Dict, List, Optional, Text, Union
 import io
 import json
 import os
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass
-from pathlib import Path
-from shlex import quote
-from typing import IO, Any, Callable, Dict, List, Optional, Text, Union
+import tarfile
+from log_utils import log_note
+
 
 _FILE = Union[None, int, IO[Any]]
 
@@ -159,11 +162,27 @@ class NearNode:
 class NearNetwork:
     home: Path
     nodes: List[NearNode]
+    artifact_path: Optional[Path]
 
     @property
     def boostrap_node(self) -> str:
         node0_key = json.loads((self.home / "node0" / "node_key.json").read_text())
         return f"{node0_key['public_key']}@127.0.0.1:{self.nodes[0].network_port}"
+
+    def save_artifacts(self) -> None:
+        """tar and gzip all logs into artifact"""
+        if self.artifact_path:
+            tarball = tarfile.open(self.artifact_path, "w:gz")
+            for root, dirs, files in os.walk(self.home):
+                for f in files:
+                    # NOTE: 'json' for config, 'txt' for neard log, 'log' for rocksdb log
+                    if f.split(".")[-1] in ("json", "txt"):
+                        log_note(str(os.path.join(root, f)))
+                        tarball.add(os.path.join(root, f))
+            tarball.close()
+
+    def set_artifact_path(self, path: Path) -> None:
+        self.artifact_path = path
 
 
 def setup_network_config(near_home: Path, start_port: int) -> NearNetwork:
@@ -214,7 +233,7 @@ def setup_network_config(near_home: Path, start_port: int) -> NearNetwork:
             path.write_text(json.dumps(data, indent=2))
 
     near_tmp.rename(near_home)
-    return NearNetwork(near_home, nodes)
+    return NearNetwork(near_home, nodes, None)
 
 
 def local_near(
