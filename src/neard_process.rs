@@ -152,6 +152,7 @@ impl NeardProcess {
             warn!("Try send SIGHUP to neard({pid:?}): {e:?}");
             result = signal::kill(pid, Signal::SIGHUP);
         }
+        force_unlink(&dyn_config_path).context("failed to remove dynamic config after applied")?;
         Ok(result?)
     }
 
