@@ -34,10 +34,8 @@ pub async fn active_validator(
     let client = ConsulClient::new(consul_url, token.as_deref())
         .context("Failed to create consul client")?;
 
-    let account_id = std::env::var(account_id).unwrap_or_else(|_| "default".to_string());
-
     let res = client
-        .get(&consul_leader_key(&account_id))
+        .get(&consul_leader_key(account_id))
         .await
         .context("Failed to get leader key from consul")?;
     let value = match res {
