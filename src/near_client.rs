@@ -89,4 +89,31 @@ impl NeardClient {
         let r: JsonRpcStatusResponse = res.json().await?;
         Ok(r.result)
     }
+
+    /// Request metrics
+    pub async fn metrics(&self) -> Result<HashMap<String, String>> {
+        let url = self
+            .url
+            .join("/metrics")
+            .context("Failed to build metrics url")?;
+        let res = self
+            .client
+            .get(url)
+            .send()
+            .await
+            .context("Failed to get metric")?;
+        let body = res.text().await?;
+        let mut metrics = HashMap::new();
+        for line in body.split('\n') {
+            if line.starts_with('#') {
+                continue;
+            } else {
+                let mut sp = line.split(' ');
+                if let Some(key) = sp.next() {
+                    metrics.insert(key.into(), sp.last().unwrap_or("").into());
+                }
+            }
+        }
+        Ok(metrics)
+    }
 }

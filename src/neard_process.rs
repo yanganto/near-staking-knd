@@ -1,5 +1,6 @@
 //! Setups neard in validator or voter mode
 
+use crate::near_client::NeardClient;
 use crate::near_config::update_neard_config;
 use crate::proc::{graceful_stop_neard, run_neard};
 use crate::settings::Settings;
@@ -137,10 +138,25 @@ impl NeardProcess {
     /// Update dynamic config
     /// NOTE: currently only expected shutdown in the config, so input parameter is only expected_shutdown
     pub async fn update_dynamic_config(
+        client: NeardClient,
         pid: Pid,
         neard_home: &Path,
         expected_shutdown: BlockHeight,
     ) -> Result<()> {
+        let mut check = 0;
+        let metrics = loop {
+            check += 1;
+            if let Ok(metrics) = client.metrics().await {
+                break metrics;
+            } else if check > 10 {
+                anyhow::bail!("fail to get neard metrics");
+            }
+            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+        };
+        let changes = metrics
+            .get("near_dynamic_config_changes")
+            .map(|s| s.parse::<usize>().unwrap_or(0))
+            .unwrap_or(0);
         let dyn_config_path = neard_home.join("dyn_config.json");
         force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
         let mut file = File::create(&dyn_config_path).await?;
@@ -152,8 +168,27 @@ impl NeardProcess {
             warn!("Try send SIGHUP to neard({pid:?}): {e:?}");
             result = signal::kill(pid, Signal::SIGHUP);
         }
-        force_unlink(&dyn_config_path).context("failed to remove dynamic config after applied")?;
-        Ok(result?)
+
+        let mut check = 0;
+        while check < 10
+            && changes + 1
+                != client
+                    .metrics()
+                    .await?
+                    .get("near_dynamic_config_changes")
+                    .map(|s| s.parse::<usize>().unwrap_or(0))
+                    .unwrap_or(0)
+        {
+            check += 1;
+            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+        }
+
+        force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
+        if check == 10 {
+            anyhow::bail!("fail check on dynamic config change")
+        } else {
+            Ok(result?)
+        }
     }
 
     /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
