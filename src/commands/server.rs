@@ -19,7 +19,7 @@ fn server_error<T: Display>(msg: T) -> Response<Body>
 where
     T: Display,
 {
-    warn!("server error '{}' on {}:{}", msg, file!(), line!());
+    warn!("server error '{}'", msg);
     let res = serde_json::to_vec(&json!({"status": 500, "message": format!("{}", msg)}));
     // FIXME: Set header: Content-Type: application/json
     let mut resp: Response<Body> = Response::default();
