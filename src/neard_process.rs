@@ -148,10 +148,10 @@ impl NeardProcess {
             check += 1;
             if let Ok(metrics) = client.metrics().await {
                 break metrics;
-            } else if check > 10 {
+            } else if check > 50 {
                 anyhow::bail!("fail to get neard metrics");
             }
-            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         };
         let changes = metrics
             .get("near_dynamic_config_changes")
@@ -170,7 +170,7 @@ impl NeardProcess {
         }
 
         let mut check = 0;
-        while check < 10
+        while check < 50
             && changes + 1
                 != client
                     .metrics()
@@ -180,11 +180,11 @@ impl NeardProcess {
                     .unwrap_or(0)
         {
             check += 1;
-            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         }
 
         force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
-        if check == 10 {
+        if check == 50 {
             anyhow::bail!("fail check on dynamic config change")
         } else {
             Ok(result?)
