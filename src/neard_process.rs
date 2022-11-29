@@ -5,7 +5,7 @@ use crate::near_config::update_neard_config;
 use crate::proc::{graceful_stop_neard, run_neard};
 use crate::settings::Settings;
 use anyhow::{Context, Result};
-use log::warn;
+use log::{error, warn};
 use near_primitives::types::BlockHeight;
 use nix::sys::signal::{self, Signal};
 use nix::unistd::Pid;
@@ -161,8 +161,9 @@ impl NeardProcess {
         let dyn_config_path = neard_home.join("dyn_config.json");
 
         let _guard = scopeguard::guard((), |_| {
-            force_unlink(&dyn_config_path)
-                .expect("dyn_config.json can not force remove as expected");
+            if let Err(e) = force_unlink(&dyn_config_path) {
+                error!("dyn_config.json can not force remove as expected: {e:?}");
+            }
         });
 
         force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
