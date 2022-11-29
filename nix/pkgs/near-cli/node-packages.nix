@@ -193,13 +193,13 @@ let
         sha512 = "9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==";
       };
     };
-    "@sinonjs/commons-1.8.5" = {
+    "@sinonjs/commons-1.8.6" = {
       name = "_at_sinonjs_slash_commons";
       packageName = "@sinonjs/commons";
-      version = "1.8.5";
+      version = "1.8.6";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@sinonjs/commons/-/commons-1.8.5.tgz";
-        sha512 = "rTpCA0wG1wUxglBSFdMMY0oTrKYvgf4fNgv/sXbfCVAdf+FnPBdKJR/7XbpTCwbCrvCbdPYnlWaUUYz4V2fPDA==";
+        url = "https://registry.npmjs.org/@sinonjs/commons/-/commons-1.8.6.tgz";
+        sha512 = "Ky+XkAkqPZSm3NLBeUng77EBQl3cmeJhITaGHdYH8kjVB+aun3S4XBRti2zt17mtt0mIUDiNxYeoJm6drVvBJQ==";
       };
     };
     "@sinonjs/fake-timers-8.1.0" = {
@@ -2803,7 +2803,7 @@ in
       sources."@ledgerhq/logs-6.10.1"
       sources."@segment/loosely-validate-event-2.0.0"
       sources."@sindresorhus/is-0.14.0"
-      sources."@sinonjs/commons-1.8.5"
+      sources."@sinonjs/commons-1.8.6"
       sources."@sinonjs/fake-timers-8.1.0"
       sources."@szmarczak/http-timer-1.1.2"
       sources."@types/istanbul-lib-coverage-2.0.4"
