@@ -17,6 +17,7 @@ use std::process::ExitStatus;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Child;
+use tokio::time::{sleep_until, Duration, Instant};
 
 /// A neard validator process
 #[derive(Debug)]
@@ -151,7 +152,7 @@ impl NeardProcess {
             } else if check > 50 {
                 anyhow::bail!("fail to get neard metrics");
             }
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            sleep_until(Instant::now() + Duration::from_millis(100)).await;
         };
         let changes = metrics
             .get("near_dynamic_config_changes")
@@ -180,7 +181,7 @@ impl NeardProcess {
                     .unwrap_or(0)
         {
             check += 1;
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            sleep_until(Instant::now() + Duration::from_millis(100)).await;
         }
 
         force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
