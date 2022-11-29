@@ -89,15 +89,15 @@ in
 
     boot.kernel.sysctl = lib.mkIf (cfg.enableSolanaKernelTuning) {
       # Increase socket buffer sizes
-      "net.core.rmem_default" = "134217728";
-      "net.core.rmem_max" = "134217728";
-      "net.core.wmem_default" = "134217728";
-      "net.core.wmem_max" = "134217728";
+      "net.core.rmem_default" = 134217728;
+      "net.core.rmem_max" = 134217728;
+      "net.core.wmem_default" = 134217728;
+      "net.core.wmem_max" = 134217728;
 
       # Increase memory mapped files limit
-      "vm.max_map_count" = "1000000";
+      "vm.max_map_count" = 1000000;
       # Increase number of allowed open file descriptors
-      "fs.nr_open" = "1000000";
+      "fs.nr_open" = 1000000;
     };
 
     # not strictly needed but useful for debugging i.e. finding out what neard version we deployed and some subcommands of neard
