@@ -159,6 +159,12 @@ impl NeardProcess {
             .map(|s| s.parse::<usize>().unwrap_or(0))
             .unwrap_or(0);
         let dyn_config_path = neard_home.join("dyn_config.json");
+
+        let _guard = scopeguard::guard((), |_| {
+            force_unlink(&dyn_config_path)
+                .expect("dyn_config.json can not force remove as expected");
+        });
+
         force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
         let mut file = File::create(&dyn_config_path).await?;
         let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
@@ -183,8 +189,6 @@ impl NeardProcess {
             check += 1;
             sleep_until(Instant::now() + Duration::from_millis(100)).await;
         }
-
-        force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
         if check == 50 {
             anyhow::bail!("fail check on dynamic config change")
         } else {

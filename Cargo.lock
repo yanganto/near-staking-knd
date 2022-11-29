@@ -656,6 +656,7 @@ dependencies = [
  "nix",
  "prometheus",
  "reqwest",
+ "scopeguard",
  "serde",
  "serde_json",
  "tokio",
