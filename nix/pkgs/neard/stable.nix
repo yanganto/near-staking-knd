@@ -8,8 +8,8 @@ let
   };
 in
 generic {
-  version = "1.29.1";
-  sha256 = "sha256-TmmGLrDpNOfadOIwmG7XRgI89XQjaqIavxCEE2plumc=";
-  cargoSha256 = "sha256-U/oxgsekDzRJF95ln+psJyv8BXTyOXeeM4C/3R/JASw=";
+  version = "1.29.2";
+  sha256 = "sha256-dVju9emwTqNQCYST4HuwSWdafM0yxVS3JXXJqCdFEpc=";
+  cargoSha256 = "sha256-HV+TAXVYWW7mjNpYCT7G6kh/xNxHq+saGbym5LiKn2Y=";
   inherit neardRustPlatform;
 }
