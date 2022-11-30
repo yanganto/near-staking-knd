@@ -152,6 +152,10 @@ class Kuutamod:
         """Wait validator port"""
         wait_for_port("127.0.0.1", self.voter_port)
 
+    def wait_rpc_port(self) -> None:
+        """Wait rpc port"""
+        wait_for_port("127.0.0.1", self.rpc_port)
+
     def terminate(self) -> None:
         """Terminate kuutamod processes"""
         self.proc.terminate()

@@ -137,48 +137,51 @@ impl NeardProcess {
     }
 
     /// Update dynamic config
-    /// NOTE: currently only expected shutdown in the config, so input parameter is only expected_shutdown
+    /// NOTE: currently only expected shutdown in the config, so input parameter is only
+    /// expected_shutdown
     pub async fn update_dynamic_config(
         client: NeardClient,
         pid: Pid,
         neard_home: &Path,
         expected_shutdown: BlockHeight,
     ) -> Result<()> {
-        let mut check = 0;
-        let metrics = loop {
-            check += 1;
-            if let Ok(metrics) = client.metrics().await {
-                break metrics;
-            } else if check > 50 {
-                anyhow::bail!("fail to get neard metrics");
-            }
-            sleep_until(Instant::now() + Duration::from_millis(100)).await;
-        };
+        // We need neard metric to make sure the dyn config is correctly applied.
+        // If we can not get the neard metric at this moment, we will not try to apply the dynamic
+        // config and abort early.
+        let metrics = client.metrics().await?;
+
         let changes = metrics
             .get("near_dynamic_config_changes")
             .map(|s| s.parse::<usize>().unwrap_or(0))
             .unwrap_or(0);
         let dyn_config_path = neard_home.join("dyn_config.json");
 
+        // The previous config file will be truncated if existing
+        let mut file = File::create(&dyn_config_path).await?;
+        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
+
+        // The guard will make sure the config file be deleted to avoid neard reload it when
+        // restarting, because neard process will load the existing dyn_config.json when it start.
         let _guard = scopeguard::guard((), |_| {
             if let Err(e) = force_unlink(&dyn_config_path) {
                 error!("dyn_config.json can not force remove as expected: {e:?}");
             }
         });
-
-        force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
-        let mut file = File::create(&dyn_config_path).await?;
-        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
         file.write_all(dynamic_config.to_string().as_bytes())
             .await?;
+
         let mut result = signal::kill(pid, Signal::SIGHUP);
         if let Err(e) = result {
             warn!("Try send SIGHUP to neard({pid:?}): {e:?}");
             result = signal::kill(pid, Signal::SIGHUP);
         }
 
+        // Check the dynamic config effect and show in metrics
+        // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
+        // log in the same time, however, the metics takes much more time to reflect these, so we
+        // take 5 seconds to check on this.
         let mut check = 0;
-        while check < 50
+        while check < 5
             && changes + 1
                 != client
                     .metrics()
@@ -188,9 +191,9 @@ impl NeardProcess {
                     .unwrap_or(0)
         {
             check += 1;
-            sleep_until(Instant::now() + Duration::from_millis(100)).await;
+            sleep_until(Instant::now() + Duration::from_secs(1)).await;
         }
-        if check == 50 {
+        if check == 5 {
             anyhow::bail!("fail check on dynamic config change")
         } else {
             Ok(result?)
