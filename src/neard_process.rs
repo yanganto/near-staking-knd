@@ -118,6 +118,51 @@ async fn get_neard_config_changes(client: &NeardClient) -> Result<u64> {
         .context("near_dynamic_config_changes")
 }
 
+/// Trigger neard to load the dynamic config
+pub fn reload_neard(pid: Pid) -> Result<()> {
+    // FIXME refactor with inspect_err after following PR shiped
+    // https://github.com/rust-lang/rust/issues/91345
+    match signal::kill(pid, Signal::SIGHUP) {
+        Ok(s) => Ok(s),
+        Err(e) => {
+            warn!("Try send SIGHUP to neard({:?}): {e:?}", pid);
+            Err(e.into())
+        }
+    }
+}
+
+/// Update dynamic config
+/// NOTE: currently only expected shutdown in the config, so input parameter is only
+/// expected_shutdown
+pub async fn reload_dynamic_config(
+    client: &NeardClient,
+    pid: Pid,
+    neard_home: &Path,
+    expected_shutdown: BlockHeight,
+) -> Result<()> {
+    // We need neard metric to make sure the dyn config is correctly applied.
+    // If we can not get the neard metric at this moment, we will not try to apply the dynamic
+    // config and abort early.
+    let changes = get_neard_config_changes(client).await?;
+
+    let dyn_config = ApplyDynConfig::new(neard_home, expected_shutdown).await?;
+    reload_neard(pid)?;
+
+    // Check the dynamic config effect and show in metrics
+    // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
+    // log in the same time, however, the metics takes much more time to reflect these, so we
+    // take 5 seconds to check on this.
+    for _ in 0..5 {
+        let latest_changes = get_neard_config_changes(client).await?;
+        if latest_changes >= changes + 1 {
+            drop(dyn_config);
+            return Ok(());
+        }
+        sleep_until(Instant::now() + Duration::from_secs(1)).await;
+    }
+    anyhow::bail!("fail check on dynamic config change")
+}
+
 impl NeardProcess {
     /// Return handle on the neard process
     pub fn process(&mut self) -> &mut Child {
@@ -146,37 +191,6 @@ impl NeardProcess {
         None
     }
 
-    /// Update dynamic config
-    /// NOTE: currently only expected shutdown in the config, so input parameter is only
-    /// expected_shutdown
-    pub async fn update_dynamic_config(
-        client: &NeardClient,
-        pid: Pid,
-        neard_home: &Path,
-        expected_shutdown: BlockHeight,
-    ) -> Result<()> {
-        // We need neard metric to make sure the dyn config is correctly applied.
-        // If we can not get the neard metric at this moment, we will not try to apply the dynamic
-        // config and abort early.
-        let changes = get_neard_config_changes(client).await?;
-
-        let op = ApplyDynConfig::new(pid, neard_home, expected_shutdown).await?;
-        op.reload().await?;
-
-        // Check the dynamic config effect and show in metrics
-        // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
-        // log in the same time, however, the metics takes much more time to reflect these, so we
-        // take 5 seconds to check on this.
-        for _ in 0..5 {
-            let latest_changes = get_neard_config_changes(client).await?;
-            if latest_changes >= changes + 1 {
-                return Ok(());
-            }
-            sleep_until(Instant::now() + Duration::from_secs(1)).await;
-        }
-        anyhow::bail!("fail check on dynamic config change")
-    }
-
     /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
     pub async fn restart(pid: Pid) -> Result<()> {
         let mut result = signal::kill(pid, Signal::SIGTERM);
@@ -201,11 +215,10 @@ impl Drop for NeardProcess {
 /// Safty operation to apply dyanic config
 struct ApplyDynConfig {
     dyn_config_path: PathBuf,
-    pid: Pid,
 }
 
 impl ApplyDynConfig {
-    pub async fn new(pid: Pid, neard_home: &Path, expected_shutdown: BlockHeight) -> Result<Self> {
+    pub async fn new(neard_home: &Path, expected_shutdown: BlockHeight) -> Result<Self> {
         let dyn_config_path = neard_home.join("dyn_config.json");
         let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
 
@@ -214,23 +227,7 @@ impl ApplyDynConfig {
         file.write_all(dynamic_config.to_string().as_bytes())
             .await?;
 
-        Ok(Self {
-            dyn_config_path,
-            pid,
-        })
-    }
-
-    /// Trigger neard to load the dynamic config
-    pub async fn reload(&self) -> Result<()> {
-        // FIXME refactor with inspect_err after following PR shiped
-        // https://github.com/rust-lang/rust/issues/91345
-        match signal::kill(self.pid, Signal::SIGHUP) {
-            Ok(s) => Ok(s),
-            Err(e) => {
-                warn!("Try send SIGHUP to neard({:?}): {e:?}", self.pid);
-                Err(e.into())
-            }
-        }
+        Ok(Self { dyn_config_path })
     }
 }
 
