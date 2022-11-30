@@ -131,10 +131,10 @@ pub fn reload_neard(pid: Pid) -> Result<()> {
     }
 }
 
-/// Update dynamic config
+/// Apply dynamic config
 /// NOTE: currently only expected shutdown in the config, so input parameter is only
 /// expected_shutdown
-pub async fn reload_dynamic_config(
+pub async fn apply_dynamic_config(
     client: &NeardClient,
     pid: Pid,
     neard_home: &Path,
@@ -145,7 +145,7 @@ pub async fn reload_dynamic_config(
     // config and abort early.
     let changes = get_neard_config_changes(client).await?;
 
-    let dyn_config = ApplyDynConfig::new(neard_home, expected_shutdown).await?;
+    let dyn_config = DynConfig::new(neard_home, expected_shutdown).await?;
     reload_neard(pid)?;
 
     // Check the dynamic config effect and show in metrics
@@ -213,11 +213,11 @@ impl Drop for NeardProcess {
 }
 
 /// Safty operation to apply dyanic config
-struct ApplyDynConfig {
+struct DynConfig {
     dyn_config_path: PathBuf,
 }
 
-impl ApplyDynConfig {
+impl DynConfig {
     pub async fn new(neard_home: &Path, expected_shutdown: BlockHeight) -> Result<Self> {
         let dyn_config_path = neard_home.join("dyn_config.json");
         let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
@@ -231,7 +231,7 @@ impl ApplyDynConfig {
     }
 }
 
-impl Drop for ApplyDynConfig {
+impl Drop for DynConfig {
     /// Make sure the config file be deleted to avoid neard reload it when restarting,
     /// because neard process will load any existing dyn_config.json when it start.
     fn drop(&mut self) {

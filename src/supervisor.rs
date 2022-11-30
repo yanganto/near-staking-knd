@@ -7,7 +7,7 @@ use crate::exit_signal_handler::ExitSignalHandler;
 use crate::ipc::Request;
 use crate::leader_protocol::consul_leader_key;
 use crate::near_client::NeardClient;
-use crate::neard_process::{reload_dynamic_config, setup_validator, setup_voter, NeardProcess};
+use crate::neard_process::{apply_dynamic_config, setup_validator, setup_voter, NeardProcess};
 use crate::scoped_consul_session::ScopedConsulSession;
 use crate::settings::Settings;
 use crate::{ipc, oom_score};
@@ -301,7 +301,7 @@ async fn schedule_maintenance_shutdown(
         (None, None) => None,
     };
     if let Some(expect_shutdown_at) = expect_shutdown_at {
-        reload_dynamic_config(&neard_client, pid, near_home, expect_shutdown_at).await?;
+        apply_dynamic_config(&neard_client, pid, near_home, expect_shutdown_at).await?;
     }
 
     Ok(expect_shutdown_at)
