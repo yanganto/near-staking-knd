@@ -161,7 +161,7 @@ impl NeardProcess {
         let changes = get_neard_config_changes(client).await?;
 
         let op = ApplyDynConfig::new(pid, neard_home, expected_shutdown).await?;
-        op.run_uncheck().await?;
+        op.reload().await?;
 
         // Check the dynamic config effect and show in metrics
         // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
@@ -220,8 +220,8 @@ impl ApplyDynConfig {
         })
     }
 
-    /// Trigger neard to load the dynamic config without check after load
-    pub async fn run_uncheck(&self) -> Result<()> {
+    /// Trigger neard to load the dynamic config
+    pub async fn reload(&self) -> Result<()> {
         // FIXME refactor with inspect_err after following PR shiped
         // https://github.com/rust-lang/rust/issues/91345
         match signal::kill(self.pid, Signal::SIGHUP) {
