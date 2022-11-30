@@ -17,7 +17,7 @@ use std::process::ExitStatus;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Child;
-use tokio::time::{sleep_until, Duration, Instant};
+use tokio::time::{sleep, sleep_until, Duration, Instant};
 
 /// A neard validator process
 #[derive(Debug)]
@@ -131,6 +131,16 @@ pub fn reload_neard(pid: Pid) -> Result<()> {
     }
 }
 
+async fn wait_until_config_applied(client: &NeardClient, initial_change_value: u64) -> Result<()> {
+    loop {
+        let latest_changes = get_neard_config_changes(client).await?;
+        if latest_changes > initial_change_value {
+            return Ok(());
+        }
+        sleep(Duration::from_millis(100)).await;
+    }
+}
+
 /// Apply dynamic config
 /// NOTE: currently only expected shutdown in the config, so input parameter is only
 /// expected_shutdown
@@ -150,17 +160,18 @@ pub async fn apply_dynamic_config(
 
     // Check the dynamic config effect and show in metrics
     // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
-    // log in the same time, however, the metics takes much more time to reflect these, so we
-    // take 5 seconds to check on this.
-    for _ in 0..5 {
-        let latest_changes = get_neard_config_changes(client).await?;
-        if latest_changes >= changes + 1 {
+    // log in the same time, however, the metrics takes much more time to reflect these, so we
+    // wait 5 seconds to check on this.
+    let apply_timeout = Instant::now() + Duration::from_secs(5);
+    tokio::select! {
+        res = wait_until_config_applied(client, changes) => {
             drop(dyn_config);
-            return Ok(());
+            return res;
         }
-        sleep_until(Instant::now() + Duration::from_secs(1)).await;
+        // startup timeout
+        _ = sleep_until(apply_timeout) => {},
     }
-    anyhow::bail!("fail check on dynamic config change")
+    anyhow::bail!("dynamic config change was not applied within 5s")
 }
 
 impl NeardProcess {
