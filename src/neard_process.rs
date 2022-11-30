@@ -12,7 +12,7 @@ use nix::unistd::Pid;
 use std::fs::remove_file;
 use std::io::ErrorKind;
 use std::os::unix::fs::symlink;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::ExitStatus;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -140,7 +140,7 @@ impl NeardProcess {
     /// NOTE: currently only expected shutdown in the config, so input parameter is only
     /// expected_shutdown
     pub async fn update_dynamic_config(
-        client: NeardClient,
+        client: &NeardClient,
         pid: Pid,
         neard_home: &Path,
         expected_shutdown: BlockHeight,
@@ -154,27 +154,9 @@ impl NeardProcess {
             .get("near_dynamic_config_changes")
             .map(|s| s.parse::<usize>().unwrap_or(0))
             .unwrap_or(0);
-        let dyn_config_path = neard_home.join("dyn_config.json");
 
-        // The previous config file will be truncated if existing
-        let mut file = File::create(&dyn_config_path).await?;
-        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
-
-        // The guard will make sure the config file be deleted to avoid neard reload it when
-        // restarting, because neard process will load the existing dyn_config.json when it start.
-        let _guard = scopeguard::guard((), |_| {
-            if let Err(e) = force_unlink(&dyn_config_path) {
-                error!("dyn_config.json can not force remove as expected: {e:?}");
-            }
-        });
-        file.write_all(dynamic_config.to_string().as_bytes())
-            .await?;
-
-        let mut result = signal::kill(pid, Signal::SIGHUP);
-        if let Err(e) = result {
-            warn!("Try send SIGHUP to neard({pid:?}): {e:?}");
-            result = signal::kill(pid, Signal::SIGHUP);
-        }
+        let op = ApplyDynConfig::new(pid, neard_home, expected_shutdown).await?;
+        op.run_uncheck().await?;
 
         // Check the dynamic config effect and show in metrics
         // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
@@ -195,9 +177,8 @@ impl NeardProcess {
         }
         if check == 5 {
             anyhow::bail!("fail check on dynamic config change")
-        } else {
-            Ok(result?)
         }
+        Ok(())
     }
 
     /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
@@ -217,6 +198,52 @@ impl Drop for NeardProcess {
             if let Err(err) = graceful_stop_neard(&mut self.process) {
                 warn!("Failed to stop near process: {err:?}");
             }
+        }
+    }
+}
+
+/// Safty operation to apply dyanic config
+struct ApplyDynConfig {
+    dyn_config_path: PathBuf,
+    pid: Pid,
+}
+
+impl ApplyDynConfig {
+    pub async fn new(pid: Pid, neard_home: &Path, expected_shutdown: BlockHeight) -> Result<Self> {
+        let dyn_config_path = neard_home.join("dyn_config.json");
+        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
+
+        // The previous config file will be truncated if existing
+        let mut file = File::create(&dyn_config_path).await?;
+        file.write_all(dynamic_config.to_string().as_bytes())
+            .await?;
+
+        Ok(Self {
+            dyn_config_path,
+            pid,
+        })
+    }
+
+    /// Trigger neard to load the dynamic config without check after load
+    pub async fn run_uncheck(&self) -> Result<()> {
+        // FIXME refactor with inspect_err after following PR shiped
+        // https://github.com/rust-lang/rust/issues/91345
+        match signal::kill(self.pid, Signal::SIGHUP) {
+            Ok(s) => Ok(s),
+            Err(e) => {
+                warn!("Try send SIGHUP to neard({:?}): {e:?}", self.pid);
+                Err(e.into())
+            }
+        }
+    }
+}
+
+impl Drop for ApplyDynConfig {
+    /// Make sure the config file be deleted to avoid neard reload it when restarting,
+    /// because neard process will load any existing dyn_config.json when it start.
+    fn drop(&mut self) {
+        if let Err(e) = force_unlink(&self.dyn_config_path) {
+            error!("dyn_config.json can not force remove as expected: {e:?}");
         }
     }
 }

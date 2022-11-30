@@ -301,7 +301,7 @@ async fn schedule_maintenance_shutdown(
         (None, None) => None,
     };
     if let Some(expect_shutdown_at) = expect_shutdown_at {
-        NeardProcess::update_dynamic_config(neard_client, pid, near_home, expect_shutdown_at)
+        NeardProcess::update_dynamic_config(&neard_client, pid, near_home, expect_shutdown_at)
             .await?;
     }
 
