@@ -108,6 +108,16 @@ pub fn setup_voter(settings: &Settings) -> Result<NeardProcess> {
     })
 }
 
+async fn get_neard_config_changes(client: &NeardClient) -> Result<u64> {
+    let metrics = client.metrics().await?;
+
+    metrics
+        .get("near_dynamic_config_changes")
+        .context("metrics do not contain the near_dynamic_config_changes field")?
+        .parse::<u64>()
+        .context("near_dynamic_config_changes")
+}
+
 impl NeardProcess {
     /// Return handle on the neard process
     pub fn process(&mut self) -> &mut Child {
@@ -148,12 +158,7 @@ impl NeardProcess {
         // We need neard metric to make sure the dyn config is correctly applied.
         // If we can not get the neard metric at this moment, we will not try to apply the dynamic
         // config and abort early.
-        let metrics = client.metrics().await?;
-
-        let changes = metrics
-            .get("near_dynamic_config_changes")
-            .map(|s| s.parse::<usize>().unwrap_or(0))
-            .unwrap_or(0);
+        let changes = get_neard_config_changes(client).await?;
 
         let op = ApplyDynConfig::new(pid, neard_home, expected_shutdown).await?;
         op.run_uncheck().await?;
@@ -162,23 +167,14 @@ impl NeardProcess {
         // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
         // log in the same time, however, the metics takes much more time to reflect these, so we
         // take 5 seconds to check on this.
-        let mut check = 0;
-        while check < 5
-            && changes + 1
-                != client
-                    .metrics()
-                    .await?
-                    .get("near_dynamic_config_changes")
-                    .map(|s| s.parse::<usize>().unwrap_or(0))
-                    .unwrap_or(0)
-        {
-            check += 1;
+        for _ in 0..5 {
+            let latest_changes = get_neard_config_changes(client).await?;
+            if latest_changes >= changes + 1 {
+                return Ok(());
+            }
             sleep_until(Instant::now() + Duration::from_secs(1)).await;
         }
-        if check == 5 {
-            anyhow::bail!("fail check on dynamic config change")
-        }
-        Ok(())
+        anyhow::bail!("fail check on dynamic config change")
     }
 
     /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
