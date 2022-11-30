@@ -111,11 +111,11 @@ pub fn setup_voter(settings: &Settings) -> Result<NeardProcess> {
 async fn get_neard_config_changes(client: &NeardClient) -> Result<u64> {
     let metrics = client.metrics().await?;
 
-    metrics
+    // NOTE if the dynamic config was not applied, the field in metric will absent and deem to 0
+    Ok(metrics
         .get("near_dynamic_config_changes")
-        .context("metrics do not contain the near_dynamic_config_changes field")?
-        .parse::<u64>()
-        .context("near_dynamic_config_changes")
+        .map(|s| s.parse::<u64>().unwrap_or(0))
+        .unwrap_or(0))
 }
 
 /// Trigger neard to load the dynamic config
