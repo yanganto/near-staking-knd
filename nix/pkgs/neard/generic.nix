@@ -41,7 +41,7 @@ neardRustPlatform.buildRustPackage rec {
     #   - https://github.com/near/nearcore/pull/7887
     (
       # This branch: https://github.com/kuutamolabs/nearcore/tree/shutdown-patch-1.29.1-patch
-      lib.optional (lib.versionOlder version "1.30.0-rc.4") (
+      lib.optional (lib.versionOlder version "1.30.0-rc.5") (
         fetchpatch {
           name = "shutdown-patch-1.29.0-patch";
           url = "https://github.com/kuutamolabs/nearcore/commit/6253b22eb1458e148c33652a93bdd39c3bc9167f.patch";
@@ -55,11 +55,11 @@ neardRustPlatform.buildRustPackage rec {
     # - Maintenance RPC
     #   - https://github.com/near/nearcore/pull/7887
     (
-      lib.optional (lib.versionAtLeast version "1.30.0-rc4") (
+      lib.optional (lib.versionAtLeast version "1.30.0-rc.5") (
         fetchpatch {
-          name = "shutdown-patch-1.30.0-rc.4-p2";
-          url = "https://github.com/yanganto/nearcore/commit/500ec141a79b75911f4e0badb407082f7f4dc37f.patch";
-          sha256 = "sha256-xFHGp9ELXrF2vuklNeioR/SpXrxEUZEJ97VGoozaGvY=";
+          name = "patch-1.30.0-rc.5";
+          url = "https://github.com/yanganto/nearcore/commit/1e291a6dec5291a2e3ba39c855b8d864e9ec2a1a.patch";
+          sha256 = "sha256-hlJaHN2VTPF4wIihPb10WfIt6zAW9ZQ1AFsiTBePi6g=";
         }
       )
     )
