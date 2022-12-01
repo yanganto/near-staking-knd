@@ -1,21 +1,23 @@
 //! Setups neard in validator or voter mode
 
+use crate::near_client::NeardClient;
 use crate::near_config::update_neard_config;
 use crate::proc::{graceful_stop_neard, run_neard};
 use crate::settings::Settings;
 use anyhow::{Context, Result};
-use log::warn;
+use log::{error, warn};
 use near_primitives::types::BlockHeight;
 use nix::sys::signal::{self, Signal};
 use nix::unistd::Pid;
 use std::fs::remove_file;
 use std::io::ErrorKind;
 use std::os::unix::fs::symlink;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::ExitStatus;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::process::Child;
+use tokio::time::{sleep, sleep_until, Duration, Instant};
 
 /// A neard validator process
 #[derive(Debug)]
@@ -106,6 +108,72 @@ pub fn setup_voter(settings: &Settings) -> Result<NeardProcess> {
     })
 }
 
+async fn get_neard_config_changes(client: &NeardClient) -> Result<u64> {
+    let metrics = client.metrics().await?;
+
+    // NOTE if the dynamic config was not applied, the field in metric will absent and deem to 0
+    Ok(metrics
+        .get("near_dynamic_config_changes")
+        .map(|s| s.parse::<u64>().unwrap_or(0))
+        .unwrap_or(0))
+}
+
+/// Trigger neard to load the dynamic config
+pub fn reload_neard(pid: Pid) -> Result<()> {
+    // FIXME refactor with inspect_err after following PR shiped
+    // https://github.com/rust-lang/rust/issues/91345
+    match signal::kill(pid, Signal::SIGHUP) {
+        Ok(s) => Ok(s),
+        Err(e) => {
+            warn!("Try send SIGHUP to neard({:?}): {e:?}", pid);
+            Err(e.into())
+        }
+    }
+}
+
+async fn wait_until_config_applied(client: &NeardClient, initial_change_value: u64) -> Result<()> {
+    loop {
+        let latest_changes = get_neard_config_changes(client).await?;
+        if latest_changes > initial_change_value {
+            return Ok(());
+        }
+        sleep(Duration::from_millis(100)).await;
+    }
+}
+
+/// Apply dynamic config
+/// NOTE: currently only expected shutdown in the config, so input parameter is only
+/// expected_shutdown
+pub async fn apply_dynamic_config(
+    client: &NeardClient,
+    pid: Pid,
+    neard_home: &Path,
+    expected_shutdown: BlockHeight,
+) -> Result<()> {
+    // We need neard metric to make sure the dyn config is correctly applied.
+    // If we can not get the neard metric at this moment, we will not try to apply the dynamic
+    // config and abort early.
+    let changes = get_neard_config_changes(client).await?;
+
+    let dyn_config = DynConfig::new(neard_home, expected_shutdown).await?;
+    reload_neard(pid)?;
+
+    // Check the dynamic config effect and show in metrics
+    // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
+    // log in the same time, however, the metrics takes much more time to reflect these, so we
+    // wait 5 seconds to check on this.
+    let apply_timeout = Instant::now() + Duration::from_secs(5);
+    tokio::select! {
+        res = wait_until_config_applied(client, changes) => {
+            drop(dyn_config);
+            return res;
+        }
+        // startup timeout
+        _ = sleep_until(apply_timeout) => {},
+    }
+    anyhow::bail!("dynamic config change was not applied within 5s")
+}
+
 impl NeardProcess {
     /// Return handle on the neard process
     pub fn process(&mut self) -> &mut Child {
@@ -134,27 +202,6 @@ impl NeardProcess {
         None
     }
 
-    /// Update dynamic config
-    /// NOTE: currently only expected shutdown in the config, so input parameter is only expected_shutdown
-    pub async fn update_dynamic_config(
-        pid: Pid,
-        neard_home: &Path,
-        expected_shutdown: BlockHeight,
-    ) -> Result<()> {
-        let dyn_config_path = neard_home.join("dyn_config.json");
-        force_unlink(&dyn_config_path).context("failed to remove previous dynamic config")?;
-        let mut file = File::create(&dyn_config_path).await?;
-        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
-        file.write_all(dynamic_config.to_string().as_bytes())
-            .await?;
-        let mut result = signal::kill(pid, Signal::SIGHUP);
-        if let Err(e) = result {
-            warn!("Try send SIGHUP to neard({pid:?}): {e:?}");
-            result = signal::kill(pid, Signal::SIGHUP);
-        }
-        Ok(result?)
-    }
-
     /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
     pub async fn restart(pid: Pid) -> Result<()> {
         let mut result = signal::kill(pid, Signal::SIGTERM);
@@ -172,6 +219,35 @@ impl Drop for NeardProcess {
             if let Err(err) = graceful_stop_neard(&mut self.process) {
                 warn!("Failed to stop near process: {err:?}");
             }
+        }
+    }
+}
+
+/// Safty operation to apply dyanic config
+struct DynConfig {
+    dyn_config_path: PathBuf,
+}
+
+impl DynConfig {
+    pub async fn new(neard_home: &Path, expected_shutdown: BlockHeight) -> Result<Self> {
+        let dyn_config_path = neard_home.join("dyn_config.json");
+        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
+
+        // The previous config file will be truncated if existing
+        let mut file = File::create(&dyn_config_path).await?;
+        file.write_all(dynamic_config.to_string().as_bytes())
+            .await?;
+
+        Ok(Self { dyn_config_path })
+    }
+}
+
+impl Drop for DynConfig {
+    /// Make sure the config file be deleted to avoid neard reload it when restarting,
+    /// because neard process will load any existing dyn_config.json when it start.
+    fn drop(&mut self) {
+        if let Err(e) = force_unlink(&self.dyn_config_path) {
+            error!("dyn_config.json can not force remove as expected: {e:?}");
         }
     }
 }

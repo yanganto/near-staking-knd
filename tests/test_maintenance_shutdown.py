@@ -25,7 +25,6 @@ def work_with_neard_versions(
     )
 
 
-@work_with_neard_versions(["1.29.1"])
 def test_maintenance_shutdown(
     kuutamod: Path,
     kuutamoctl: Path,
@@ -80,6 +79,7 @@ def test_maintenance_shutdown(
         assert follower_res['kuutamod_state{type="Validating"}'] == "0"
 
     with Section("test maintenance shutdown on follower"):
+        follower.wait_rpc_port()
         pid = follower.neard_pid()
         assert pid is not None
 
@@ -100,6 +100,7 @@ def test_maintenance_shutdown(
         log_note(f"follower restart time {duration}")
 
     with Section("test maintenance shutdown on leader"):
+        leader.wait_rpc_port()
         pid = leader.neard_pid()
         assert pid is not None
 
