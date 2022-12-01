@@ -67,7 +67,7 @@ def test_maintenance_shutdown(
         assert proc.stdout
         print(proc.stdout)
         data = json.loads(proc.stdout)
-        assert data.get("ID")
+        assert data.get("Node")
         assert follower is not None
 
         # Check if neard processes use correct specified ports

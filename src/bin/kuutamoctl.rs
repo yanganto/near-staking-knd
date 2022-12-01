@@ -52,7 +52,7 @@ async fn show_active_validator(kuutamo_client: &CommandClient, args: &Args) -> R
         );
     } else {
         match validator {
-            Some(v) => println!("Name: {}\nId: {}", v.name, v.id),
+            Some(v) => println!("Name: {}\nNode: {}", v.name, v.node),
             None => println!("No active validator"),
         }
     }

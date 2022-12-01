@@ -11,8 +11,8 @@ use crate::{consul_client::ConsulClient, leader_protocol::consul_leader_key};
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Validator {
     /// Fully qualified domain
-    #[serde(rename = "ID")]
-    pub id: String,
+    #[serde(rename = "Node")]
+    pub node: String,
     /// Local name without domain
     #[serde(rename = "Name")]
     pub name: String,
@@ -66,7 +66,7 @@ pub async fn active_validator(
     };
 
     Ok(Some(Validator {
-        id: session.id().to_string(),
+        node: session.node().to_string(),
         name: session.name().to_string(),
     }))
 }

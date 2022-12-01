@@ -63,6 +63,10 @@ impl ConsulSession {
     pub fn name(&self) -> &str {
         &self.name
     }
+    /// Node Name
+    pub fn node(&self) -> &str {
+        &self.node
+    }
 }
 
 #[derive(Debug)]
