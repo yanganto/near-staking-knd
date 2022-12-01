@@ -57,9 +57,9 @@ neardRustPlatform.buildRustPackage rec {
     (
       lib.optional (lib.versionAtLeast version "1.30.0-rc.5") (
         fetchpatch {
-          name = "patch-1.30.0-rc.5";
-          url = "https://github.com/yanganto/nearcore/commit/1e291a6dec5291a2e3ba39c855b8d864e9ec2a1a.patch";
-          sha256 = "sha256-hlJaHN2VTPF4wIihPb10WfIt6zAW9ZQ1AFsiTBePi6g=";
+          name = "maintenance_patch-1.30.0-rc.5";
+          url = "https://github.com/kuutamolabs/nearcore/commit/8671b358052461a26a42f90d4d8b30a5f8ba4a79.patch";
+          sha256 = "sha256-QGn76On3j7WJZ3USTPs0VKE99jvNTL6w/QZ2T+zTDt4=";
         }
       )
     )
