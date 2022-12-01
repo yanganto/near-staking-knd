@@ -63,17 +63,6 @@ neardRustPlatform.buildRustPackage rec {
         }
       )
     )
-
-    # Enable tracked_shards
-    (
-      lib.optional (lib.versionAtLeast version "1.30.0-rc.5") (
-        fetchpatch {
-          name = "tracked_shard_patch-1.30.0-rc.5";
-          url = "https://github.com/yanganto/nearcore/commit/1e291a6dec5291a2e3ba39c855b8d864e9ec2a1a.patch";
-          sha256 = "sha256-hlJaHN2VTPF4wIihPb10WfIt6zAW9ZQ1AFsiTBePi6g=";
-        }
-      )
-    )
   ];
 
   postPatch = ''
