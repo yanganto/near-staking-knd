@@ -19,7 +19,7 @@ upgrade-neard:
 # Upgrade neard-unstable package
 upgrade-neard-unstable:
   nix-update --override-filename nix/pkgs/neard/unstable.nix \
-    --version-regex '^(\d+\.\d+\.\d+(-rc.\d+)?)$' \
+    --version-regex '^(\d+\.\d+\.\d+-rc\.\d+)$' \
     -f nix/pkgs/neard/nix-update.nix \
     --build --commit neard-unstable --version=unstable
 
