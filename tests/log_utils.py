@@ -17,6 +17,7 @@ class Section(object):
         print("\033[1;36m" + "#" * (len(self.section_name) + 9) + " \033[0m")
         print("\033[1;36m# START: " + self.section_name + " \033[0m")
 
-    def __exit__(self, _type: Any, _value: Any, _traceback: Any) -> None:
-        print("\033[1;36m| END:   " + self.section_name + " \033[0m")
-        print("\033[1;36m" + "-" * (len(self.section_name) + 9) + " \033[0m")
+    def __exit__(self, _type: Any, _value: Any, traceback: Any) -> None:
+        if not traceback:
+            print("\033[1;36m| END:   " + self.section_name + " \033[0m")
+            print("\033[1;36m" + "-" * (len(self.section_name) + 9) + " \033[0m")
