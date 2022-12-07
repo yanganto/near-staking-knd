@@ -110,12 +110,13 @@ def test_maintenance_shutdown(
         )
 
         assert proc.returncode == 0
-        for i in range(5):
+        for i in range(100):
             new_pid = leader.neard_pid()
-            if new_pid is not pid:
+            if new_pid != pid:
                 break
+            time.sleep(0.1)
         else:
-            assert new_pid is not pid
+            assert new_pid != pid
 
         log_note("checking on leader restart and keep producing block")
         assert leader.network_produces_blocks()
