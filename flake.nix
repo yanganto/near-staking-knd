@@ -3,11 +3,21 @@
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
+
+  inputs.srvos.url = "github:numtide/srvos/kuutamo-fixes";
+
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
   inputs.core-contracts.url = "github:near/core-contracts";
   inputs.core-contracts.flake = false;
   inputs.fenix.url = "github:nix-community/fenix";
   inputs.fenix.inputs.nixpkgs.follows = "nixpkgs";
+
+  inputs.disko.url = "github:nix-community/disko";
+  inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
+
+  inputs.nixos-remote.url = "github:numtide/nixos-remote/kuutamo";
+  inputs.nixos-remote.inputs.nixpkgs.follows = "nixpkgs";
+  inputs.nixos-remote.inputs.disko.follows = "disko";
 
   nixConfig.extra-substituters = [
     "https://cache.garnix.io"
@@ -22,6 +32,7 @@
         ./nix/pkgs/flake-module.nix
         ./nix/modules/flake-module.nix
         ./nix/modules/tests/flake-module.nix
+        ./nix/hosts/flake-module.nix
         ./nix/checks/flake-module.nix
         ./nix/shell.nix
       ];

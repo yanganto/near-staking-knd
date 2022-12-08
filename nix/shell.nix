@@ -33,6 +33,8 @@
             self'.packages.near-cli
             pkgs.nix-update
 
+            inputs'.nixos-remote.packages.nixos-remote
+
             # Benchmark tools
             #pkgs.fio
             #pkgs.numactl

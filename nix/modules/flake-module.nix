@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 {
   flake = { ... }: {
     nixosModules = {
@@ -22,6 +22,38 @@
       };
       kuutamo-binary-cache = ./binary-cache;
       kuutamod = ./kuutamod;
+
+      disko-partitioning-script = ./disko-partitioning-script.nix;
+      networkd = ./networkd.nix;
+
+      single-node-validator = {
+        imports = [
+          self.nixosModules.kuutamod
+          self.nixosModules.disko-partitioning-script
+          self.nixosModules.networkd
+          self.nixosModules.kuutamo-binary-cache
+          inputs.srvos.nixosModules.common
+          inputs.disko.nixosModules.disko
+        ];
+
+      };
+
+      single-node-validator-mainnet = {
+        imports = [
+          self.nixosModules.single-node-validator
+          self.nixosModules.neard-mainnet
+          ./single-node-validator/mainnet.nix
+        ];
+      };
+
+      single-node-validator-testnet = {
+        imports = [
+          self.nixosModules.single-node-validator
+          self.nixosModules.neard-testnet
+          ./single-node-validator/testnet.nix
+        ];
+      };
+
       default = self.nixosModules.kuutamod;
     };
   };
