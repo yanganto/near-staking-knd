@@ -256,7 +256,7 @@ async fn acquire_key(
 fn reload_configuration(settings: &mut Settings, consul_client: &ConsulClient) -> Result<()> {
     settings.consul_token = match settings.consul_token_file {
         Some(ref file) => {
-            let s = fs::read_to_string(&file)
+            let s = fs::read_to_string(file)
                 .with_context(|| format!("cannot read consul token file {}", file.display()))?;
             info!("Update consul token");
             Some(s.trim_end().to_string())
