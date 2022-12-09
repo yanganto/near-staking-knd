@@ -110,7 +110,7 @@ def test_maintenance_shutdown(
         )
 
         assert proc.returncode == 0
-        for i in range(100):
+        for i in range(200):
             new_pid = leader.neard_pid()
             if new_pid != pid:
                 break
