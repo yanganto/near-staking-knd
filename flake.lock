@@ -16,6 +16,26 @@
         "type": "github"
       }
     },
+    "disko": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1670593551,
+        "narHash": "sha256-QTk/ITNL9JPupp2wWMoQ9yma3l8xvvB+wsW9C7g25Qk=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "12cda2489936794f8541c7fc530f9aadcac6d4ea",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "type": "github"
+      }
+    },
     "fenix": {
       "inputs": {
         "nixpkgs": [
@@ -24,11 +44,11 @@
         "rust-analyzer-src": "rust-analyzer-src"
       },
       "locked": {
-        "lastModified": 1670048555,
-        "narHash": "sha256-aDPv/Cqq5zuipggMt135/J8EsvTat5z7PMKIGif8U88=",
+        "lastModified": 1670566996,
+        "narHash": "sha256-M+KsSE2D8ByDf3HZhnvLRpytg8aXScoWhg+NrdHjeeE=",
         "owner": "nix-community",
         "repo": "fenix",
-        "rev": "1275708e85707bbcd363b72d1b0e46cf4b61ddfb",
+        "rev": "ab24d0ad17a733624b99f5d6466e71b8c239a001",
         "type": "github"
       },
       "original": {
@@ -44,11 +64,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1668450977,
-        "narHash": "sha256-cfLhMhnvXn6x1vPm+Jow3RiFAUSCw/l1utktCw5rVA4=",
+        "lastModified": 1670441596,
+        "narHash": "sha256-+T487QnluBT5F9tVk0chG/zzv+9zzTrx3o7rlOBK7ps=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "d591857e9d7dd9ddbfba0ea02b43b927c3c0f1fa",
+        "rev": "8d0e2444ab05f79df93b70e5e497f8c708eb6b9b",
         "type": "github"
       },
       "original": {
@@ -57,13 +77,37 @@
         "type": "github"
       }
     },
+    "nixos-remote": {
+      "inputs": {
+        "disko": [
+          "disko"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1670599248,
+        "narHash": "sha256-8n4dJV2qAC/I9zf4GHds1RVYD7FvSjqx06lChf5cO5k=",
+        "owner": "numtide",
+        "repo": "nixos-remote",
+        "rev": "1ddff837338f3c95ee67b7cbbc9640e4b5d80b01",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "ref": "kuutamo",
+        "repo": "nixos-remote",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1670058159,
-        "narHash": "sha256-ERiP2JWanLuGV1PDyHTbcigFCfIi9oco5LFdMJHjREE=",
+        "lastModified": 1670566912,
+        "narHash": "sha256-xOmQ1V8DvmgnlCqx/gQGrRctVnujTWBp4N9A+wr4+50=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "49b8ad618e64d9fe9ab686817bfebe047860dcae",
+        "rev": "9e4a15be2c56ef710392d3464ce68b298fcafe84",
         "type": "github"
       },
       "original": {
@@ -76,25 +120,44 @@
     "root": {
       "inputs": {
         "core-contracts": "core-contracts",
+        "disko": "disko",
         "fenix": "fenix",
         "flake-parts": "flake-parts",
-        "nixpkgs": "nixpkgs"
+        "nixos-remote": "nixos-remote",
+        "nixpkgs": "nixpkgs",
+        "srvos": "srvos"
       }
     },
     "rust-analyzer-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1669747020,
-        "narHash": "sha256-kNfchCXcI4jcwBdU57f4ifdgPAvLKLJIHKUCiZVv+v0=",
+        "lastModified": 1670426523,
+        "narHash": "sha256-Zh+pAuj4PmBmISXCz+54yVSwSXZwbn+ZELgM85xVUE0=",
         "owner": "rust-lang",
         "repo": "rust-analyzer",
-        "rev": "398a71affb05aeeea1991044ec9ca1229e68f0f3",
+        "rev": "6e8a54d0f68702cf7981c8299357838eb0f4d5b2",
         "type": "github"
       },
       "original": {
         "owner": "rust-lang",
         "ref": "nightly",
         "repo": "rust-analyzer",
+        "type": "github"
+      }
+    },
+    "srvos": {
+      "locked": {
+        "lastModified": 1670522347,
+        "narHash": "sha256-t9NK/EolgJ5q1ay//r3SAVbBJo7Kkcq3PHBSh/6mU+g=",
+        "owner": "numtide",
+        "repo": "srvos",
+        "rev": "e6fd2f278ce6d4a68d7f1e0958db87aced6c5d20",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "ref": "kuutamo-fixes",
+        "repo": "srvos",
         "type": "github"
       }
     }

@@ -25,7 +25,7 @@ pub async fn active_validator(
 ) -> Result<Option<Validator>> {
     let token = match consul_token_file {
         Some(ref file) => {
-            let s = fs::read_to_string(&file)
+            let s = fs::read_to_string(file)
                 .with_context(|| format!("cannot read consul token file {}", file.display()))?;
             Some(s.trim_end().to_string())
         }
