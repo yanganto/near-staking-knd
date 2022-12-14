@@ -1,54 +1,33 @@
 { lib, pkgs, config, ... }: {
+  imports = [
+    ./network.nix
+    ./hardware.nix
+    ./consul.nix
+  ];
+
+
+  # FIXME this should be configureable
   networking.hostName = "nixos";
 
-  imports = [
-    # FIXME: this should be provided by kuutamoctl
-    ./users.nix
-    ./network.nix
+  # FIXME: this is only for debugging and we won't keep this for later
+  users.extraUsers.root.hashedPassword = "$6$u9LHxoCmgitOlJq3$ra347e9QiAwntV2rm8gHBA23bJSZ8nrU6oJK6fU2Cnbz8Vh0xoWSCqFkx5WgUFJnPvwziTdusJ3lR2HjlV.bx0";
+
+  # FIXME: this should be provided by kuutamoctl
+  users.extraUsers.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbBp2dH2X3dcU1zh+xW3ZsdYROKpJd3n13ssOP092qE joerg@turingmachine"
   ];
 
   # FIXME: this should be provided by kuutamoctl
   kuutamo.network.ipv4.address = "199.127.63.197";
   kuutamo.network.ipv4.gateway = "199.127.63.1";
+  kuutamo.network.ipv4.cidr = "24";
   kuutamo.network.ipv6.address = "2605:9880:400:700:8:b10c:1932:3224";
   kuutamo.network.ipv6.gateway = "2605:9880:400::1";
-
-  # Single node consul server. Just needed for kuutamo here
-  services.consul = {
-    interface.bind = "lo";
-    extraConfig = {
-      server = true;
-      bootstrap_expect = 1;
-    };
-  };
-
-  boot.initrd.availableKernelModules = [
-    "xhci_pci"
-    "ahci"
-    "nvme"
-  ];
-
-  disko.devices = import ./raid-config.nix {
-    raidLevel = 0;
-  };
-
-  # / is a mirror raid
-  boot.loader.grub.devices = [ "/dev/nvme0n1" "/dev/nvme1n1" ];
-  # for mdraid 1.1
-  boot.loader.grub.extraConfig = "insmod mdraid1x";
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-
-  # srvos limits ssh keys usage.
-  services.openssh.authorizedKeysFiles = lib.mkForce [
-    "/etc/ssh/authorized_keys.d/%u"
-    "%h/.ssh/authorized_keys"
-  ];
+  kuutamo.network.ipv6.cidr = "48";
 
   # FIXME: how to upload these?
   kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
   kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
-
 
   system.stateVersion = "22.05";
 }
