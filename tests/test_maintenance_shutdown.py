@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
 
-import os
 import json
+import os
 import time
 from pathlib import Path
-import pytest
+from typing import Any, List
 
+import pytest
 from command import Command
 from consul import Consul
 from kuutamod import Kuutamod
+from log_utils import Section, log_note
 from ports import Ports
 from setup_localnet import NearNetwork
-from typing import Any, List
-from log_utils import log_note, Section
 
 
 def work_with_neard_versions(

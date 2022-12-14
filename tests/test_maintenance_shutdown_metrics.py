@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
 import time
+from pathlib import Path
 
 from command import Command
 from consul import Consul

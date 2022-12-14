@@ -41,7 +41,7 @@ rustPlatform.buildRustPackage ({
     install -D ${../../Cargo.lock} $out/Cargo.lock
     cp -r ${../../src} $out/src
     cp -r ${../../tests} $out/tests
-    install -D ${../../setup.cfg} $out/setup.cfg
+    install -D ${../../pyproject.toml} $out/pyproject.toml
   '';
   buildPhase = ''
     mypy .

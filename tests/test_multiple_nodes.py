@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-from signal import SIGKILL
 import json
 import os
 import time
+from pathlib import Path
+from signal import SIGKILL
 
 from command import Command
 from consul import Consul

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-import time
 import json
 import signal
+import time
 from pathlib import Path
 from tempfile import _TemporaryFileWrapper
 

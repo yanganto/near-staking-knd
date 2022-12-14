@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import tempfile
-from typing import Iterator, IO
+from typing import IO, Iterator
 
 import pytest
 

@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-from dataclasses import dataclass
-from pathlib import Path
-from shlex import quote
-from typing import IO, Any, Callable, Dict, List, Optional, Text, Union
 import io
 import json
 import os
@@ -11,8 +7,12 @@ import shutil
 import subprocess
 import sys
 import tarfile
-from log_utils import log_note
+from dataclasses import dataclass
+from pathlib import Path
+from shlex import quote
+from typing import IO, Any, Callable, Dict, List, Optional, Text, Union
 
+from log_utils import log_note
 
 _FILE = Union[None, int, IO[Any]]
 

@@ -12,7 +12,7 @@ command = "sh"
 options = [
     "-eucx",
     """
-flake8 "$@"
+ruff --fix "$@"
 black "$@"
     """,
     "--", # this argument is ignored by bash
