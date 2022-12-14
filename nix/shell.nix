@@ -19,7 +19,7 @@
         # python
         pkgs.black
         pkgs.mypy
-        pkgs.python3.pkgs.flake8
+        pkgs.ruff
       ];
     in
     {

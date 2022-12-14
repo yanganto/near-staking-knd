@@ -3,8 +3,8 @@
 import socket
 import subprocess
 import time
-from typing import Optional
 from timeit import default_timer as timer
+from typing import Optional
 
 
 def wait_for_port(

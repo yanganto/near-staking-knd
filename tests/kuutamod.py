@@ -1,22 +1,22 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from pathlib import Path
-from signal import SIGHUP
-from subprocess import Popen
+
 import http.client
 import json
 import os
 import subprocess
 import time
+from dataclasses import dataclass
+from pathlib import Path
+from signal import SIGHUP
+from subprocess import Popen
+from typing import Any, Callable, Optional, TypeVar, cast
 
 from command import Command
 from consul import Consul
 from network import wait_for_port
 from ports import Ports
-from typing import Any, Callable, TypeVar, Optional, cast
-from setup_localnet import NearNetwork
 from prometheus import query_prometheus_endpoint
-
+from setup_localnet import NearNetwork
 
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 

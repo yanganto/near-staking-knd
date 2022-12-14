@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.joinpath("tests")))
 
 import os
+
 from setup_localnet import setup_core_contracts
 
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()

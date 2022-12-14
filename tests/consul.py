@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
+import json
+import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import subprocess
 from typing import Iterator, Optional
-import time
 
 import pytest
-import json
 from command import Command
-from ports import Ports
 from network import wait_for_port
+from ports import Ports
 
 
 @dataclass
