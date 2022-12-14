@@ -4,6 +4,7 @@
 
 pub mod commands;
 pub mod consul_client;
+pub mod deploy;
 pub mod exit_signal_handler;
 pub mod ipc;
 pub mod leader_protocol;
