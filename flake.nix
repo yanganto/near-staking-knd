@@ -4,7 +4,7 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
 
-  inputs.srvos.url = "github:numtide/srvos/kuutamo-fixes";
+  inputs.srvos.url = "github:numtide/srvos";
 
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
   inputs.core-contracts.url = "github:near/core-contracts";

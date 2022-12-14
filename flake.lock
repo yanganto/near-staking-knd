@@ -147,16 +147,15 @@
     },
     "srvos": {
       "locked": {
-        "lastModified": 1670522347,
-        "narHash": "sha256-t9NK/EolgJ5q1ay//r3SAVbBJo7Kkcq3PHBSh/6mU+g=",
+        "lastModified": 1671013632,
+        "narHash": "sha256-gK0U70bRnjswf49U+O9RL3m8icQpYm+LQBaYpk1NAZE=",
         "owner": "numtide",
         "repo": "srvos",
-        "rev": "e6fd2f278ce6d4a68d7f1e0958db87aced6c5d20",
+        "rev": "8a04ec335a7d3effada985551653d10b9795051d",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
-        "ref": "kuutamo-fixes",
         "repo": "srvos",
         "type": "github"
       }
