@@ -87,11 +87,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1670599248,
-        "narHash": "sha256-8n4dJV2qAC/I9zf4GHds1RVYD7FvSjqx06lChf5cO5k=",
+        "lastModified": 1671022994,
+        "narHash": "sha256-Z8/HJCNZ7KEBYwZzoIZ8a4gQhl48Xk1F7jKrPjH9V7c=",
         "owner": "numtide",
         "repo": "nixos-remote",
-        "rev": "1ddff837338f3c95ee67b7cbbc9640e4b5d80b01",
+        "rev": "0fe84c24043451f2338510d95dc8753a470463d0",
         "type": "github"
       },
       "original": {
@@ -147,16 +147,15 @@
     },
     "srvos": {
       "locked": {
-        "lastModified": 1670522347,
-        "narHash": "sha256-t9NK/EolgJ5q1ay//r3SAVbBJo7Kkcq3PHBSh/6mU+g=",
+        "lastModified": 1671013632,
+        "narHash": "sha256-gK0U70bRnjswf49U+O9RL3m8icQpYm+LQBaYpk1NAZE=",
         "owner": "numtide",
         "repo": "srvos",
-        "rev": "e6fd2f278ce6d4a68d7f1e0958db87aced6c5d20",
+        "rev": "8a04ec335a7d3effada985551653d10b9795051d",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
-        "ref": "kuutamo-fixes",
         "repo": "srvos",
         "type": "github"
       }
