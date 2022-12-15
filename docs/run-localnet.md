@@ -179,7 +179,7 @@ level=warn pid=2119211 message="Termination timeout reached. Send SIGKILL to nea
 ... we can see that the second instance takes over:
 
 ```
-2022-07-12T14:52:02.827213Z  INFO stats: #       0 CyjBSLQPeET76Z2tZP2otY8gDFsxANBgobf57o9Mzi8e 4 validators 0 peers ⬇ 0 B/s ⬆ 0 B/s 0.00 bps 0 gas/s CPU: 0%, Mem: 34.0 MB
+2022-07-12T14:52:02.827213Z  INFO stats: #       0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 4 validators 0 peers ⬇ 0 B/s ⬆ 0 B/s 0.00 bps 0 gas/s CPU: 0%, Mem: 34.0 MB
 level=info pid=2158051 message="state changed: Voting -> Validating" target="kuutamod::supervisor" node_id=node
 2022-07-12T14:52:04.271448Z  WARN neard: SIGTERM, stopping... this may take a few minutes.
 2022-07-12T14:52:09.281715Z  INFO neard: Waiting for RocksDB to gracefully shutdown
@@ -193,8 +193,8 @@ level=warn pid=2158051 message="Cannot reach neard status api: Failed to get sta
 2022-07-12T14:52:09.312801Z  INFO db: Dropped a RocksDB instance. num_instances=0
 2022-07-12T14:52:09.401450Z  INFO db: Created a new RocksDB instance. num_instances=1
 2022-07-12T14:52:09.440197Z  INFO near_network::peer_manager::peer_manager_actor: Bandwidth stats total_bandwidth_used_by_all_peers=0 total_msg_received_count=0 max_max_record_num_messages_in_progress=0
-2022-07-12T14:52:09.454305Z  INFO stats: #       0 CyjBSLQPeET76Z2tZP2otY8gDFsxANBgobf57o9Mzi8e Validator | 4 validators 0 peers ⬇ 0 B/s ⬆ 0 B/s NaN bps 0 gas/s
-2022-07-12T14:52:19.457739Z  INFO stats: #       0 CyjBSLQPeET76Z2tZP2otY8gDFsxANBgobf57o9Mzi8e Validator | 4 validators 0 peers ⬇ 0 B/s ⬆ 0 B/s 0.00 bps 0 gas/s CPU: 1%, Mem: 34.7 MB
+2022-07-12T14:52:09.454305Z  INFO stats: #       0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx Validator | 4 validators 0 peers ⬇ 0 B/s ⬆ 0 B/s NaN bps 0 gas/s
+2022-07-12T14:52:19.457739Z  INFO stats: #       0 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx Validator | 4 validators 0 peers ⬇ 0 B/s ⬆ 0 B/s 0.00 bps 0 gas/s CPU: 1%, Mem: 34.7 MB
 ```
 
 This currently requires a restart of `neard` so that it loads the `validator node key`.

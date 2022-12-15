@@ -1,0 +1,6 @@
+[default.extend-words]
+arbitor = "arbitor"
+substituters = "substituters"
+
+[files]
+extend-exclude = ["*validator_key.json"]
