@@ -32,7 +32,7 @@ lint:
   cargo clippy --all-targets --all-features -- -D warnings
   mypy .
 
-# Continously run cargo check as code changes
+# Continuously run cargo check as code changes
 watch:
   cargo watch
 

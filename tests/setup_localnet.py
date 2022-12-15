@@ -165,7 +165,7 @@ class NearNetwork:
     artifact_path: Optional[Path]
 
     @property
-    def boostrap_node(self) -> str:
+    def bootstrap_node(self) -> str:
         node0_key = json.loads((self.home / "node0" / "node_key.json").read_text())
         return f"{node0_key['public_key']}@127.0.0.1:{self.nodes[0].network_port}"
 
@@ -224,7 +224,7 @@ def setup_network_config(near_home: Path, start_port: int) -> NearNetwork:
             data["tracked_shards"] = [0]
             network = data["network"]
             network["addr"] = f"0.0.0.0:{rpc_port + 1}"
-            # this makes debugging tests a bit more pleasent and less spammy
+            # this makes debugging tests a bit more pleasant and less spammy
             network["peer_stats_period"]["secs"] = 15
             nodes.append(NearNode(rpc_port=rpc_port, network_port=rpc_port + 1))
             f.write(

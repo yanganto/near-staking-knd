@@ -18,7 +18,7 @@ def near_network(command: Command, ports: Ports) -> Iterator[NearNetwork]:
     with TemporaryDirectory() as dir:
         neard_home = Path(dir) / "neard_home"
         near_network = setup_network_config(neard_home, ports.allocate(6 * 2))
-        node = near_network.boostrap_node
+        node = near_network.bootstrap_node
         p1 = command.run(
             ["neard", "--home", str(neard_home / "node0"), "run"],
             extra_env=dict(RUST_LOG="info"),

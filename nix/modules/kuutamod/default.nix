@@ -57,7 +57,7 @@ in
       type = lib.types.listOf lib.types.str;
       default = [ ];
       description = ''
-        Comma-seperated list of ip addresses to be written to neard configuration on which the validator is *directly* reachable.
+        Comma-separated list of ip addresses to be written to neard configuration on which the validator is *directly* reachable.
         Kuutamod will add the configured validator node key and port number of this node to these addresses.
       '';
     };
@@ -100,7 +100,7 @@ in
     # start neard manually.
     # Do NOT start this service if any kuutamod for this validator key is
     # signing or else it will result in double-signing
-    # This service assumes that configuration is already mostly implace i.e. a
+    # This service assumes that configuration is already mostly inplace i.e. a
     # neard backup and neard's config.json
     systemd.services.neard-manual = {
       inherit (config.systemd.services.neard) path;

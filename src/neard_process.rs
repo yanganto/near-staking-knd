@@ -120,7 +120,7 @@ async fn get_neard_config_changes(client: &NeardClient) -> Result<u64> {
 
 /// Trigger neard to load the dynamic config
 pub fn reload_neard(pid: Pid) -> Result<()> {
-    // FIXME refactor with inspect_err after following PR shiped
+    // FIXME refactor with inspect_err after following PR shipped
     // https://github.com/rust-lang/rust/issues/91345
     match signal::kill(pid, Signal::SIGHUP) {
         Ok(s) => Ok(s),
@@ -223,7 +223,7 @@ impl Drop for NeardProcess {
     }
 }
 
-/// Safty operation to apply dyanic config
+/// Safety operation to apply dyanic config
 struct DynConfig {
     dyn_config_path: PathBuf,
 }

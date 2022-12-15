@@ -62,7 +62,7 @@ pub struct Settings {
     #[clap(skip)]
     pub validator_node_public_key: String,
 
-    /// The address neard will listen, when beeing a validator
+    /// The address neard will listen, when being a validator
     #[clap(
         long,
         default_value = "0.0.0.0:24567",
@@ -80,7 +80,7 @@ pub struct Settings {
     )]
     pub voter_network_addr: SocketAddr,
 
-    /// Comma-seperated list of ip addresses to be written to neard configuration on which the validator is *directly* reachable.
+    /// Comma-separated list of ip addresses to be written to neard configuration on which the validator is *directly* reachable.
     /// Kuutamod will add the configured validator node key and port number of this node to these addresses.
     #[clap(long, env = "KUUTAMO_PUBLIC_ADDRESSES", value_delimiter = ',')]
     pub public_addresses: Vec<IpAddr>,

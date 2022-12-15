@@ -102,9 +102,7 @@ impl CommandServer {
                 r#"{"status": 200, "message": "OK"}"#,
             ))),
             (&Method::GET, "/active_validator") => self.handle_active_validator().await,
-            (&Method::POST, "/maintainance_shutdown") => {
-                self.handle_maintenance_shutdown(req).await
-            }
+            (&Method::POST, "/maintenance_shutdown") => self.handle_maintenance_shutdown(req).await,
             _ => Ok(not_found()),
         }
     }

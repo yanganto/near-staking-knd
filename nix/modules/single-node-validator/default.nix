@@ -6,7 +6,7 @@
   ];
 
 
-  # FIXME this should be configureable
+  # FIXME this should be configurable
   networking.hostName = "nixos";
 
   # FIXME: this is only for debugging and we won't keep this for later

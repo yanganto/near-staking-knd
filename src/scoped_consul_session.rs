@@ -22,7 +22,7 @@ impl<'a> ScopedConsulSession<'a> {
         }
     }
 
-    /// Consums and deletes consul session,
+    /// Consumes and deletes consul session,
     /// We used to have this in `Drop` but we cannot do async stuff in their easily
     pub async fn destroy(self) {
         let mut wait = 1;

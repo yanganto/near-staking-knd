@@ -25,7 +25,7 @@ class Command:
     ) -> subprocess.Popen:
         env = os.environ.copy()
         env.update(extra_env)
-        # We start a new session here so that we can than more reliably kill all childs as well
+        # We start a new session here so that we can than more reliably kill all children as well
         p = subprocess.Popen(
             command,
             env=env,
