@@ -37,7 +37,7 @@ For example, if we only had two nodes, then if these two nodes could not reach
 each other, it would be impossible for one node to determine whether the other
 node had failed or only the intervening network was not working. In this case,
 the system could end up allowing two active validators, which could result in
-the validators beeing [kicked](https://nomicon.io/BlockchainLayer/EpochManager/Staking) or even lose
+the validators being [kicked](https://nomicon.io/BlockchainLayer/EpochManager/Staking) or even lose
 their stake in the future.
 
 To counteract this, we recommend running at least three nodes for consul. Note

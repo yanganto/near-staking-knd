@@ -95,7 +95,7 @@ def test_multiple_nodes(
         time.sleep(0.1)
 
     print("##### test graceful failover ######")
-    # gracefull migration
+    # graceful migration
     leader.terminate()
     start = time.perf_counter()
     while True:

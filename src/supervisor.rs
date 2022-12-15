@@ -151,14 +151,14 @@ impl StateMachine {
 
 struct NeardStatus {
     next_try: Instant,
-    continous_errors: u8,
+    continuous_errors: u8,
 }
 
 impl NeardStatus {
     fn new() -> Self {
         Self {
             next_try: Instant::now(),
-            continous_errors: 0,
+            continuous_errors: 0,
         }
     }
 
@@ -170,18 +170,18 @@ impl NeardStatus {
     }
 
     async fn handle_neard_desyncs(&mut self, c: &NeardClient) -> StateType {
-        while self.continous_errors < 3 {
+        while self.continuous_errors < 3 {
             let status = self.query(c).await;
             match status {
                 Ok(status) => {
-                    self.continous_errors = 0;
+                    self.continuous_errors = 0;
                     if status.sync_info.syncing {
                         // node is synced fully with the network
                         return StateType::Syncing;
                     }
                 }
                 Err(err) => {
-                    self.continous_errors += 1;
+                    self.continuous_errors += 1;
                     warn!("Cannot reach neard status api: {}", err);
                 }
             }
@@ -193,7 +193,7 @@ impl NeardStatus {
 async fn wait_for_neard_exit(neard_process: Option<&mut NeardProcess>) {
     if let Some(p) = neard_process {
         match p.wait().await {
-            Ok(res) => warn!("Neard finished unexpectly with {}. Check the logs above for potential error or panic messages from neard.", res),
+            Ok(res) => warn!("Neard finished unexpectedly with {}. Check the logs above for potential error or panic messages from neard.", res),
             Err(err) => warn!("Cannot get status of neard process {}", err),
         }
     }
@@ -410,7 +410,7 @@ impl StateMachine {
     }
 
     async fn handle_syncing(&mut self) -> Result<StateType> {
-        let mut continous_errors = 0;
+        let mut continuous_errors = 0;
         let mut neard_status = NeardStatus::new();
         loop {
             tokio::select! {
@@ -426,7 +426,7 @@ impl StateMachine {
                 status = neard_status.query(&self.neard_client)=> {
                     match status {
                         Ok(status) => {
-                            continous_errors = 0;
+                            continuous_errors = 0;
                             if !status.sync_info.syncing {
                                 // node is synced fully with the network
                                 return Ok(StateType::Registering);
@@ -434,8 +434,8 @@ impl StateMachine {
                         }
                         Err(err) => {
                             warn!("Cannot reach neard status api: {}", err);
-                            continous_errors += 1;
-                            if continous_errors == 3 {
+                            continuous_errors += 1;
+                            if continuous_errors == 3 {
                                 return Ok(StateType::Startup);
                             }
                         }
@@ -571,7 +571,7 @@ impl StateMachine {
         let pid = validator.pid();
 
         let mut on_startup = true;
-        let mut continous_errors = 0;
+        let mut continuous_errors = 0;
         let mut next_renewal = time::Instant::now().add(CONSUL_SESSION_RENEWAL);
         let mut session_expired = time::Instant::now().add(CONSUL_LEADER_TIMEOUT);
         let mut neard_status = NeardStatus::new();
@@ -598,7 +598,7 @@ impl StateMachine {
                 res = neard_status.query(&self.neard_client) => {
                     match res {
                         Ok(status) => {
-                            continous_errors = 0;
+                            continuous_errors = 0;
                             on_startup = false;
                             if status.sync_info.syncing {
                                 // FIXME, we might want to add a threshold after which we step down here.
@@ -606,15 +606,15 @@ impl StateMachine {
                             }
                         }
                         Err(err) => {
-                            continous_errors += 1;
+                            continuous_errors += 1;
                             warn!("Cannot reach neard status api: {}", err);
                             if on_startup {
                                 // On startup we give neard ~120s to make it's status api reachable.
                                 // This is needed on testnet where the startup can take a long time.
-                                if continous_errors == 120 {
+                                if continuous_errors == 120 {
                                     return Ok(StateType::Startup)
                                 }
-                            } else if continous_errors == 3 {
+                            } else if continuous_errors == 3 {
                                 return Ok(StateType::Startup)
                             }
                         }

@@ -55,7 +55,7 @@ def test_single_node(
         KUUTAMO_VALIDATOR_NODE_KEY=str(validator_node_key),
         KUUTAMO_VOTER_NODE_KEY=str(voter_node_key),
         KUUTAMO_NEARD_HOME=str(neard_home),
-        KUUTAMO_NEARD_BOOTNODES=near_network.boostrap_node,
+        KUUTAMO_NEARD_BOOTNODES=near_network.bootstrap_node,
         KUUTAMO_CONSUL_TOKEN_FILE=temporary_file.name,
         RUST_BACKTRACE="1",
     )

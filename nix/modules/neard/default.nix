@@ -121,7 +121,7 @@ in
         ExecStartPre = [
           "+${pkgs.writeShellScript "neard-setup" ''
             set -eux -o pipefail
-            # Boostrap chain data for new nodes
+            # Bootstrap chain data for new nodes
             runNeard() {
               setpriv --reuid neard --regid neard --clear-groups --inh-caps=-all -- "$@"
             }
