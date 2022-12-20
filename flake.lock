@@ -77,6 +77,41 @@
         "type": "github"
       }
     },
+    "nixos-2211": {
+      "locked": {
+        "lastModified": 1659446231,
+        "narHash": "sha256-hekabNdTdgR/iLsgce5TGWmfIDZ86qjPhxDg/8TlzhE=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "eabc38219184cc3e04a974fe31857d8e0eac098d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "release-21.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixos-images": {
+      "inputs": {
+        "nixos-2211": "nixos-2211",
+        "nixos-unstable": "nixos-unstable"
+      },
+      "locked": {
+        "lastModified": 1671454948,
+        "narHash": "sha256-Qhfvp60YpApHyYjUWGGNLswaUeNA3ltvAKxPBV14j7Y=",
+        "owner": "nix-community",
+        "repo": "nixos-images",
+        "rev": "bfda69ea42f58412ac4f715cf0ed25f37c0a5902",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nixos-images",
+        "type": "github"
+      }
+    },
     "nixos-remote": {
       "inputs": {
         "disko": [
@@ -98,6 +133,22 @@
         "owner": "numtide",
         "ref": "kuutamo",
         "repo": "nixos-remote",
+        "type": "github"
+      }
+    },
+    "nixos-unstable": {
+      "locked": {
+        "lastModified": 1671385618,
+        "narHash": "sha256-Z1VCiuDq4qmjT7q9lnqfFR31GaBO5PNNgo1EhZfYulk=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "035a0cfee1d9f12165041cd6ede06cdf9b1ba9cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable-small",
+        "repo": "nixpkgs",
         "type": "github"
       }
     },
@@ -123,6 +174,7 @@
         "disko": "disko",
         "fenix": "fenix",
         "flake-parts": "flake-parts",
+        "nixos-images": "nixos-images",
         "nixos-remote": "nixos-remote",
         "nixpkgs": "nixpkgs",
         "srvos": "srvos",
