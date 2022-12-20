@@ -9,17 +9,8 @@
     let
       formatters = [
         # our meta-formatter
-        pkgs.treefmt
-
-        # nix
-        pkgs.nixpkgs-fmt
-        # rust
-        pkgs.rustfmt
+        self'.packages.treefmt
         pkgs.clippy
-        # python
-        pkgs.black
-        pkgs.mypy
-        pkgs.ruff
       ];
     in
     {

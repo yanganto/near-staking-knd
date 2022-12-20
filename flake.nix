@@ -6,6 +6,8 @@
 
   inputs.srvos.url = "github:numtide/srvos";
 
+  inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
+
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
   inputs.core-contracts.url = "github:near/core-contracts";
   inputs.core-contracts.flake = false;
