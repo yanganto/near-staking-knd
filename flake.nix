@@ -26,8 +26,8 @@
     "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
   ];
 
-  outputs = { self, flake-parts, nixpkgs, fenix, ... }:
-    flake-parts.lib.mkFlake { inherit self; } {
+  outputs = inputs @ { flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         ./nix/pkgs/flake-module.nix
         ./nix/modules/flake-module.nix
