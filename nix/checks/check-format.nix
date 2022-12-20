@@ -1,4 +1,4 @@
-{ runCommand, git, formatters, self }:
+{ runCommand, formatters, self }:
 runCommand "check-format"
 {
   nativeBuildInputs = formatters;

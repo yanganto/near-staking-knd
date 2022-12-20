@@ -8,7 +8,6 @@
 , llvmPackages
 , lib
 , stdenv
-, autoPatchelfHook
 , darwin
 }:
 { version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], neardRustPlatform ? rustPlatform }:

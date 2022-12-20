@@ -1,9 +1,4 @@
-{ config, inputs, pkgs, lib, ... }:
-let
-  types = import (inputs.disko + "/types.nix") {
-    inherit lib;
-  };
-in
+{ config, pkgs, lib, ... }:
 {
   # FIXME some of the stuff we can later remove once disko also runs `blkdiscard` itself
   system.build.disko = lib.mkForce (pkgs.writeScript "disko" ''

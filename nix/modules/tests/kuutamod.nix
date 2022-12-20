@@ -1,7 +1,7 @@
 { makeTest', nixosModules }:
 makeTest' {
   name = "single-node-kuutamod";
-  nodes.server = { lib, ... }: {
+  nodes.server = { ... }: {
     imports = [
       nixosModules.kuutamod
       nixosModules.neard-mainnet

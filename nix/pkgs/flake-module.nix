@@ -3,8 +3,7 @@
 , ...
 }: {
   perSystem =
-    { config
-    , self'
+    { self'
     , inputs'
     , pkgs
     , ...
