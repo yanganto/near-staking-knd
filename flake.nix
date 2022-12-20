@@ -21,6 +21,8 @@
   inputs.nixos-remote.inputs.nixpkgs.follows = "nixpkgs";
   inputs.nixos-remote.inputs.disko.follows = "disko";
 
+  inputs.nixos-images.url = "github:nix-community/nixos-images";
+
   nixConfig.extra-substituters = [
     "https://cache.garnix.io"
   ];
