@@ -41,8 +41,9 @@
                 "--"
               ];
               includes = [ "*.nix" ];
-              excludes = [ "nix/sources.nix" ];
+              excludes = [ "nix/pkgs/near-cli/*.nix" ];
             };
+
             shell = {
               command = "sh";
               options = [
