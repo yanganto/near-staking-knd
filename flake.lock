@@ -125,7 +125,8 @@
         "flake-parts": "flake-parts",
         "nixos-remote": "nixos-remote",
         "nixpkgs": "nixpkgs",
-        "srvos": "srvos"
+        "srvos": "srvos",
+        "treefmt-nix": "treefmt-nix"
       }
     },
     "rust-analyzer-src": {
@@ -157,6 +158,21 @@
       "original": {
         "owner": "numtide",
         "repo": "srvos",
+        "type": "github"
+      }
+    },
+    "treefmt-nix": {
+      "locked": {
+        "lastModified": 1671542447,
+        "narHash": "sha256-0cmLK/g4O8RKLoPnMdEWNWi0AA0O/xUlfNWjK2rvo2Q=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "4230552f8a71c510d222f1804e42184e106aafd7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
         "type": "github"
       }
     }

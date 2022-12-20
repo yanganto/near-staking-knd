@@ -6,7 +6,6 @@
 let
   kuutamod = pkgs.callPackage ../../pkgs/kuutamod.nix { };
   cfg = config.kuutamo.kuutamod;
-  cfgNeard = config.kuutamo.neard;
 in
 {
   options.kuutamo.kuutamod = {

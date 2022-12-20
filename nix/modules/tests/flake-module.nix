@@ -1,7 +1,7 @@
-{ self, config, lib, pkgs, ... }:
+{ self, lib, ... }:
 
 {
-  perSystem = { config, self', inputs', pkgs, ... }:
+  perSystem = { pkgs, ... }:
     let
       makeTest = import (pkgs.path + "/nixos/tests/make-test-python.nix");
 

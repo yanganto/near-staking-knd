@@ -4,7 +4,7 @@
 makeTest'
 {
   name = "neard";
-  nodes.server = { lib, ... }: {
+  nodes.server = { ... }: {
     imports = [
       nixosModules.neard-mainnet
     ];

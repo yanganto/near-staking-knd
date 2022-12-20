@@ -5,8 +5,6 @@
 , pkg-config
 , mypy
 , python3
-, consul
-, neard
 , runCommand
 , enableLint ? false
 ,

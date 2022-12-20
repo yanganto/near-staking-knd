@@ -1,6 +1,6 @@
 { self, ... }:
 {
-  flake = { lib, ... }:
+  flake = { ... }:
     let
       inherit (self.inputs.nixpkgs) lib;
     in
