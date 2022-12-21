@@ -12,24 +12,28 @@ use std::path::PathBuf;
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct InstallArgs {
     /// Comma-separated lists of hosts to perform the install
+    #[clap(long, default_value = "")]
     hosts: String,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct DryUpdateArgs {
     /// Comma-separated lists of hosts to perform the dry-update
+    #[clap(long, default_value = "")]
     hosts: String,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct UpdateArgs {
     /// Comma-separated lists of hosts to perform the update
+    #[clap(long, default_value = "")]
     hosts: String,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct RollbackArgs {
     /// Comma-separated lists of hosts to perform the rollback
+    #[clap(long, default_value = "")]
     hosts: String,
 }
 
@@ -51,11 +55,11 @@ enum Command {
 #[clap(author, version, about, long_about = None)]
 struct Args {
     /// configuration file to load
-    #[clap(default_value = "kuutamo.toml")]
+    #[clap(long, default_value = "kuutamo.toml", env = "KUUTAMO_CONFIG")]
     config: PathBuf,
 
     /// skip interactive dialogs by assuming the answer is yes
-    #[clap(default_value = "false")]
+    #[clap(long, default_value = "false")]
     yes: bool,
 
     #[clap(subcommand)]
