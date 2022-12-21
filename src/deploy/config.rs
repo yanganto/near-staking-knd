@@ -1,4 +1,5 @@
 use anyhow::{bail, Context, Result};
+use format_serde_error::SerdeError;
 use regex::Regex;
 use serde::Serialize;
 use serde_derive::Deserialize;
@@ -8,7 +9,7 @@ use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use toml;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct ConfigFile {
     #[serde(default)]
     global: GlobalConfig,
@@ -19,7 +20,7 @@ struct ConfigFile {
     hosts: HashMap<String, HostConfig>,
 }
 
-#[derive(Default, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 struct HostConfig {
     #[serde(default)]
     ipv4_address: Option<IpAddr>,
@@ -59,7 +60,7 @@ pub struct ValidatorKeys {
 }
 
 /// Global configuration affecting all hosts
-#[derive(Default, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 pub struct GlobalConfig {
     #[serde(default)]
     flake: Option<String>,
@@ -285,7 +286,9 @@ pub struct Config {
 
 /// Parse toml configuration
 pub fn parse_config(content: &str) -> Result<Config> {
-    let config: ConfigFile = toml::from_str(content).context("Configuration is not valid")?;
+    let config: ConfigFile = toml::from_str(content)
+        // pretty print our error message.
+        .map_err(|e| SerdeError::new(content.to_string(), e))?;
     let hosts = config
         .hosts
         .iter()

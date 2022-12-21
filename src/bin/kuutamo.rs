@@ -159,10 +159,6 @@ fn run_deploy() -> Result<()> {
 }
 
 /// The kuutamo program entry point
-pub fn main() {
-    let res = run_deploy();
-    if let Err(e) = res {
-        eprintln!("{}", e);
-        std::process::exit(1);
-    }
+pub fn main() -> Result<()> {
+    run_deploy()
 }

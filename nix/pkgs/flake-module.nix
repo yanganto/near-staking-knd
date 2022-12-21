@@ -7,7 +7,14 @@
     , inputs'
     , pkgs
     , ...
-    }: {
+    }: let
+      cargoLock = {
+        lockFile = ../../Cargo.lock;
+        outputHashes = {
+          "format_serde_error-0.3.0" = "sha256-R4zD1dAfB8OmlfYUDsDjevMkjfIWGtwLRRYGGRvZ8F4=";
+        };
+      };
+    in {
       packages = {
         neard = pkgs.callPackage ./neard/stable.nix {
           rustToolchain_1_63 = inputs'.fenix.packages.toolchainOf {
@@ -19,8 +26,12 @@
         neard-unstable = pkgs.callPackage ./neard/unstable.nix { };
         inherit (pkgs.callPackages ./near-cli/overrides.nix { }) near-cli;
 
-        kuutamod = pkgs.callPackage ./kuutamod.nix { };
-        kuutamo = pkgs.callPackage ./kuutamo.nix { };
+        kuutamod = pkgs.callPackage ./kuutamod.nix {
+          inherit cargoLock;
+        };
+        kuutamo = pkgs.callPackage ./kuutamo.nix {
+          inherit cargoLock;
+        };
 
         treefmt = pkgs.callPackage ./treefmt.nix {
           inherit (self.inputs) treefmt-nix;

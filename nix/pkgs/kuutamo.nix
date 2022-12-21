@@ -2,6 +2,7 @@
 , lib
 , runCommand
 , nix
+, cargoLock
 }:
 # FIXME: refactor this repository to have multiple workspaces
 rustPlatform.buildRustPackage {
@@ -12,7 +13,7 @@ rustPlatform.buildRustPackage {
     install -D ${../../Cargo.lock} $out/Cargo.lock
     cp -r ${../../src} $out/src
   '';
-  cargoLock.lockFile = ../../Cargo.lock;
+  inherit cargoLock;
 
   cargoBuildFlags = [ "--bin" "kuutamo" ];
   checkFlagsArray = [ "deploy::test_" ];
