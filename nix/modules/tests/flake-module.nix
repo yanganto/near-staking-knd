@@ -1,7 +1,7 @@
 { self, inputs, lib, ... }:
 
 {
-  perSystem = { pkgs, inputs', ... }:
+  perSystem = { pkgs, inputs', self', ... }:
     let
       makeTest = import (pkgs.path + "/nixos/tests/make-test-python.nix");
       eval-config = import (pkgs.path + "/nixos/lib/eval-config.nix");
@@ -37,12 +37,16 @@
           fi
         '';
         install-nixos = pkgs.callPackage ./install-nixos.nix {
-          inherit makeTest' eval-config kexec-installer;
+          inherit self makeTest' eval-config kexec-installer;
           diskoModule = inputs.disko.nixosModules.disko;
-          inherit (inputs'.nixos-remote.packages) nixos-remote;
+          validator-system = self.nixosConfigurations.validator-00;
+          inherit (self'.packages) kuutamo;
 
           inherit (self) nixosModules;
         };
       };
     };
+  flake = import ./test-flake/configurations.nix {
+    near-staking-knd = self;
+  };
 }

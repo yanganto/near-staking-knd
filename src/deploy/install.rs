@@ -5,7 +5,7 @@ use std::process::Command;
 use super::{Host, NixosFlake};
 
 /// Install a Validator on a given machine
-pub fn install(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
+pub fn install(hosts: &[Host], kexec_url: &str, flake: &NixosFlake) -> Result<()> {
     hosts
         .iter()
         .map(|host| {
@@ -16,7 +16,14 @@ pub fn install(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
                 format!("{}@{}", host.install_ssh_user, host.ssh_hostname)
             };
             let flake_uri = format!("{}#{}", flake.path().display(), host.name);
-            let args = &["--flake", &flake_uri, &connection_string];
+            let args = &[
+                "--debug",
+                "--no-ssh-copy-id",
+                "--kexec", kexec_url,
+                "--flake",
+                &flake_uri,
+                &connection_string,
+            ];
             println!("$ nixos-remote {}", args.join(" "));
             let status = Command::new("nixos-remote").args(args).status();
             let status = status.with_context(|| {

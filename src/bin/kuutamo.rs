@@ -14,6 +14,10 @@ struct InstallArgs {
     /// Comma-separated lists of hosts to perform the install
     #[clap(long, default_value = "")]
     hosts: String,
+
+    /// Kexec-tarball url to install from
+    #[clap(long, default_value = "https://github.com/nix-community/nixos-images/releases/download/nixos-22.11/nixos-kexec-installer-x86_64-linux.tar.gz")]
+    kexec_url: String,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -116,7 +120,7 @@ fn install(
         return Ok(());
     }
     let hosts = filter_hosts(&install_args.hosts, &config.hosts)?;
-    deploy::install(&hosts, &flake)
+    deploy::install(&hosts, &install_args.kexec_url, flake)
 }
 fn generate_config(
     _args: &Args,

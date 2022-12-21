@@ -3,7 +3,7 @@
     system = "x86_64-linux";
     modules = [
       near-staking-knd.nixosModules."single-node-validator-mainnet"
-      { kuutamo.deployConfig = builtins.fromTOML (builtins.readFile ./validator-00.toml); }
+      { kuutamo.deployConfig = builtins.fromTOML (builtins.readFile (builtins.path { name = "validator.toml"; path = ./validator-00.toml; })); }
     ];
   };
 }

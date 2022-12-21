@@ -1,13 +1,13 @@
 name = "validator-00"
 nixos_module = "single-node-validator-mainnet"
-ipv4_address = "199.127.1.2"
+ipv4_address = "192.168.42.2"
 ipv4_cidr = 24
-ipv4_gateway = "199.127.1.255"
+ipv4_gateway = "192.168.42.255"
 ipv6_address = "2605:9880:400:700:8:b10c:1932:3224"
 ipv6_cidr = 48
 ipv6_gateway = "2605:9880:400::1"
 install_ssh_user = "root"
-ssh_hostname = "199.127.63.197"
+ssh_hostname = "192.168.42.2"
 public_ssh_keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbBp2dH2X3dcU1zh+xW3ZsdYROKpJd3n13ssOP092qE joerg@turingmachine"]
 
 [validator_keys]
