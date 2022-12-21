@@ -79,6 +79,9 @@ fn ask_yes_no(prompt_text: &str) -> bool {
 }
 
 fn filter_hosts(host_spec: &str, hosts: &HashMap<String, Host>) -> Result<Vec<Host>> {
+    if host_spec.is_empty() {
+        return Ok(hosts.values().map(Clone::clone).collect::<Vec<_>>());
+    }
     let mut filtered = vec![];
     for name in host_spec.split(',') {
         match hosts.get(name) {
