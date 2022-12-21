@@ -95,7 +95,7 @@ pub struct Host {
     /// SSH hostname used for connecting
     pub ssh_hostname: String,
 
-    /// Public ssh ssh keys that will be added to the nixos configuration
+    /// Public ssh keys that will be added to the nixos configuration
     pub public_ssh_keys: Vec<String>,
 
     /// Validator keys used by neard
