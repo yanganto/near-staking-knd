@@ -2,10 +2,10 @@ use anyhow::{Context, Result};
 use log::info;
 use std::process::Command;
 
-use super::Host;
+use super::{Host, NixosFlake};
 
 /// Install a Validator on a given machine
-pub fn install(hosts: &[Host]) -> Result<()> {
+pub fn install(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
     hosts
         .iter()
         .map(|host| {
@@ -15,7 +15,9 @@ pub fn install(hosts: &[Host]) -> Result<()> {
             } else {
                 format!("{}@{}", host.install_ssh_user, host.ssh_hostname)
             };
-            let args = &["--flake", &host.nixos_module, &connection_string];
+            let flake_uri = format!("{}#{}", flake.path().display(), host.nixos_module);
+            let args = &["--flake", &flake_uri, &connection_string];
+            println!("$ nixos-remote {}", args.join(" "));
             let status = Command::new("nixos-remote").args(args).status();
             status.with_context(|| format!("nixos-remote failed (nixos-remote {})", args.join(" ")))
         })

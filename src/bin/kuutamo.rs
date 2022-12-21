@@ -100,7 +100,7 @@ fn install(
     args: &Args,
     install_args: &InstallArgs,
     config: &Config,
-    _flake: &NixosFlake,
+    flake: &NixosFlake,
 ) -> Result<()> {
     if !args.yes && !ask_yes_no(
             "Installing will remove any existing data from the configured hosts. Do you want to continue? (y/n)"
@@ -108,7 +108,7 @@ fn install(
         return Ok(());
     }
     let hosts = filter_hosts(&install_args.hosts, &config.hosts)?;
-    deploy::install(&hosts)
+    deploy::install(&hosts, &flake)
 }
 
 fn dry_update(
