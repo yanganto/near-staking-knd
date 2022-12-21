@@ -20,6 +20,7 @@
         inherit (pkgs.callPackages ./near-cli/overrides.nix { }) near-cli;
 
         kuutamod = pkgs.callPackage ./kuutamod.nix { };
+        kuutamo = pkgs.callPackage ./kuutamo.nix { };
 
         treefmt = self.inputs.treefmt-nix.lib.mkWrapper pkgs {
           # Used to find the project root

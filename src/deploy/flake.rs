@@ -108,7 +108,13 @@ ipv6_address = "2605:9880:400::3"
     let flake = generate_nixos_flake(&config)?;
     let flake_path = flake.path();
     let flake_nix = flake_path.join("flake.nix");
-    let args = vec!["--parse", flake_nix.to_str().unwrap()];
+    let tmp_dir = TempDir::new()?;
+    let args = vec![
+        "--parse",
+        flake_nix.to_str().unwrap(),
+        "--store",
+        tmp_dir.path().to_str().unwrap(),
+    ];
     let status = Command::new("nix-instantiate").args(args).status()?;
     assert_eq!(status.code(), Some(0));
     assert!(flake_path.join("validator-00.toml").exists());
