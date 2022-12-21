@@ -20,7 +20,7 @@ impl NixosFlake {
 /// Creates a flake directory
 pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
     let tmp_dir = Builder::new()
-        .prefix("kuutamo-flake")
+        .prefix("kuutamo-flake.")
         .tempdir()
         .context("cannot create temporary directory")?;
     let flake_path = tmp_dir.path().join("flake.nix");
