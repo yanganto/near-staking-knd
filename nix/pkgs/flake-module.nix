@@ -7,14 +7,16 @@
     , inputs'
     , pkgs
     , ...
-    }: let
+    }:
+    let
       cargoLock = {
         lockFile = ../../Cargo.lock;
         outputHashes = {
           "format_serde_error-0.3.0" = "sha256-R4zD1dAfB8OmlfYUDsDjevMkjfIWGtwLRRYGGRvZ8F4=";
         };
       };
-    in {
+    in
+    {
       packages = {
         neard = pkgs.callPackage ./neard/stable.nix {
           rustToolchain_1_63 = inputs'.fenix.packages.toolchainOf {

@@ -48,7 +48,7 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
         system = "x86_64-linux";
         modules = [
           near-staking-knd.nixosModules."{nixos_module}"
-          {{ kuutamo.host.settings = builtins.fromTOML (builtins.readFile ./{name}.toml); }}
+          {{ kuutamo.deployConfig = builtins.fromTOML (builtins.readFile ./{name}.toml); }}
         ];
       }};
 "#
