@@ -81,7 +81,7 @@ pub fn test_nixos_flake() -> Result<()> {
     let config = parse_config(
         r#"
 [global]
-flake = "github:myfork/near-stagking-knd"
+flake = "github:myfork/near-staking-knd"
 
 [host_defaults]
 public_ssh_keys = [

@@ -111,7 +111,7 @@ pub struct Global {
 }
 
 fn validate_global(global_config: &GlobalConfig) -> Result<Global> {
-    let default_flake = "github:kuutamolabs/near-stagking-knd";
+    let default_flake = "github:kuutamolabs/near-staking-knd";
     let flake = global_config
         .flake
         .as_deref()
@@ -317,7 +317,7 @@ pub fn test_parse_config() -> Result<()> {
     let config = parse_config(
         r#"
 [global]
-flake = "github:myfork/near-stagking-knd"
+flake = "github:myfork/near-staking-knd"
 
 [host_defaults]
 public_ssh_keys = [
@@ -341,7 +341,7 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#,
     )?;
-    assert_eq!(config.global.flake, "github:myfork/near-stagking-knd");
+    assert_eq!(config.global.flake, "github:myfork/near-staking-knd");
 
     let hosts = &config.hosts;
     assert_eq!(hosts.len(), 2);
