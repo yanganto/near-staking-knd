@@ -15,7 +15,7 @@ pub fn install(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
             } else {
                 format!("{}@{}", host.install_ssh_user, host.ssh_hostname)
             };
-            let flake_uri = format!("{}#{}", flake.path().display(), host.nixos_module);
+            let flake_uri = format!("{}#{}", flake.path().display(), host.name);
             let args = &["--flake", &flake_uri, &connection_string];
             println!("$ nixos-remote {}", args.join(" "));
             let status = Command::new("nixos-remote").args(args).status();
