@@ -22,6 +22,8 @@ rustPlatform.buildRustPackage ({
   buildInputs = [ openssl ];
   nativeBuildInputs = [ pkg-config python3.pkgs.pytest ] ++ lib.optionals enableLint [ clippy mypy ];
 
+  cargoBuildFlags = [ "--bin" "kuutamoctl" "--bin" "kuutamod" ];
+
   doCheck = false;
 
   meta = with lib; {
