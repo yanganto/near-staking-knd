@@ -17,6 +17,12 @@ struct InstallArgs {
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
+struct GenerateConfigArgs {
+    /// Directory where to copy the configuration to.
+    directory: PathBuf,
+}
+
+#[derive(clap::Args, PartialEq, Debug, Clone)]
 struct DryUpdateArgs {
     /// Comma-separated lists of hosts to perform the dry-update
     #[clap(long, default_value = "")]
@@ -41,6 +47,8 @@ struct RollbackArgs {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(clap::Subcommand, PartialEq, Debug, Clone)]
 enum Command {
+    /// Generate NixOS configuration
+    GenerateConfig(GenerateConfigArgs),
     /// Install Validator on a given machine. This will remove all data of the current system!
     Install(InstallArgs),
     /// Upload update to host and show which actions would be performed on an update
@@ -110,6 +118,14 @@ fn install(
     let hosts = filter_hosts(&install_args.hosts, &config.hosts)?;
     deploy::install(&hosts, &flake)
 }
+fn generate_config(
+    _args: &Args,
+    config_args: &GenerateConfigArgs,
+    _config: &Config,
+    flake: &NixosFlake,
+) -> Result<()> {
+    deploy::generate_config(&config_args.directory, flake)
+}
 
 fn dry_update(
     _args: &Args,
@@ -152,6 +168,9 @@ fn run_deploy() -> Result<()> {
     let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
 
     match args.action {
+        Command::GenerateConfig(ref config_args) => {
+            generate_config(&args, config_args, &config, &flake)
+        }
         Command::Install(ref install_args) => install(&args, install_args, &config, &flake),
         Command::DryUpdate(ref dry_update_args) => {
             dry_update(&args, dry_update_args, &config, &flake)
