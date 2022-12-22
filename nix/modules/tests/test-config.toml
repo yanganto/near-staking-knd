@@ -1,0 +1,19 @@
+[global]
+# we provide this path in our nixos test
+flake = "/root/near-staking-knd"
+
+[host_defaults]
+public_ssh_keys = [
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbBp2dH2X3dcU1zh+xW3ZsdYROKpJd3n13ssOP092qE joerg@turingmachine"
+]
+validator_key_file = "validator_key.json"
+validator_node_key_file = "node_key.json"
+
+[hosts.validator-00]
+ipv4_address = "192.168.42.2"
+ipv4_gateway = "192.168.42.255"
+ipv4_cidr = 24
+
+ipv6_address = "2605:9880:400:700:8:b10c:1932:3224"
+ipv6_cidr = 48
+ipv6_gateway = "2605:9880:400::1"

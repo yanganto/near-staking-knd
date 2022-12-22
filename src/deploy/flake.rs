@@ -23,8 +23,6 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
         .prefix("kuutamo-flake.")
         .tempdir()
         .context("cannot create temporary directory")?;
-    let flake_path = tmp_dir.path().join("flake.nix");
-    let mut flake_file = File::create(flake_path).context("could not create flake.nix")?;
 
     let nixos_flake = &config.global.flake;
     for (name, host) in &config.hosts {
@@ -43,30 +41,38 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
         .map(|(name, host)| {
             let nixos_module = &host.nixos_module;
             format!(
-                r#"
-      nixosConfigurations."{name}" = near-staking-knd.inputs.nixpkgs.lib.nixosSystem {{
-        system = "x86_64-linux";
-        modules = [
-          near-staking-knd.nixosModules."{nixos_module}"
-          {{ kuutamo.deployConfig = builtins.fromTOML (builtins.readFile ./{name}.toml); }}
-        ];
-      }};
-"#
+                r#"  nixosConfigurations."{name}" = near-staking-knd.inputs.nixpkgs.lib.nixosSystem {{
+    system = "x86_64-linux";
+    modules = [
+      near-staking-knd.nixosModules."{nixos_module}"
+      {{ kuutamo.deployConfig = builtins.fromTOML (builtins.readFile ./{name}.toml); }}
+    ];
+  }};"#
             )
         })
         .collect::<Vec<_>>()
         .join("\n");
+    let configuration_path = tmp_dir.path().join("configurations.nix");
+    let mut configuration_file =
+        File::create(configuration_path).context("could not create configurations.nix")?;
+    let configuration_content = format!(
+        r#"{{ near-staking-knd, ... }}: {{
+{configurations}
+}}"#
+    );
+    configuration_file
+        .write_all(configuration_content.as_bytes())
+        .context("could not write configurations.nix")?;
     let flake_content = format!(
-        r#"
-{{
+        r#"{{
   inputs.near-staking-knd.url = "{nixos_flake}";
 
-  outputs = {{ self, near-staking-knd, ... }}: {{
-{configurations}
-  }};
+  outputs = inputs: import ./configurations.nix inputs;
 }}
 "#
     );
+    let flake_path = tmp_dir.path().join("flake.nix");
+    let mut flake_file = File::create(flake_path).context("could not create flake.nix")?;
     flake_file
         .write_all(flake_content.as_bytes())
         .context("could not write flake.nix")?;
