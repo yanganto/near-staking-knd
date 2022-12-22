@@ -33,6 +33,7 @@
         };
         kuutamo = pkgs.callPackage ./kuutamo.nix {
           inherit cargoLock;
+          inherit (inputs'.nixos-remote.packages) nixos-remote;
         };
 
         treefmt = pkgs.callPackage ./treefmt.nix {

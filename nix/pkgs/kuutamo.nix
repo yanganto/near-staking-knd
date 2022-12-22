@@ -3,6 +3,8 @@
 , runCommand
 , nix
 , cargoLock
+, nixos-remote
+, makeWrapper
 }:
 # FIXME: refactor this repository to have multiple workspaces
 rustPlatform.buildRustPackage {
@@ -17,6 +19,12 @@ rustPlatform.buildRustPackage {
 
   cargoBuildFlags = [ "--bin" "kuutamo" ];
   checkFlagsArray = [ "deploy::test_" ];
+
+  nativeBuildInputs = [ makeWrapper ];
+
+  postInstall = ''
+    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-remote ]}
+  '';
 
   checkInputs = [ nix ];
 
