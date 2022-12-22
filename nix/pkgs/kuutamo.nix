@@ -23,9 +23,9 @@ rustPlatform.buildRustPackage {
   doCheck = true;
 
   meta = with lib; {
-    description = "Command-line for setting up validators";
-    homepage = "https://github.com/kuutamoaps/kuutamocore";
-    license = licenses.mit;
+    description = "A NEAR Staking node distribution by kuutamo";
+    homepage = "https://github.com/kuutamolabs/near-staking-knd";
+    license = licenses.asl20;
     maintainers = with maintainers; [ mic92 ];
     platforms = platforms.unix;
   };
