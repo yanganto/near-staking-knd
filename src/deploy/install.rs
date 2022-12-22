@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use log::info;
 use std::process::Command;
 
@@ -19,7 +19,23 @@ pub fn install(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
             let args = &["--flake", &flake_uri, &connection_string];
             println!("$ nixos-remote {}", args.join(" "));
             let status = Command::new("nixos-remote").args(args).status();
-            status.with_context(|| format!("nixos-remote failed (nixos-remote {})", args.join(" ")))
+            let status = status.with_context(|| {
+                format!("nixos-remote failed (nixos-remote {})", args.join(" "))
+            })?;
+            if !status.success() {
+                match status.code() {
+                    Some(code) => bail!(
+                        "nixos-remote failed (nixos-remote {}) with exit code: {}",
+                        args.join(" "),
+                        code
+                    ),
+                    None => bail!(
+                        "nixos-remote (nixos-remote {}) was terminated by a signal",
+                        args.join(" ")
+                    ),
+                }
+            }
+            Ok(())
         })
         .collect::<Result<Vec<_>>>()?;
     Ok(())
