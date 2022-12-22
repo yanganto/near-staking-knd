@@ -11,8 +11,6 @@
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
   inputs.core-contracts.url = "github:near/core-contracts";
   inputs.core-contracts.flake = false;
-  inputs.fenix.url = "github:nix-community/fenix";
-  inputs.fenix.inputs.nixpkgs.follows = "nixpkgs";
 
   inputs.disko.url = "github:nix-community/disko";
   inputs.disko.inputs.nixpkgs.follows = "nixpkgs";

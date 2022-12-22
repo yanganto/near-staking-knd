@@ -10,9 +10,9 @@
 , stdenv
 , darwin
 }:
-{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], neardRustPlatform ? rustPlatform }:
+{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ] }:
 # based on https://github.com/ZentriaMC/neard-nix/blob/master/neardtynix
-neardRustPlatform.buildRustPackage rec {
+rustPlatform.buildRustPackage rec {
   pname = "neard";
   inherit version;
 

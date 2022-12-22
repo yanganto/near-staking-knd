@@ -1,5 +1,4 @@
 { self
-, fenix
 , ...
 }: {
   perSystem =
@@ -18,13 +17,7 @@
     in
     {
       packages = {
-        neard = pkgs.callPackage ./neard/stable.nix {
-          rustToolchain_1_63 = inputs'.fenix.packages.toolchainOf {
-            channel = "stable";
-            date = "2022-08-11";
-            sha256 = "sha256-KXx+ID0y4mg2B3LHp7IyaiMrdexF6octADnAtFIOjrY=";
-          };
-        };
+        neard = pkgs.callPackage ./neard/stable.nix { };
         neard-unstable = pkgs.callPackage ./neard/unstable.nix { };
         inherit (pkgs.callPackages ./near-cli/overrides.nix { }) near-cli;
 
