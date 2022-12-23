@@ -1,5 +1,6 @@
 name = "validator-00"
 nixos_module = "single-node-validator-mainnet"
+extra_nixos_modules = ["qemu-test-profile"]
 ipv4_address = "192.168.42.2"
 ipv4_cidr = 24
 ipv4_gateway = "192.168.42.255"

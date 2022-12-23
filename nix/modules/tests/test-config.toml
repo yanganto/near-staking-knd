@@ -9,6 +9,7 @@ public_ssh_keys = [
 validator_key_file = "validator_key.json"
 validator_node_key_file = "node_key.json"
 disks = [ "/dev/vdb" ]
+extra_nixos_modules = [ "qemu-test-profile" ]
 
 [hosts.validator-00]
 ipv4_address = "192.168.42.2"

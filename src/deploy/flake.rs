@@ -39,12 +39,21 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
         .hosts
         .iter()
         .map(|(name, host)| {
-            let nixos_module = &host.nixos_module;
+            let mut nixos_modules = vec![];
+            nixos_modules.push(host.nixos_module.clone());
+            nixos_modules.extend_from_slice(host.extra_nixos_modules.as_slice());
+
+            let modules = nixos_modules
+                .iter()
+                .map(|m| format!("      near-staking-knd.nixosModules.\"{}\"", m))
+                .collect::<Vec<_>>()
+                .join("\n");
+
             format!(
                 r#"  nixosConfigurations."{name}" = near-staking-knd.inputs.nixpkgs.lib.nixosSystem {{
     system = "x86_64-linux";
     modules = [
-      near-staking-knd.nixosModules."{nixos_module}"
+{modules}
       {{ kuutamo.deployConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "validator.toml"; path = ./{name}.toml; }})); }}
     ];
   }};"#

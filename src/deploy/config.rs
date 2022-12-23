@@ -30,6 +30,8 @@ struct HostConfig {
     ipv4_cidr: Option<u8>,
     #[serde(default)]
     nixos_module: Option<String>,
+    #[serde(default)]
+    extra_nixos_modules: Vec<String>,
 
     #[serde(default)]
     ipv6_address: Option<IpAddr>,
@@ -39,7 +41,7 @@ struct HostConfig {
     ipv6_cidr: Option<u8>,
 
     #[serde(default)]
-    public_ssh_keys: Option<Vec<String>>,
+    public_ssh_keys: Vec<String>,
 
     #[serde(default)]
     install_ssh_user: Option<String>,
@@ -77,6 +79,9 @@ pub struct Host {
 
     /// NixOS module to use as a base for the host from the flake
     pub nixos_module: String,
+
+    /// Extra NixOS modules to include in the system
+    pub extra_nixos_modules: Vec<String>,
 
     /// Public ipv4 address of the host
     pub ipv4_address: IpAddr,
@@ -176,6 +181,10 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         .unwrap_or(default_module)
         .to_string();
 
+    let mut extra_nixos_modules = vec![];
+    extra_nixos_modules.extend_from_slice(&host.extra_nixos_modules);
+    extra_nixos_modules.extend_from_slice(&default.extra_nixos_modules);
+
     let ipv4_gateway = host
         .ipv4_gateway
         .or(default.ipv4_gateway)
@@ -225,12 +234,12 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         .cloned()
         .unwrap_or_else(|| String::from("root"));
 
-    let public_ssh_keys = host
-        .public_ssh_keys
-        .as_ref()
-        .or(default.public_ssh_keys.as_ref())
-        .with_context(|| format!("no public_ssh_keys provided for hosts.{}", name))?
-        .to_vec();
+    let mut public_ssh_keys = vec![];
+    public_ssh_keys.extend_from_slice(&host.public_ssh_keys);
+    public_ssh_keys.extend_from_slice(&default.public_ssh_keys);
+    if public_ssh_keys.is_empty() {
+        bail!("no public_ssh_keys provided for hosts.{}", name);
+    }
 
     let default_disks = vec![PathBuf::from("/dev/nvme0n1"), PathBuf::from("/dev/nvme1n1")];
     let disks = host
@@ -281,6 +290,7 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
     Ok(Host {
         name,
         nixos_module,
+        extra_nixos_modules,
         install_ssh_user,
         ssh_hostname,
         ipv4_address,
