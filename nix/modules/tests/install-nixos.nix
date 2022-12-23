@@ -71,9 +71,11 @@ makeTest' {
     def create_test_machine(oldmachine=None, args={}): # taken from <nixpkgs/nixos/tests/installer.nix>
         machine = create_machine({
           "qemuFlags":
-            '-cpu max -m 1024 -virtfs local,path=/nix/store,security_model=none,mount_tag=nix-store,'
-            f' -drive file={oldmachine.state_dir}/installed.qcow2,id=drive1,if=none,index=1,werror=report'
-            f' -device virtio-blk-pci,drive=drive1',
+            '-cpu max -m 4024 -virtfs local,path=/nix/store,security_model=none,mount_tag=nix-store,'
+            f' -drive file={oldmachine.state_dir}/empty0.qcow2,id=drive1,if=none,index=1,werror=report'
+            f' -device virtio-blk-pci,drive=drive1'
+            f' -drive file={oldmachine.state_dir}/empty1.qcow2,id=drive2,if=none,index=2,werror=report'
+            f' -device virtio-blk-pci,drive=drive2'
         } | args)
         driver.machines.append(machine)
         return machine
@@ -89,6 +91,7 @@ makeTest' {
 
     new_machine = create_test_machine(oldmachine=installed, args={ "name": "after_install" })
     new_machine.start()
-    assert "nixos-remote" == new_machine.succeed("hostname").strip()
+    hostname = new_machine.succeed("hostname").strip()
+    assert "validator-00" == hostname, f"'validator-00' != '{hostname}'"
   '';
 }
