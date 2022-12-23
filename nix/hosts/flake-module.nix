@@ -35,13 +35,14 @@
               self.nixosModules.single-node-validator-mainnet
             ];
           };
-          single-node-standby-mainnet = lib.nixosSystem {
-            system = "x86_64-linux";
-            modules = [
-              dummyConfig
-              self.nixosModules.single-node-validator-mainnet
-            ];
-          };
+          # TODO: allow node to not be a validator
+          #single-node-standby-mainnet = lib.nixosSystem {
+          #  system = "x86_64-linux";
+          #  modules = [
+          #    dummyConfig
+          #    self.nixosModules.single-node-validator-mainnet
+          #  ];
+          #};
 
           single-node-validator-testnet = lib.nixosSystem {
             system = "x86_64-linux";
