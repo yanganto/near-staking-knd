@@ -51,6 +51,9 @@ struct HostConfig {
     validator_key_file: Option<PathBuf>,
     #[serde(default)]
     validator_node_key_file: Option<PathBuf>,
+
+    #[serde(default)]
+    pub disks: Option<Vec<PathBuf>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
@@ -97,6 +100,9 @@ pub struct Host {
 
     /// Public ssh keys that will be added to the nixos configuration
     pub public_ssh_keys: Vec<String>,
+
+    /// Block device paths to use for installing
+    pub disks: Vec<PathBuf>,
 
     /// Validator keys used by neard
     pub validator_keys: Option<ValidatorKeys>,
@@ -226,6 +232,18 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         .with_context(|| format!("no public_ssh_keys provided for hosts.{}", name))?
         .to_vec();
 
+    let default_disks = vec![PathBuf::from("/dev/nvme0n1"), PathBuf::from("/dev/nvme1n1")];
+    let disks = host
+        .disks
+        .as_ref()
+        .or(default.disks.as_ref())
+        .unwrap_or(&default_disks)
+        .to_vec();
+
+    if disks.is_empty() {
+        bail!("no disks specified for hosts.{}", name);
+    }
+
     let validator_key_file = host
         .validator_key_file
         .as_ref()
@@ -273,6 +291,7 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         ipv6_gateway,
         validator_keys,
         public_ssh_keys,
+        disks,
     })
 }
 

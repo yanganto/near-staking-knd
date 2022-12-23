@@ -16,7 +16,10 @@ struct InstallArgs {
     hosts: String,
 
     /// Kexec-tarball url to install from
-    #[clap(long, default_value = "https://github.com/nix-community/nixos-images/releases/download/nixos-22.11/nixos-kexec-installer-x86_64-linux.tar.gz")]
+    #[clap(
+        long,
+        default_value = "https://github.com/nix-community/nixos-images/releases/download/nixos-22.11/nixos-kexec-installer-x86_64-linux.tar.gz"
+    )]
     kexec_url: String,
 }
 

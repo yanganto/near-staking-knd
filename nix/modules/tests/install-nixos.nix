@@ -59,6 +59,7 @@ makeTest' {
         };
       };
 
+      virtualisation.emptyDiskImages = [ 4096 4096 ];
       virtualisation.memorySize = 4096;
       documentation.enable = false;
       services.openssh.enable = true;

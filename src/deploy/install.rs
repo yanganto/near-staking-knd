@@ -19,7 +19,8 @@ pub fn install(hosts: &[Host], kexec_url: &str, flake: &NixosFlake) -> Result<()
             let args = &[
                 "--debug",
                 "--no-ssh-copy-id",
-                "--kexec", kexec_url,
+                "--kexec",
+                kexec_url,
                 "--flake",
                 &flake_uri,
                 &connection_string,
