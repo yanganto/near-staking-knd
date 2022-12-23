@@ -134,11 +134,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1671803556,
-        "narHash": "sha256-q69qDe/YKlRMFbS/62G5se36ROh4pwDOUn8Gg2CT7uw=",
+        "lastModified": 1672138595,
+        "narHash": "sha256-A/Tf+Qt14g8kgo3sPGs+M4QwejZFW1MGdrJ/QOwnZgE=",
         "owner": "kuutamolabs",
         "repo": "nixpkgs",
-        "rev": "3c1ce7b9be2e3f7b20a0072c175535dc7333157c",
+        "rev": "c78d89329e31c1a4cfc11aa4a965d18785c5b519",
         "type": "github"
       },
       "original": {
