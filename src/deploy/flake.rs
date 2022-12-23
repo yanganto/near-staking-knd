@@ -67,7 +67,8 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
     let configuration_content = format!(
         r#"{{ near-staking-knd, ... }}: {{
 {configurations}
-}}"#
+}}
+"#
     );
     configuration_file
         .write_all(configuration_content.as_bytes())
