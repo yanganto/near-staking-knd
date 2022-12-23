@@ -46,7 +46,14 @@
         };
       };
     };
-  flake = import ./test-flake/configurations.nix {
+  flake = {
+    nixosModules.qemu-test-profile = { modulesPath, ... }: {
+      imports = [
+        (modulesPath + "/testing/test-instrumentation.nix")
+        (modulesPath + "/profiles/qemu-guest.nix")
+      ];
+    };
+  } // import ./test-flake/configurations.nix {
     near-staking-knd = self;
   };
 }
