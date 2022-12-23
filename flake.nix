@@ -20,6 +20,7 @@
   inputs.nixos-remote.url = "github:numtide/nixos-remote/kuutamo";
   inputs.nixos-remote.inputs.nixpkgs.follows = "nixpkgs";
   inputs.nixos-remote.inputs.disko.follows = "disko";
+  inputs.nixos-remote.inputs.nixos-images.follows = "nixos-images";
 
   inputs.nixos-images.url = "github:nix-community/nixos-images";
 

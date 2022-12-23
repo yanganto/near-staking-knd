@@ -97,16 +97,19 @@
         "disko": [
           "disko"
         ],
+        "nixos-images": [
+          "nixos-images"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1671648225,
-        "narHash": "sha256-r4HMr4ljaRoa16u54SrfCU0KXZux/mju0JWY/dTgfsg=",
+        "lastModified": 1671817228,
+        "narHash": "sha256-1AI9Fl38fWLk8ZRaYpOeXjQQfIftHxTmqOaxtB21P1Y=",
         "owner": "numtide",
         "repo": "nixos-remote",
-        "rev": "932cf2331bcfcd1fef11399c41e2296f8bd74536",
+        "rev": "dccd39a201b849bba423158693b2d844e39c02fc",
         "type": "github"
       },
       "original": {
