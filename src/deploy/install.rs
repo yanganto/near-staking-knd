@@ -1,11 +1,11 @@
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use log::info;
 use std::process::Command;
 
-use super::Host;
+use super::{Host, NixosFlake};
 
 /// Install a Validator on a given machine
-pub fn install(hosts: &[Host]) -> Result<()> {
+pub fn install(hosts: &[Host], kexec_url: &str, flake: &NixosFlake) -> Result<()> {
     hosts
         .iter()
         .map(|host| {
@@ -15,9 +15,35 @@ pub fn install(hosts: &[Host]) -> Result<()> {
             } else {
                 format!("{}@{}", host.install_ssh_user, host.ssh_hostname)
             };
-            let args = &["--flake", &host.nixos_module, &connection_string];
+            let flake_uri = format!("{}#{}", flake.path().display(), host.name);
+            let args = &[
+                "--debug",
+                "--no-ssh-copy-id",
+                "--kexec",
+                kexec_url,
+                "--flake",
+                &flake_uri,
+                &connection_string,
+            ];
+            println!("$ nixos-remote {}", args.join(" "));
             let status = Command::new("nixos-remote").args(args).status();
-            status.with_context(|| format!("nixos-remote failed (nixos-remote {})", args.join(" ")))
+            let status = status.with_context(|| {
+                format!("nixos-remote failed (nixos-remote {})", args.join(" "))
+            })?;
+            if !status.success() {
+                match status.code() {
+                    Some(code) => bail!(
+                        "nixos-remote failed (nixos-remote {}) with exit code: {}",
+                        args.join(" "),
+                        code
+                    ),
+                    None => bail!(
+                        "nixos-remote (nixos-remote {}) was terminated by a signal",
+                        args.join(" ")
+                    ),
+                }
+            }
+            Ok(())
         })
         .collect::<Result<Vec<_>>>()?;
     Ok(())

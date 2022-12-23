@@ -1,4 +1,5 @@
 use anyhow::{bail, Context, Result};
+use format_serde_error::SerdeError;
 use regex::Regex;
 use serde::Serialize;
 use serde_derive::Deserialize;
@@ -8,7 +9,7 @@ use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use toml;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct ConfigFile {
     #[serde(default)]
     global: GlobalConfig,
@@ -19,7 +20,7 @@ struct ConfigFile {
     hosts: HashMap<String, HostConfig>,
 }
 
-#[derive(Default, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 struct HostConfig {
     #[serde(default)]
     ipv4_address: Option<IpAddr>,
@@ -29,6 +30,8 @@ struct HostConfig {
     ipv4_cidr: Option<u8>,
     #[serde(default)]
     nixos_module: Option<String>,
+    #[serde(default)]
+    extra_nixos_modules: Vec<String>,
 
     #[serde(default)]
     ipv6_address: Option<IpAddr>,
@@ -38,7 +41,7 @@ struct HostConfig {
     ipv6_cidr: Option<u8>,
 
     #[serde(default)]
-    public_ssh_keys: Option<Vec<String>>,
+    public_ssh_keys: Vec<String>,
 
     #[serde(default)]
     install_ssh_user: Option<String>,
@@ -50,6 +53,9 @@ struct HostConfig {
     validator_key_file: Option<PathBuf>,
     #[serde(default)]
     validator_node_key_file: Option<PathBuf>,
+
+    #[serde(default)]
+    pub disks: Option<Vec<PathBuf>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
@@ -59,7 +65,7 @@ pub struct ValidatorKeys {
 }
 
 /// Global configuration affecting all hosts
-#[derive(Default, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 pub struct GlobalConfig {
     #[serde(default)]
     flake: Option<String>,
@@ -73,6 +79,9 @@ pub struct Host {
 
     /// NixOS module to use as a base for the host from the flake
     pub nixos_module: String,
+
+    /// Extra NixOS modules to include in the system
+    pub extra_nixos_modules: Vec<String>,
 
     /// Public ipv4 address of the host
     pub ipv4_address: IpAddr,
@@ -94,8 +103,11 @@ pub struct Host {
     /// SSH hostname used for connecting
     pub ssh_hostname: String,
 
-    /// Public ssh ssh keys that will be added to the nixos configuration
+    /// Public ssh keys that will be added to the nixos configuration
     pub public_ssh_keys: Vec<String>,
+
+    /// Block device paths to use for installing
+    pub disks: Vec<PathBuf>,
 
     /// Validator keys used by neard
     pub validator_keys: Option<ValidatorKeys>,
@@ -110,7 +122,7 @@ pub struct Global {
 }
 
 fn validate_global(global_config: &GlobalConfig) -> Result<Global> {
-    let default_flake = "github:kuutamolabs/near-stagking-knd";
+    let default_flake = "github:kuutamolabs/near-staking-knd";
     let flake = global_config
         .flake
         .as_deref()
@@ -169,6 +181,10 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         .unwrap_or(default_module)
         .to_string();
 
+    let mut extra_nixos_modules = vec![];
+    extra_nixos_modules.extend_from_slice(&host.extra_nixos_modules);
+    extra_nixos_modules.extend_from_slice(&default.extra_nixos_modules);
+
     let ipv4_gateway = host
         .ipv4_gateway
         .or(default.ipv4_gateway)
@@ -218,12 +234,24 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         .cloned()
         .unwrap_or_else(|| String::from("root"));
 
-    let public_ssh_keys = host
-        .public_ssh_keys
+    let mut public_ssh_keys = vec![];
+    public_ssh_keys.extend_from_slice(&host.public_ssh_keys);
+    public_ssh_keys.extend_from_slice(&default.public_ssh_keys);
+    if public_ssh_keys.is_empty() {
+        bail!("no public_ssh_keys provided for hosts.{}", name);
+    }
+
+    let default_disks = vec![PathBuf::from("/dev/nvme0n1"), PathBuf::from("/dev/nvme1n1")];
+    let disks = host
+        .disks
         .as_ref()
-        .or(default.public_ssh_keys.as_ref())
-        .with_context(|| format!("no public_ssh_keys provided for hosts.{}", name))?
+        .or(default.disks.as_ref())
+        .unwrap_or(&default_disks)
         .to_vec();
+
+    if disks.is_empty() {
+        bail!("no disks specified for hosts.{}", name);
+    }
 
     let validator_key_file = host
         .validator_key_file
@@ -262,6 +290,7 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
     Ok(Host {
         name,
         nixos_module,
+        extra_nixos_modules,
         install_ssh_user,
         ssh_hostname,
         ipv4_address,
@@ -272,6 +301,7 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         ipv6_gateway,
         validator_keys,
         public_ssh_keys,
+        disks,
     })
 }
 
@@ -285,7 +315,9 @@ pub struct Config {
 
 /// Parse toml configuration
 pub fn parse_config(content: &str) -> Result<Config> {
-    let config: ConfigFile = toml::from_str(content).context("Configuration is not valid")?;
+    let config: ConfigFile = toml::from_str(content)
+        // pretty print our error message.
+        .map_err(|e| SerdeError::new(content.to_string(), e))?;
     let hosts = config
         .hosts
         .iter()
@@ -314,7 +346,7 @@ pub fn test_parse_config() -> Result<()> {
     let config = parse_config(
         r#"
 [global]
-flake = "github:myfork/near-stagking-knd"
+flake = "github:myfork/near-staking-knd"
 
 [host_defaults]
 public_ssh_keys = [
@@ -338,7 +370,7 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#,
     )?;
-    assert_eq!(config.global.flake, "github:myfork/near-stagking-knd");
+    assert_eq!(config.global.flake, "github:myfork/near-staking-knd");
 
     let hosts = &config.hosts;
     assert_eq!(hosts.len(), 2);

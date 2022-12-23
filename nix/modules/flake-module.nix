@@ -21,7 +21,12 @@
         ];
       };
       kuutamo-binary-cache = ./binary-cache;
-      kuutamod = ./kuutamod;
+      kuutamod = { pkgs, ... }: {
+        imports = [
+          ./kuutamod
+        ];
+        kuutamo.kuutamod.package = self.packages.${pkgs.stdenv.hostPlatform.system}.kuutamod;
+      };
 
       disko-partitioning-script = ./disko-partitioning-script.nix;
       networkd = ./networkd.nix;

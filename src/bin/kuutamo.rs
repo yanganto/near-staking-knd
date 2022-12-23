@@ -12,24 +12,41 @@ use std::path::PathBuf;
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct InstallArgs {
     /// Comma-separated lists of hosts to perform the install
+    #[clap(long, default_value = "")]
     hosts: String,
+
+    /// Kexec-tarball url to install from
+    #[clap(
+        long,
+        default_value = "https://github.com/nix-community/nixos-images/releases/download/nixos-22.11/nixos-kexec-installer-x86_64-linux.tar.gz"
+    )]
+    kexec_url: String,
+}
+
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+struct GenerateConfigArgs {
+    /// Directory where to copy the configuration to.
+    directory: PathBuf,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct DryUpdateArgs {
     /// Comma-separated lists of hosts to perform the dry-update
+    #[clap(long, default_value = "")]
     hosts: String,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct UpdateArgs {
     /// Comma-separated lists of hosts to perform the update
+    #[clap(long, default_value = "")]
     hosts: String,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct RollbackArgs {
     /// Comma-separated lists of hosts to perform the rollback
+    #[clap(long, default_value = "")]
     hosts: String,
 }
 
@@ -37,6 +54,8 @@ struct RollbackArgs {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(clap::Subcommand, PartialEq, Debug, Clone)]
 enum Command {
+    /// Generate NixOS configuration
+    GenerateConfig(GenerateConfigArgs),
     /// Install Validator on a given machine. This will remove all data of the current system!
     Install(InstallArgs),
     /// Upload update to host and show which actions would be performed on an update
@@ -51,11 +70,11 @@ enum Command {
 #[clap(author, version, about, long_about = None)]
 struct Args {
     /// configuration file to load
-    #[clap(default_value = "kuutamo.toml")]
+    #[clap(long, default_value = "kuutamo.toml", env = "KUUTAMO_CONFIG")]
     config: PathBuf,
 
     /// skip interactive dialogs by assuming the answer is yes
-    #[clap(default_value = "false")]
+    #[clap(long, default_value = "false")]
     yes: bool,
 
     #[clap(subcommand)]
@@ -75,6 +94,9 @@ fn ask_yes_no(prompt_text: &str) -> bool {
 }
 
 fn filter_hosts(host_spec: &str, hosts: &HashMap<String, Host>) -> Result<Vec<Host>> {
+    if host_spec.is_empty() {
+        return Ok(hosts.values().map(Clone::clone).collect::<Vec<_>>());
+    }
     let mut filtered = vec![];
     for name in host_spec.split(',') {
         match hosts.get(name) {
@@ -93,7 +115,7 @@ fn install(
     args: &Args,
     install_args: &InstallArgs,
     config: &Config,
-    _flake: &NixosFlake,
+    flake: &NixosFlake,
 ) -> Result<()> {
     if !args.yes && !ask_yes_no(
             "Installing will remove any existing data from the configured hosts. Do you want to continue? (y/n)"
@@ -101,7 +123,15 @@ fn install(
         return Ok(());
     }
     let hosts = filter_hosts(&install_args.hosts, &config.hosts)?;
-    deploy::install(&hosts)
+    deploy::install(&hosts, &install_args.kexec_url, flake)
+}
+fn generate_config(
+    _args: &Args,
+    config_args: &GenerateConfigArgs,
+    _config: &Config,
+    flake: &NixosFlake,
+) -> Result<()> {
+    deploy::generate_config(&config_args.directory, flake)
 }
 
 fn dry_update(
@@ -145,6 +175,9 @@ fn run_deploy() -> Result<()> {
     let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
 
     match args.action {
+        Command::GenerateConfig(ref config_args) => {
+            generate_config(&args, config_args, &config, &flake)
+        }
         Command::Install(ref install_args) => install(&args, install_args, &config, &flake),
         Command::DryUpdate(ref dry_update_args) => {
             dry_update(&args, dry_update_args, &config, &flake)
@@ -155,10 +188,6 @@ fn run_deploy() -> Result<()> {
 }
 
 /// The kuutamo program entry point
-pub fn main() {
-    let res = run_deploy();
-    if let Err(e) = res {
-        eprintln!("{}", e);
-        std::process::exit(1);
-    }
+pub fn main() -> Result<()> {
+    run_deploy()
 }

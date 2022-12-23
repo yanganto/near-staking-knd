@@ -1,4 +1,7 @@
-{ raidLevel ? 1 }:
+{ config
+, lib
+, ...
+}:
 let
   biosBoot = {
     type = "partition";
@@ -33,10 +36,10 @@ let
   };
 in
 {
-  disk = {
-    nvme0n1 = {
+  disko.devices = {
+    disk = lib.genAttrs config.kuutamo.disko.disks (disk: {
       type = "disk";
-      device = "/dev/nvme0n1";
+      device = disk;
       content = {
         type = "table";
         format = "gpt";
@@ -46,42 +49,29 @@ in
           raidPart
         ];
       };
-    };
-    nvme1n1 = {
-      type = "disk";
-      device = "/dev/nvme1n1";
-      content = {
-        type = "table";
-        format = "gpt";
-        partitions = [
-          biosBoot
-          efiBoot
-          raidPart
-        ];
-      };
-    };
-  };
+    });
 
-  mdadm = {
-    boot = {
-      type = "mdadm";
-      # if one disk fails we can boot at least a kernel and show what is going on.
-      level = 1;
-      # metadata 1.0 so we can use it as an esp partition
-      metadata = "1.0";
-      content = {
-        type = "filesystem";
-        format = "vfat";
-        mountpoint = "/boot";
+    mdadm = {
+      boot = {
+        type = "mdadm";
+        # if one disk fails we can boot at least a kernel and show what is going on.
+        level = 1;
+        # metadata 1.0 so we can use it as an esp partition
+        metadata = "1.0";
+        content = {
+          type = "filesystem";
+          format = "vfat";
+          mountpoint = "/boot";
+        };
       };
-    };
-    root = {
-      type = "mdadm";
-      level = raidLevel;
-      content = {
-        type = "filesystem";
-        format = "ext4";
-        mountpoint = "/";
+      root = {
+        type = "mdadm";
+        level = config.kuutamo.disko.raidLevel;
+        content = {
+          type = "filesystem";
+          format = "ext4";
+          mountpoint = "/";
+        };
       };
     };
   };

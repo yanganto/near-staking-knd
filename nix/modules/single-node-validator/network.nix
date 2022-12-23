@@ -17,8 +17,8 @@ in
     };
 
     kuutamo.network.ipv4.cidr = lib.mkOption {
-      type = lib.types.str;
-      default = "32";
+      type = lib.types.int;
+      default = 32;
     };
 
     kuutamo.network.ipv4.gateway = lib.mkOption {
@@ -31,8 +31,8 @@ in
     };
 
     kuutamo.network.ipv6.cidr = lib.mkOption {
-      type = lib.types.str;
-      default = "128";
+      type = lib.types.int;
+      default = 128;
     };
 
     kuutamo.network.ipv6.gateway = lib.mkOption {
@@ -73,11 +73,11 @@ in
 
         [Network]
         ${lib.optionalString (cfg.ipv4.address != null) ''
-          Address = ${cfg.ipv4.address}/${cfg.ipv4.cidr}
+          Address = ${cfg.ipv4.address}/${toString cfg.ipv4.cidr}
           Gateway = ${cfg.ipv4.gateway}
         ''}
         ${lib.optionalString (cfg.ipv6.address != null) ''
-          Address = ${cfg.ipv6.address}/${cfg.ipv6.cidr}
+          Address = ${cfg.ipv6.address}/${toString cfg.ipv6.cidr}
           Gateway = ${cfg.ipv6.gateway}
         ''}
       '';

@@ -20,11 +20,9 @@ impl NixosFlake {
 /// Creates a flake directory
 pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
     let tmp_dir = Builder::new()
-        .prefix("kuutamo-flake")
+        .prefix("kuutamo-flake.")
         .tempdir()
         .context("cannot create temporary directory")?;
-    let flake_path = tmp_dir.path().join("flake.nix");
-    let mut flake_file = File::create(flake_path).context("could not create flake.nix")?;
 
     let nixos_flake = &config.global.flake;
     for (name, host) in &config.hosts {
@@ -41,32 +39,50 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
         .hosts
         .iter()
         .map(|(name, host)| {
-            let nixos_module = &host.nixos_module;
+            let mut nixos_modules = vec![];
+            nixos_modules.push(host.nixos_module.clone());
+            nixos_modules.extend_from_slice(host.extra_nixos_modules.as_slice());
+
+            let modules = nixos_modules
+                .iter()
+                .map(|m| format!("      near-staking-knd.nixosModules.\"{}\"", m))
+                .collect::<Vec<_>>()
+                .join("\n");
+
             format!(
-                r#"
-      nixosConfigurations."{name}" = near-staking-knd.inputs.nixpkgs.lib.nixosSystem {{
-        system = "x86_64-linux";
-        modules = [
-          near-staking-knd.nixosModules."{nixos_module}"
-          {{ kuutamo.host.settings = builtins.fromTOML (builtins.readFile ./{name}.toml); }}
-        ];
-      }};
-"#
+                r#"  nixosConfigurations."{name}" = near-staking-knd.inputs.nixpkgs.lib.nixosSystem {{
+    system = "x86_64-linux";
+    modules = [
+{modules}
+      {{ kuutamo.deployConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "validator.toml"; path = ./{name}.toml; }})); }}
+    ];
+  }};"#
             )
         })
         .collect::<Vec<_>>()
         .join("\n");
-    let flake_content = format!(
-        r#"
-{{
-  inputs.near-staking-knd.url = "{nixos_flake}";
-
-  outputs = {{ self, near-staking-knd, ... }}: {{
+    let configuration_path = tmp_dir.path().join("configurations.nix");
+    let mut configuration_file =
+        File::create(configuration_path).context("could not create configurations.nix")?;
+    let configuration_content = format!(
+        r#"{{ near-staking-knd, ... }}: {{
 {configurations}
-  }};
 }}
 "#
     );
+    configuration_file
+        .write_all(configuration_content.as_bytes())
+        .context("could not write configurations.nix")?;
+    let flake_content = format!(
+        r#"{{
+  inputs.near-staking-knd.url = "{nixos_flake}";
+
+  outputs = inputs: import ./configurations.nix inputs;
+}}
+"#
+    );
+    let flake_path = tmp_dir.path().join("flake.nix");
+    let mut flake_file = File::create(flake_path).context("could not create flake.nix")?;
     flake_file
         .write_all(flake_content.as_bytes())
         .context("could not write flake.nix")?;
@@ -81,7 +97,7 @@ pub fn test_nixos_flake() -> Result<()> {
     let config = parse_config(
         r#"
 [global]
-flake = "github:myfork/near-stagking-knd"
+flake = "github:myfork/near-staking-knd"
 
 [host_defaults]
 public_ssh_keys = [
@@ -108,7 +124,13 @@ ipv6_address = "2605:9880:400::3"
     let flake = generate_nixos_flake(&config)?;
     let flake_path = flake.path();
     let flake_nix = flake_path.join("flake.nix");
-    let args = vec!["--parse", flake_nix.to_str().unwrap()];
+    let tmp_dir = TempDir::new()?;
+    let args = vec![
+        "--parse",
+        flake_nix.to_str().unwrap(),
+        "--store",
+        tmp_dir.path().to_str().unwrap(),
+    ];
     let status = Command::new("nix-instantiate").args(args).status()?;
     assert_eq!(status.code(), Some(0));
     assert!(flake_path.join("validator-00.toml").exists());

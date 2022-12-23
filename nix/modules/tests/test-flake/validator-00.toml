@@ -1,0 +1,17 @@
+name = "validator-00"
+nixos_module = "single-node-validator-mainnet"
+extra_nixos_modules = ["qemu-test-profile"]
+ipv4_address = "192.168.42.2"
+ipv4_cidr = 24
+ipv4_gateway = "192.168.42.255"
+ipv6_address = "2605:9880:400:700:8:b10c:1932:3224"
+ipv6_cidr = 48
+ipv6_gateway = "2605:9880:400::1"
+install_ssh_user = "root"
+ssh_hostname = "192.168.42.2"
+public_ssh_keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbBp2dH2X3dcU1zh+xW3ZsdYROKpJd3n13ssOP092qE joerg@turingmachine"]
+disks = ["/dev/vdb", "/dev/vdc"]
+
+[validator_keys]
+key_file = "validator_key.json"
+node_key_file = "node_key.json"

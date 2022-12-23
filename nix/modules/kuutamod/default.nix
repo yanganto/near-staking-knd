@@ -4,7 +4,6 @@
 , ...
 }:
 let
-  kuutamod = pkgs.callPackage ../../pkgs/kuutamod.nix { };
   cfg = config.kuutamo.kuutamod;
 in
 {
@@ -52,6 +51,14 @@ in
         Whether to open ports used by neard
       '';
     };
+
+    package = lib.mkOption {
+      type = lib.types.package;
+      description = lib.mdDoc ''
+        Kuutamod package to use
+      '';
+    };
+
     publicAddresses = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
@@ -83,7 +90,7 @@ in
 
     environment.systemPackages = [
       # for kuutamoctl
-      kuutamod
+      cfg.package
     ];
 
     # this is useful for kuutamodctl
@@ -183,7 +190,7 @@ in
               ''}"
               # we need to execute this as the neard user so we get access to private tmp
             ];
-          ExecStart = "${kuutamod}/bin/kuutamod";
+          ExecStart = "${cfg.package}/bin/kuutamod";
         };
     };
 

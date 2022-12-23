@@ -11,9 +11,11 @@
         self'.packages.treefmt
         pkgs.clippy
       ];
+      stdenv' = if pkgs.stdenv.hostPlatform.isGnu then pkgs.fastStdenv else pkgs.stdenv;
     in
     {
-      devShells.default = pkgs.mkShell {
+      devShells.default = stdenv'.mkDerivation {
+        name = "env";
         buildInputs =
           formatters
           ++ [
@@ -43,6 +45,7 @@
             pkgs.rust-analyzer
             pkgs.cargo-watch
             pkgs.clippy
+            pkgs.mold
 
             # kuutamod deps
             self'.packages.neard

@@ -6,6 +6,7 @@
 , mypy
 , python3
 , runCommand
+, cargoLock
 , enableLint ? false
 ,
 }:
@@ -17,7 +18,7 @@ rustPlatform.buildRustPackage ({
     install -D ${../../Cargo.lock} $out/Cargo.lock
     cp -r ${../../src} $out/src
   '';
-  cargoLock.lockFile = ../../Cargo.lock;
+  inherit cargoLock;
 
   buildInputs = [ openssl ];
   nativeBuildInputs = [ pkg-config python3.pkgs.pytest ] ++ lib.optionals enableLint [ clippy mypy ];

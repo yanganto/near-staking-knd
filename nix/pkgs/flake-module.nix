@@ -1,5 +1,4 @@
 { self
-, fenix
 , ...
 }: {
   perSystem =
@@ -7,71 +6,31 @@
     , inputs'
     , pkgs
     , ...
-    }: {
-      packages = {
-        neard = pkgs.callPackage ./neard/stable.nix {
-          rustToolchain_1_63 = inputs'.fenix.packages.toolchainOf {
-            channel = "stable";
-            date = "2022-08-11";
-            sha256 = "sha256-KXx+ID0y4mg2B3LHp7IyaiMrdexF6octADnAtFIOjrY=";
-          };
+    }:
+    let
+      cargoLock = {
+        lockFile = ../../Cargo.lock;
+        outputHashes = {
+          "format_serde_error-0.3.0" = "sha256-R4zD1dAfB8OmlfYUDsDjevMkjfIWGtwLRRYGGRvZ8F4=";
         };
+      };
+    in
+    {
+      packages = {
+        neard = pkgs.callPackage ./neard/stable.nix { };
         neard-unstable = pkgs.callPackage ./neard/unstable.nix { };
         inherit (pkgs.callPackages ./near-cli/overrides.nix { }) near-cli;
 
-        kuutamod = pkgs.callPackage ./kuutamod.nix { };
+        kuutamod = pkgs.callPackage ./kuutamod.nix {
+          inherit cargoLock;
+        };
+        kuutamo = pkgs.callPackage ./kuutamo.nix {
+          inherit cargoLock;
+          inherit (inputs'.nixos-remote.packages) nixos-remote;
+        };
 
-        treefmt = self.inputs.treefmt-nix.lib.mkWrapper pkgs {
-          # Used to find the project root
-          projectRootFile = "flake.lock";
-
-          programs.rustfmt.enable = true;
-
-          settings.formatter = {
-            nix = {
-              command = "sh";
-              options = [
-                "-eucx"
-                ''
-                  # First deadnix
-                  ${pkgs.lib.getExe pkgs.deadnix} --edit "$@"
-                  # Then nixpkgs-fmt
-                  ${pkgs.lib.getExe pkgs.nixpkgs-fmt} "$@"
-                ''
-                "--"
-              ];
-              includes = [ "*.nix" ];
-              excludes = [ "nix/pkgs/near-cli/*.nix" ];
-            };
-
-            shell = {
-              command = "sh";
-              options = [
-                "-eucx"
-                ''
-                  # First shellcheck
-                  ${pkgs.lib.getExe pkgs.shellcheck} --external-sources --source-path=SCRIPTDIR "$@"
-                  # Then format
-                  ${pkgs.lib.getExe pkgs.shfmt} -i 2 -s -w "$@"
-                ''
-                "--"
-              ];
-              includes = [ "*.sh" ];
-            };
-
-            python = {
-              command = "sh";
-              options = [
-                "-eucx"
-                ''
-                  ${pkgs.lib.getExe pkgs.ruff} --fix "$@"
-                  ${pkgs.lib.getExe pkgs.python3.pkgs.black} "$@"
-                ''
-                "--" # this argument is ignored by bash
-              ];
-              includes = [ "*.py" ];
-            };
-          };
+        treefmt = pkgs.callPackage ./treefmt.nix {
+          inherit (self.inputs) treefmt-nix;
         };
 
         # passthru as convenience for the CI.
