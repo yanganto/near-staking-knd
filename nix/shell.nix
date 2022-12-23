@@ -16,6 +16,8 @@
     {
       devShells.default = stdenv'.mkDerivation {
         name = "env";
+        phases = [ "buildPhase" ];
+        buildPhase = "touch $out";
         buildInputs =
           formatters
           ++ [
