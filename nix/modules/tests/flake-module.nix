@@ -31,8 +31,8 @@
         generated-flake-is-same = pkgs.runCommand "generated-flake-is-same" { } ''
           if ! diff -Naur "${generated-flake}" "${./test-flake}"; then
             echo "Generated configuration in ./test-flake is no longer up-to-date!!" >&2
-            echo "Get the updated configuration from:" >&2
-            echo "  ${generated-flake}" >&2
+            echo "run the following command:" >&2
+            echo "$ just ./nix/modules/tests/generate-test-flake" >&2
             exit 1
           fi
         '';
