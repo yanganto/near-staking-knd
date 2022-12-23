@@ -35,6 +35,7 @@
             echo "$ just ./nix/modules/tests/generate-test-flake" >&2
             exit 1
           fi
+          touch $out
         '';
         install-nixos = pkgs.callPackage ./install-nixos.nix {
           inherit self makeTest' eval-config kexec-installer;
