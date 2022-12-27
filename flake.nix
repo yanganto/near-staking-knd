@@ -7,6 +7,7 @@
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
 
   inputs.srvos.url = "github:numtide/srvos";
+  inputs.srvos.inputs.nixpkgs.follows = "nixpkgs";
 
   inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
 
