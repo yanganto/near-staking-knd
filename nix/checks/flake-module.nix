@@ -1,12 +1,8 @@
-{ self, ... }:
+{ ... }:
 {
   perSystem = { self', pkgs, ... }:
     {
       checks = {
-        format = pkgs.callPackage ./check-format.nix {
-          inherit self;
-          inherit (self'.devShells.default) formatters;
-        };
         kuutamod-unit-tests = pkgs.callPackage ./kuutamod-unit-tests.nix {
           neard = self'.packages.neard;
           kuutamod = self'.packages.kuutamod;

@@ -1,6 +1,8 @@
-{ self
-, ...
+{ ...
 }: {
+  imports = [
+    ./treefmt.nix
+  ];
   perSystem =
     { self'
     , inputs'
@@ -29,9 +31,6 @@
           inherit (inputs'.nixos-remote.packages) nixos-remote;
         };
 
-        treefmt = pkgs.callPackage ./treefmt.nix {
-          inherit (self.inputs) treefmt-nix;
-        };
 
         # passthru as convenience for the CI.
         nix-update = pkgs.nix-update;
