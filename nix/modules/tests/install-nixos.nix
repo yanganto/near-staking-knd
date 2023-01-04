@@ -1,9 +1,7 @@
-{ lib
-, self
+{ self
 , kuutamo
 , openssh
 , makeTest'
-, writeShellScriptBin
 , validator-system
 , kexec-installer
 , stdenv
@@ -12,7 +10,7 @@
 makeTest' {
   name = "nixos-remote";
   nodes = {
-    installer = {
+    installer = { pkgs, lib, ... }: {
       virtualisation.vlans = [ 1 ];
       systemd.network = {
         enable = true;
@@ -25,22 +23,18 @@ makeTest' {
       };
 
       documentation.enable = false;
-      environment.etc.sshKey = {
-        source = ./ssh-keys/ssh;
-        mode = "0600";
-      };
+      system.activationScripts.rsa-key = ''
+        ${pkgs.coreutils}/bin/install -D -m600 ${./ssh-keys/ssh} /root/.ssh/id_rsa
+      '';
       environment.systemPackages = [
-        (writeShellScriptBin "run-kuutamo" ''
+        (writeShellScriptBin "install-kuutamo" ''
           set -x
           set -eu -o pipefail
-          eval $(ssh-agent)
-          ssh-add /etc/sshKey
           # our test config will read from here
           cp -r ${self} /root/near-staking-knd
           exec ${lib.getExe kuutamo} --config "${./test-config.toml}" --yes install --kexec-url ${kexec-installer}/nixos-kexec-installer-${stdenv.hostPlatform.system}.tar.gz
         '')
       ];
-      programs.ssh.startAgent = true;
       system.extraDependencies = [
         validator-system.config.system.build.toplevel
         validator-system.config.system.build.disko
@@ -86,7 +80,7 @@ makeTest' {
 
     installer.wait_for_unit("network.target")
     installer.succeed("ping -c1 192.168.42.2")
-    installer.succeed("run-kuutamo >&2")
+    installer.succeed("install-kuutamo >&2")
     installed.shutdown()
 
     new_machine = create_test_machine(oldmachine=installed, args={ "name": "after_install" })
