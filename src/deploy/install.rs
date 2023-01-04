@@ -1,6 +1,8 @@
 use anyhow::{bail, Context, Result};
 use log::info;
-use std::process::Command;
+use std::{path::PathBuf, process::Command};
+
+use crate::deploy::secrets::Secrets;
 
 use super::{Host, NixosFlake};
 
@@ -15,10 +17,30 @@ pub fn install(hosts: &[Host], kexec_url: &str, flake: &NixosFlake) -> Result<()
             } else {
                 format!("{}@{}", host.install_ssh_user, host.ssh_hostname)
             };
+
+            let mut secret_files = vec![];
+            let validator_key: Option<PathBuf>;
+            let node_key: Option<PathBuf>;
+            if let Some(keys) = &host.validator_keys {
+                validator_key = Some(PathBuf::from("/var/lib/secrets/validator_key.json"));
+                node_key = Some(PathBuf::from("/var/lib/secrets/node_key.json"));
+                secret_files.push((
+                    validator_key.as_ref().unwrap().as_path(),
+                    keys.key_file.as_path(),
+                ));
+                secret_files.push((
+                    node_key.as_ref().unwrap().as_path(),
+                    keys.node_key_file.as_path(),
+                ));
+            }
+            let secrets =
+                Secrets::new(secret_files.iter()).context("failed to prepare uploading secrets")?;
             let flake_uri = format!("{}#{}", flake.path().display(), host.name);
             let args = &[
                 "--debug",
                 "--no-ssh-copy-id",
+                "--extra-files",
+                &format!("{}", secrets.path().display()),
                 "--kexec",
                 kexec_url,
                 "--flake",

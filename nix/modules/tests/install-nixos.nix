@@ -1,46 +1,38 @@
-{ lib
-, self
+{ self
 , kuutamo
 , openssh
 , makeTest'
-, writeShellScriptBin
 , validator-system
 , kexec-installer
 , stdenv
+, lib
 , ...
 }:
+
+let
+  shared = {
+    virtualisation.vlans = [ 1 ];
+    systemd.network = {
+      enable = true;
+
+      networks."10-eth1" = {
+        matchConfig.Name = "eth1";
+        linkConfig.RequiredForOnline = "no";
+      };
+    };
+    documentation.enable = false;
+  };
+in
 makeTest' {
   name = "nixos-remote";
   nodes = {
-    installer = {
-      virtualisation.vlans = [ 1 ];
-      systemd.network = {
-        enable = true;
+    installer = { pkgs, ... }: {
+      imports = [ shared ];
+      systemd.network.networks."10-eth1".networkConfig.Address = "192.168.42.1/24";
 
-        networks."10-eth1" = {
-          matchConfig.Name = "eth1";
-          linkConfig.RequiredForOnline = "no";
-          networkConfig.Address = "192.168.42.1/24";
-        };
-      };
-
-      documentation.enable = false;
-      environment.etc.sshKey = {
-        source = ./ssh-keys/ssh;
-        mode = "0600";
-      };
-      environment.systemPackages = [
-        (writeShellScriptBin "run-kuutamo" ''
-          set -x
-          set -eu -o pipefail
-          eval $(ssh-agent)
-          ssh-add /etc/sshKey
-          # our test config will read from here
-          cp -r ${self} /root/near-staking-knd
-          exec ${lib.getExe kuutamo} --config "${./test-config.toml}" --yes install --kexec-url ${kexec-installer}/nixos-kexec-installer-${stdenv.hostPlatform.system}.tar.gz
-        '')
-      ];
-      programs.ssh.startAgent = true;
+      system.activationScripts.rsa-key = ''
+        ${pkgs.coreutils}/bin/install -D -m600 ${./ssh-keys/ssh} /root/.ssh/id_rsa
+      '';
       system.extraDependencies = [
         validator-system.config.system.build.toplevel
         validator-system.config.system.build.disko
@@ -48,20 +40,11 @@ makeTest' {
       ] ++ builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
     };
     installed = {
-      virtualisation.vlans = [ 1 ];
-      systemd.network = {
-        enable = true;
-
-        networks."10-eth1" = {
-          matchConfig.Name = "eth1";
-          linkConfig.RequiredForOnline = "no";
-          networkConfig.Address = "192.168.42.2/24";
-        };
-      };
+      imports = [ shared ];
+      systemd.network.networks."10-eth1".networkConfig.Address = "192.168.42.2/24";
 
       virtualisation.emptyDiskImages = [ 4096 4096 ];
       virtualisation.memorySize = 4096;
-      documentation.enable = false;
       services.openssh.enable = true;
       services.openssh.useDns = false;
       users.users.root.openssh.authorizedKeys.keyFiles = [ ./ssh-keys/ssh.pub ];
@@ -86,7 +69,10 @@ makeTest' {
 
     installer.wait_for_unit("network.target")
     installer.succeed("ping -c1 192.168.42.2")
-    installer.succeed("run-kuutamo >&2")
+    # our test config will read from here
+    installer.succeed("cp -r ${self} /root/near-staking-knd")
+
+    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes install --kexec-url ${kexec-installer}/nixos-kexec-installer-${stdenv.hostPlatform.system}.tar.gz >&2")
     installed.shutdown()
 
     new_machine = create_test_machine(oldmachine=installed, args={ "name": "after_install" })
