@@ -138,6 +138,10 @@ impl Host {
 
         Secrets::new(secret_files.iter()).context("failed to prepare uploading secrets")
     }
+    /// The hostname to which we will deploy
+    pub fn deploy_ssh_target(&self) -> String {
+        format!("root@{}", self.ssh_hostname)
+    }
 }
 
 /// Global configuration affecting all hosts

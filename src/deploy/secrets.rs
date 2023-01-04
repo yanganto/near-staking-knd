@@ -53,12 +53,11 @@ impl Secrets {
     pub fn upload(&self, host: &Host) -> Result<()> {
         // Do proper logging here?
         println!("Upload secrets");
-        let target = format!("root@{}/", host.ssh_hostname);
         let path = self
             .path()
             .to_str()
             .context("Cannot convert secrets directory to string")?;
-        let args = vec!["-vrlF", path, &target];
+        let args = vec!["-vrlF", path, &host.deploy_ssh_target()];
         let status = Command::new("rsync").args(&args).status();
         let status = status.with_context(|| format!("rsync failed (rsync {})", args.join(" ")))?;
         if !status.success() {
