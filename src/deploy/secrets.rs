@@ -26,7 +26,7 @@ impl Secrets {
             let dir = secret_path.parent().with_context(|| {
                 format!("Cannot get parent of directory: {}", secret_path.display())
             })?;
-            fs::create_dir_all(&dir).with_context(|| format!("cannot create {}", dir.display()))?;
+            fs::create_dir_all(dir).with_context(|| format!("cannot create {}", dir.display()))?;
             let mut content = Vec::new();
             // read the whole file
             let mut f =
@@ -49,6 +49,7 @@ impl Secrets {
     }
 
     // rsync -vrlF -e "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" "$extra_files" "${ssh_connection}:/mnt/"
+    #[allow(dead_code)]
     pub fn upload(&self, host: &Host) -> Result<()> {
         // Do proper logging here?
         println!("Upload secrets");
@@ -57,7 +58,7 @@ impl Secrets {
             .path()
             .to_str()
             .context("Cannot convert secrets directory to string")?;
-        let args = vec!["-vrlF", &path, &target];
+        let args = vec!["-vrlF", path, &target];
         let status = Command::new("rsync").args(&args).status();
         let status = status.with_context(|| format!("rsync failed (rsync {})", args.join(" ")))?;
         if !status.success() {
