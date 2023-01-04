@@ -274,13 +274,13 @@ let
         sha512 = "Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==";
       };
     };
-    "@types/yargs-16.0.4" = {
+    "@types/yargs-16.0.5" = {
       name = "_at_types_slash_yargs";
       packageName = "@types/yargs";
-      version = "16.0.4";
+      version = "16.0.5";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/yargs/-/yargs-16.0.4.tgz";
-        sha512 = "T8Yc9wt/5LbJyCaLiHPReJa0kApcIgJ7Bn735GjItUfh08Z1pJvu8QZqb9s+mMvKV6WUQRV7K2R46YbjMXTTJw==";
+        url = "https://registry.npmjs.org/@types/yargs/-/yargs-16.0.5.tgz";
+        sha512 = "AxO/ADJOBFJScHbWhq2xAhlWP24rY4aCEG/NFaMvbT3X2MgRsLjhjQwsn0Zi5zn0LG9jUhCCZMeX9Dkuw6k+vQ==";
       };
     };
     "@types/yargs-parser-21.0.0" = {
@@ -2818,7 +2818,7 @@ in
       sources."@types/istanbul-reports-3.0.1"
       sources."@types/node-18.11.18"
       sources."@types/stack-utils-2.0.1"
-      sources."@types/yargs-16.0.4"
+      sources."@types/yargs-16.0.5"
       sources."@types/yargs-parser-21.0.0"
       sources."analytics-node-6.2.0"
       sources."ansi-align-3.0.1"
