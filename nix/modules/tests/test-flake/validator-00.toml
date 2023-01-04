@@ -13,5 +13,5 @@ public_ssh_keys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbBp2dH2X3dcU1zh+xW3Zsd
 disks = ["/dev/vdb", "/dev/vdc"]
 
 [validator_keys]
-key_file = "validator_key.json"
-node_key_file = "node_key.json"
+key_file = "/root/near-staking-knd/nix/modules/tests/validator_key.json"
+node_key_file = "/root/near-staking-knd/nix/modules/tests/node_key.json"
