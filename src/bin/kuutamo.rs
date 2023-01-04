@@ -138,30 +138,30 @@ fn dry_update(
     _args: &Args,
     dry_update_args: &DryUpdateArgs,
     config: &Config,
-    _flake: &NixosFlake,
+    flake: &NixosFlake,
 ) -> Result<()> {
     let hosts = filter_hosts(&dry_update_args.hosts, &config.hosts)?;
-    deploy::dry_update(&hosts)
+    deploy::dry_update(&hosts, flake)
 }
 
 fn update(
     _args: &Args,
     update_args: &UpdateArgs,
     config: &Config,
-    _flake: &NixosFlake,
+    flake: &NixosFlake,
 ) -> Result<()> {
     let hosts = filter_hosts(&update_args.hosts, &config.hosts)?;
-    deploy::update(&hosts)
+    deploy::update(&hosts, flake)
 }
 
 fn rollback(
     _args: &Args,
     rollback_args: &RollbackArgs,
     config: &Config,
-    _flake: &NixosFlake,
+    flake: &NixosFlake,
 ) -> Result<()> {
     let hosts = filter_hosts(&rollback_args.hosts, &config.hosts)?;
-    deploy::rollback(&hosts)
+    deploy::rollback(&hosts, flake)
 }
 
 fn run_deploy() -> Result<()> {

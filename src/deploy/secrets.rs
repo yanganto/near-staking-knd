@@ -5,8 +5,6 @@ use std::{path::Path, process::Command};
 use anyhow::{bail, Context, Result};
 use tempfile::{Builder, TempDir};
 
-use super::Host;
-
 pub struct Secrets {
     tmp_dir: TempDir,
 }
@@ -49,15 +47,14 @@ impl Secrets {
     }
 
     // rsync -vrlF -e "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" "$extra_files" "${ssh_connection}:/mnt/"
-    #[allow(dead_code)]
-    pub fn upload(&self, host: &Host) -> Result<()> {
+    pub fn upload(&self, ssh_target: &str) -> Result<()> {
         // Do proper logging here?
         println!("Upload secrets");
         let path = self
             .path()
             .to_str()
             .context("Cannot convert secrets directory to string")?;
-        let args = vec!["-vrlF", path, &host.deploy_ssh_target()];
+        let args = vec!["-vrlF", path, ssh_target];
         let status = Command::new("rsync").args(&args).status();
         let status = status.with_context(|| format!("rsync failed (rsync {})", args.join(" ")))?;
         if !status.success() {

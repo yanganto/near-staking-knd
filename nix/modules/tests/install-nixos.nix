@@ -79,5 +79,9 @@ makeTest' {
     new_machine.start()
     hostname = new_machine.succeed("hostname").strip()
     assert "validator-00" == hostname, f"'validator-00' != '{hostname}'"
+
+    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes dry-update >&2")
+    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes update >&2")
+    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes rollback >&2")
   '';
 }

@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 use toml;
 
 use super::secrets::Secrets;
+use super::NixosFlake;
 
 #[derive(Debug, Deserialize)]
 struct ConfigFile {
@@ -141,6 +142,10 @@ impl Host {
     /// The hostname to which we will deploy
     pub fn deploy_ssh_target(&self) -> String {
         format!("root@{}", self.ssh_hostname)
+    }
+    /// The hostname to which we will deploy
+    pub fn flake_uri(&self, flake: &NixosFlake) -> String {
+        format!("{}#{}", flake.path().display(), self.name)
     }
 }
 
