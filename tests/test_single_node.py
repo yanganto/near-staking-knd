@@ -51,7 +51,7 @@ def test_single_node(
         KUUTAMO_VALIDATOR_NETWORK_ADDR=f"127.0.0.1:{validator_port}",
         KUUTAMO_VOTER_NETWORK_ADDR=f"127.0.0.1:{voter_port}",
         KUUTAMO_VALIDATOR_KEY=str(validator_key),
-        KUUTAMO_PUBLIC_ADDRESSES="127.0.0.1,::1",
+        KUUTAMO_PUBLIC_ADDRESS="127.0.0.1",
         KUUTAMO_VALIDATOR_NODE_KEY=str(validator_node_key),
         KUUTAMO_VOTER_NODE_KEY=str(voter_node_key),
         KUUTAMO_NEARD_HOME=str(neard_home),

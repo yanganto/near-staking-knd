@@ -61,7 +61,7 @@ pub fn setup_validator(settings: &Settings) -> Result<NeardProcess> {
 
     update_neard_config(
         settings.neard_home.join("config.json"),
-        &settings.public_addresses,
+        &[settings.public_address],
         settings.validator_network_addr.port(),
         &settings.validator_node_public_key,
         &settings.validator_network_addr,
