@@ -9,6 +9,8 @@ use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use toml;
 
+use super::secrets::Secrets;
+
 #[derive(Debug, Deserialize)]
 struct ConfigFile {
     #[serde(default)]
@@ -113,6 +115,29 @@ pub struct Host {
 
     /// Validator keys used by neard
     pub validator_keys: Option<ValidatorKeys>,
+}
+
+impl Host {
+    /// Returns prepared secrets directory for host
+    pub fn secrets(&self) -> Result<Secrets> {
+        let mut secret_files = vec![];
+        let validator_key: Option<PathBuf>;
+        let node_key: Option<PathBuf>;
+        if let Some(keys) = &self.validator_keys {
+            validator_key = Some(PathBuf::from("/var/lib/secrets/validator_key.json"));
+            node_key = Some(PathBuf::from("/var/lib/secrets/node_key.json"));
+            secret_files.push((
+                validator_key.as_ref().unwrap().as_path(),
+                keys.key_file.as_path(),
+            ));
+            secret_files.push((
+                node_key.as_ref().unwrap().as_path(),
+                keys.node_key_file.as_path(),
+            ));
+        }
+
+        Secrets::new(secret_files.iter()).context("failed to prepare uploading secrets")
+    }
 }
 
 /// Global configuration affecting all hosts
