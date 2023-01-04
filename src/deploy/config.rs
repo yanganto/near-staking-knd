@@ -60,8 +60,10 @@ struct HostConfig {
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct ValidatorKeys {
-    key_file: PathBuf,
-    node_key_file: PathBuf,
+    // Near validator key
+    pub key_file: PathBuf,
+    // Near validator node key
+    pub node_key_file: PathBuf,
 }
 
 /// Global configuration affecting all hosts

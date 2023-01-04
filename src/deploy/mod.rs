@@ -14,4 +14,5 @@ mod flake;
 mod generate_config;
 mod install;
 mod rollback;
+mod secrets;
 mod update;
