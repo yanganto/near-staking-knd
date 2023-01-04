@@ -56,6 +56,13 @@ rustPlatform.buildRustPackage rec {
       )
     )
 
+    # Limit RocksDB file open numbers
+    (
+      lib.optional (lib.versionAtLeast version "1.31.0-rc.1") (
+        ./0003-rocksdb-max-open.patch
+      )
+    )
+
     (
       lib.optional (lib.versionAtLeast version "1.31.0-rc.1") (
         fetchpatch {
