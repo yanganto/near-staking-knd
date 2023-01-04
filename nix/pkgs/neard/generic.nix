@@ -47,6 +47,15 @@ rustPlatform.buildRustPackage rec {
         }
       )
     )
+
+    # Remove test dependency on contract
+    # Since we are not building tests, we can skip those.
+    (
+      lib.optional (lib.versionAtLeast version "1.31.0-rc.1") (
+        ./0002-rm-near-test-contracts.patch
+      )
+    )
+
     (
       lib.optional (lib.versionAtLeast version "1.31.0-rc.1") (
         fetchpatch {
