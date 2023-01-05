@@ -194,9 +194,9 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
     } else {
         None
     };
+
     let ipv4_address = host
         .ipv4_address
-        .or(default.ipv4_address)
         .with_context(|| format!("no ipv4_address provided for host.{}", name))?;
     let ipv4_cidr = host
         .ipv4_cidr
@@ -242,7 +242,6 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
 
     let ipv6_address = host
         .ipv6_address
-        .or(default.ipv6_address)
         .with_context(|| format!("no ipv6_address provided for hosts.{}", name))?;
     if !ipv6_address.is_ipv6() {
         format!(
