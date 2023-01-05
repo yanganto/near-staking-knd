@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ pkgs, config, lib, ... }:
 let
   cfg = config.kuutamo.network;
 in
@@ -64,6 +64,24 @@ in
 
     # we just have one interface called 'eth0'
     networking.usePredictableInterfaceNames = false;
+
+    systemd.services.log-network-status = {
+      wantedBy = [ "multi-user.target" ];
+      # No point in restarting this. We just need this after boot
+      restartIfChanged = false;
+
+      serviceConfig = {
+        Type = "oneshot";
+        StandardOutput = "journal+console";
+        ExecStart = [
+          # if we cannot get online still print what interfaces we have
+          "-${pkgs.systemd}/lib/systemd/systemd-networkd-wait-online -i eth0"
+          "${pkgs.iproute2}/bin/ip -c addr"
+          "${pkgs.iproute2}/bin/ip -c -6 route"
+          "${pkgs.iproute2}/bin/ip -c -4 route"
+        ];
+      };
+    };
 
     systemd.network = {
       enable = true;
