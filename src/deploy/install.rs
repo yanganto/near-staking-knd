@@ -12,7 +12,13 @@ use crate::deploy::command::status_to_pretty_err;
 use super::{Host, NixosFlake};
 
 /// Install a Validator on a given machine
-pub fn install(hosts: &[Host], kexec_url: &str, flake: &NixosFlake, no_reboot: bool) -> Result<()> {
+pub fn install(
+    hosts: &[Host],
+    kexec_url: &str,
+    flake: &NixosFlake,
+    debug: bool,
+    no_reboot: bool,
+) -> Result<()> {
     hosts
         .iter()
         .map(|host| {
@@ -27,7 +33,6 @@ pub fn install(hosts: &[Host], kexec_url: &str, flake: &NixosFlake, no_reboot: b
             let flake_uri = format!("{}#{}", flake.path().display(), host.name);
             let extra_files = format!("{}", secrets.path().display());
             let mut args = vec![
-                "--debug",
                 "--no-ssh-copy-id",
                 "--extra-files",
                 &extra_files,
@@ -36,6 +41,9 @@ pub fn install(hosts: &[Host], kexec_url: &str, flake: &NixosFlake, no_reboot: b
                 "--flake",
                 &flake_uri,
             ];
+            if debug {
+                args.push("--debug");
+            }
             if no_reboot {
                 args.push("--no-reboot");
             }

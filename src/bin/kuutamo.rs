@@ -22,6 +22,11 @@ struct InstallArgs {
     )]
     kexec_url: String,
 
+    /// Enables debug output in nixos-remote
+    #[clap(long, action)]
+    debug: bool,
+
+    /// Do not reboot after installation
     #[clap(long, action)]
     no_reboot: bool,
 }
@@ -85,7 +90,7 @@ struct Args {
 }
 
 fn ask_yes_no(prompt_text: &str) -> bool {
-    print!("{} ", prompt_text);
+    println!("{} ", prompt_text);
     let stdin = io::stdin();
     let mut line = String::new();
     if stdin.lock().read_line(&mut line).is_err() {
@@ -120,16 +125,17 @@ fn install(
     config: &Config,
     flake: &NixosFlake,
 ) -> Result<()> {
+    let hosts = filter_hosts(&install_args.hosts, &config.hosts)?;
     if !args.yes && !ask_yes_no(
             "Installing will remove any existing data from the configured hosts. Do you want to continue? (y/n)"
         ) {
         return Ok(());
     }
-    let hosts = filter_hosts(&install_args.hosts, &config.hosts)?;
     deploy::install(
         &hosts,
         &install_args.kexec_url,
         flake,
+        install_args.debug,
         install_args.no_reboot,
     )
 }
