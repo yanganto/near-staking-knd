@@ -22,6 +22,11 @@ struct InstallArgs {
     )]
     kexec_url: String,
 
+    /// Enables debug output in nixos-remote
+    #[clap(long, action)]
+    debug: bool,
+
+    /// Do not reboot after installation
     #[clap(long, action)]
     no_reboot: bool,
 }
@@ -130,6 +135,7 @@ fn install(
         &hosts,
         &install_args.kexec_url,
         flake,
+        install_args.debug,
         install_args.no_reboot,
     )
 }
