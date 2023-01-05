@@ -5,6 +5,8 @@ use std::{path::Path, process::Command};
 use anyhow::{bail, Context, Result};
 use tempfile::{Builder, TempDir};
 
+use crate::deploy::command::status_to_pretty_err;
+
 pub struct Secrets {
     tmp_dir: TempDir,
 }
@@ -56,20 +58,7 @@ impl Secrets {
             .context("Cannot convert secrets directory to string")?;
         let args = vec!["-vrlF", path, ssh_target];
         let status = Command::new("rsync").args(&args).status();
-        let status = status.with_context(|| format!("rsync failed (rsync {})", args.join(" ")))?;
-        if !status.success() {
-            match status.code() {
-                Some(code) => bail!(
-                    "rsync failed (rsync {}) with exit code: {}",
-                    args.join(" "),
-                    code
-                ),
-                None => bail!(
-                    "rsync failed (rsync {}) was terminated by a signal",
-                    args.join(" ")
-                ),
-            }
-        }
+        status_to_pretty_err(status, "rsync", &args)?;
         Ok(())
     }
 }

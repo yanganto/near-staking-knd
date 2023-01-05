@@ -1,6 +1,8 @@
-use anyhow::{bail, Context, Result};
+use anyhow::Result;
 use log::info;
 use std::process::Command;
+
+use crate::deploy::command::status_to_pretty_err;
 
 use super::{Host, NixosFlake};
 
@@ -31,22 +33,7 @@ pub fn install(hosts: &[Host], kexec_url: &str, flake: &NixosFlake) -> Result<()
             ];
             println!("$ nixos-remote {}", args.join(" "));
             let status = Command::new("nixos-remote").args(args).status();
-            let status = status.with_context(|| {
-                format!("nixos-remote failed (nixos-remote {})", args.join(" "))
-            })?;
-            if !status.success() {
-                match status.code() {
-                    Some(code) => bail!(
-                        "nixos-remote failed (nixos-remote {}) with exit code: {}",
-                        args.join(" "),
-                        code
-                    ),
-                    None => bail!(
-                        "nixos-remote (nixos-remote {}) was terminated by a signal",
-                        args.join(" ")
-                    ),
-                }
-            }
+            status_to_pretty_err(status, "nixos-remote", args)?;
             Ok(())
         })
         .collect::<Result<Vec<_>>>()?;
