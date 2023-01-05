@@ -12,7 +12,7 @@ pub fn rollback(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
         .map(|host| {
             info!("Rollback {}", host.name);
 
-            nixos_rebuild("rollback", host, flake, true)?;
+            nixos_rebuild("rollback", host, flake, false)?;
 
             Ok(())
         })
