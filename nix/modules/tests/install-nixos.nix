@@ -92,8 +92,7 @@ makeTest' {
     hostname = new_machine.succeed("hostname").strip()
     assert "validator-00" == hostname, f"'validator-00' != '{hostname}'"
 
-    breakpoint()
-    installer.wait_until_succeeds("timeout 2 ssh root@192.168.42.2 -- exit 0 >&2")
+    installer.wait_until_succeeds("ssh -o StrictHostKeyChecking=no root@192.168.42.2 -- exit 0 >&2")
     installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes dry-update >&2")
     installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes update >&2")
     installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes rollback >&2")
