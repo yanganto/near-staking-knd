@@ -37,7 +37,7 @@
           self.nixosModules.disko-partitioning-script
           self.nixosModules.networkd
           self.nixosModules.kuutamo-binary-cache
-          inputs.srvos.nixosModules.common
+          inputs.srvos.nixosModules.server
           inputs.disko.nixosModules.disko
         ];
 

@@ -105,16 +105,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1671817228,
-        "narHash": "sha256-1AI9Fl38fWLk8ZRaYpOeXjQQfIftHxTmqOaxtB21P1Y=",
+        "lastModified": 1672821735,
+        "narHash": "sha256-zzT6k76e2DifC0lJ7pMYcnTeMesR0pzYXCEGIqrBP7k=",
         "owner": "numtide",
         "repo": "nixos-remote",
-        "rev": "dccd39a201b849bba423158693b2d844e39c02fc",
+        "rev": "e4f04317f790eff35e3c850ae5586962cd590732",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
-        "ref": "kuutamo",
         "repo": "nixos-remote",
         "type": "github"
       }

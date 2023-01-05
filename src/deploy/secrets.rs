@@ -2,10 +2,10 @@ use std::fs::{self, File};
 use std::io::Read;
 use std::{path::Path, process::Command};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use tempfile::{Builder, TempDir};
 
-use super::Host;
+use crate::deploy::command::status_to_pretty_err;
 
 pub struct Secrets {
     tmp_dir: TempDir,
@@ -49,31 +49,16 @@ impl Secrets {
     }
 
     // rsync -vrlF -e "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" "$extra_files" "${ssh_connection}:/mnt/"
-    #[allow(dead_code)]
-    pub fn upload(&self, host: &Host) -> Result<()> {
+    pub fn upload(&self, ssh_target: &str) -> Result<()> {
         // Do proper logging here?
         println!("Upload secrets");
-        let target = format!("root@{}/", host.ssh_hostname);
         let path = self
             .path()
             .to_str()
             .context("Cannot convert secrets directory to string")?;
-        let args = vec!["-vrlF", path, &target];
+        let args = vec!["-vrlF", path, ssh_target];
         let status = Command::new("rsync").args(&args).status();
-        let status = status.with_context(|| format!("rsync failed (rsync {})", args.join(" ")))?;
-        if !status.success() {
-            match status.code() {
-                Some(code) => bail!(
-                    "rsync failed (rsync {}) with exit code: {}",
-                    args.join(" "),
-                    code
-                ),
-                None => bail!(
-                    "rsync failed (rsync {}) was terminated by a signal",
-                    args.join(" ")
-                ),
-            }
-        }
+        status_to_pretty_err(status, "rsync", &args)?;
         Ok(())
     }
 }

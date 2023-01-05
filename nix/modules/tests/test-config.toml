@@ -4,7 +4,7 @@ flake = "/root/near-staking-knd"
 
 [host_defaults]
 public_ssh_keys = [
-  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbBp2dH2X3dcU1zh+xW3ZsdYROKpJd3n13ssOP092qE joerg@turingmachine"
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMziQ+DhXsMxhx64DxUhR0G/DfSAz2pqAREDy/VUYEEF"
 ]
 validator_key_file = "/root/near-staking-knd/nix/modules/tests/validator_key.json"
 validator_node_key_file = "/root/near-staking-knd/nix/modules/tests/node_key.json"
@@ -12,6 +12,8 @@ disks = [ "/dev/vdb", "/dev/vdc" ]
 extra_nixos_modules = [ "qemu-test-profile" ]
 
 [hosts.validator-00]
+# nixos tests have predictable mac addresses and our `installed` machine has the index 01 in vlan 01
+mac_address  = "52:54:00:12:01:01"
 ipv4_address = "192.168.42.2"
 ipv4_gateway = "192.168.42.255"
 ipv4_cidr = 24

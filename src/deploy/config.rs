@@ -9,6 +9,9 @@ use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use toml;
 
+use super::secrets::Secrets;
+use super::NixosFlake;
+
 #[derive(Debug, Deserialize)]
 struct ConfigFile {
     #[serde(default)]
@@ -33,6 +36,8 @@ struct HostConfig {
     #[serde(default)]
     extra_nixos_modules: Vec<String>,
 
+    #[serde(default)]
+    pub mac_address: Option<String>,
     #[serde(default)]
     ipv6_address: Option<IpAddr>,
     #[serde(default)]
@@ -85,6 +90,9 @@ pub struct Host {
     /// Extra NixOS modules to include in the system
     pub extra_nixos_modules: Vec<String>,
 
+    /// Mac address of the public interface to use
+    pub mac_address: Option<String>,
+
     /// Public ipv4 address of the host
     pub ipv4_address: IpAddr,
     /// Cidr of the public ipv4 address
@@ -113,6 +121,37 @@ pub struct Host {
 
     /// Validator keys used by neard
     pub validator_keys: Option<ValidatorKeys>,
+}
+
+impl Host {
+    /// Returns prepared secrets directory for host
+    pub fn secrets(&self) -> Result<Secrets> {
+        let mut secret_files = vec![];
+        let validator_key: Option<PathBuf>;
+        let node_key: Option<PathBuf>;
+        if let Some(keys) = &self.validator_keys {
+            validator_key = Some(PathBuf::from("/var/lib/secrets/validator_key.json"));
+            node_key = Some(PathBuf::from("/var/lib/secrets/node_key.json"));
+            secret_files.push((
+                validator_key.as_ref().unwrap().as_path(),
+                keys.key_file.as_path(),
+            ));
+            secret_files.push((
+                node_key.as_ref().unwrap().as_path(),
+                keys.node_key_file.as_path(),
+            ));
+        }
+
+        Secrets::new(secret_files.iter()).context("failed to prepare uploading secrets")
+    }
+    /// The hostname to which we will deploy
+    pub fn deploy_ssh_target(&self) -> String {
+        format!("root@{}", self.ssh_hostname)
+    }
+    /// The hostname to which we will deploy
+    pub fn flake_uri(&self, flake: &NixosFlake) -> String {
+        format!("{}#{}", flake.path().display(), self.name)
+    }
 }
 
 /// Global configuration affecting all hosts
@@ -146,9 +185,18 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
     if !hostname_regex.is_match(&name) {
         bail!("a host's name must only contain letters from a to z, the digits from 0 to 9, and the hyphen (-). But not starting with a hyphen. got: '{}'", name);
     }
+    let mac_address = if let Some(ref a) = &host.mac_address {
+        let mac_address_regex = Regex::new(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$").unwrap();
+        if !mac_address_regex.is_match(a) {
+            bail!("mac address does match a valid format: {} (valid example value: 02:42:34:d1:18:7a)", a);
+        }
+        Some(a.clone())
+    } else {
+        None
+    };
+
     let ipv4_address = host
         .ipv4_address
-        .or(default.ipv4_address)
         .with_context(|| format!("no ipv4_address provided for host.{}", name))?;
     let ipv4_cidr = host
         .ipv4_cidr
@@ -194,7 +242,6 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
 
     let ipv6_address = host
         .ipv6_address
-        .or(default.ipv6_address)
         .with_context(|| format!("no ipv6_address provided for hosts.{}", name))?;
     if !ipv6_address.is_ipv6() {
         format!(
@@ -295,6 +342,7 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         extra_nixos_modules,
         install_ssh_user,
         ssh_hostname,
+        mac_address,
         ipv4_address,
         ipv4_cidr,
         ipv4_gateway,

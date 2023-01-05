@@ -6,6 +6,8 @@
 , kexec-installer
 , stdenv
 , lib
+, path
+, pkgs
 , ...
 }:
 
@@ -22,6 +24,13 @@ let
     };
     documentation.enable = false;
   };
+  qemu-common = import (path + "/nixos/lib/qemu-common.nix") {
+    inherit lib pkgs;
+  };
+  interfacesNumbered = config: lib.zipLists config.virtualisation.vlans (lib.range 1 255);
+  getNicFlags = config: lib.flip lib.concatMap
+    (interfacesNumbered config)
+    ({ fst, snd }: qemu-common.qemuNICFlags snd fst config.virtualisation.test.nodeNumber);
 in
 makeTest' {
   name = "nixos-remote";
@@ -49,16 +58,19 @@ makeTest' {
       services.openssh.useDns = false;
       users.users.root.openssh.authorizedKeys.keyFiles = [ ./ssh-keys/ssh.pub ];
     };
+
+
   };
-  testScript = ''
+  testScript = { nodes, ... }: ''
     def create_test_machine(oldmachine=None, args={}): # taken from <nixpkgs/nixos/tests/installer.nix>
         machine = create_machine({
           "qemuFlags":
             '-cpu max -m 4024 -virtfs local,path=/nix/store,security_model=none,mount_tag=nix-store,'
             f' -drive file={oldmachine.state_dir}/empty0.qcow2,id=drive1,if=none,index=1,werror=report'
-            f' -device virtio-blk-pci,drive=drive1'
+            ' -device virtio-blk-pci,drive=drive1'
             f' -drive file={oldmachine.state_dir}/empty1.qcow2,id=drive2,if=none,index=2,werror=report'
-            f' -device virtio-blk-pci,drive=drive2'
+            ' -device virtio-blk-pci,drive=drive2'
+            ' ${toString (getNicFlags nodes.installed)}'
         } | args)
         driver.machines.append(machine)
         return machine
@@ -72,12 +84,20 @@ makeTest' {
     # our test config will read from here
     installer.succeed("cp -r ${self} /root/near-staking-knd")
 
-    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes install --kexec-url ${kexec-installer}/nixos-kexec-installer-${stdenv.hostPlatform.system}.tar.gz >&2")
+    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes install --no-reboot --kexec-url ${kexec-installer}/nixos-kexec-installer-${stdenv.hostPlatform.system}.tar.gz >&2")
+    installer.succeed("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.42.2 -- reboot >&2")
     installed.shutdown()
 
     new_machine = create_test_machine(oldmachine=installed, args={ "name": "after_install" })
     new_machine.start()
     hostname = new_machine.succeed("hostname").strip()
     assert "validator-00" == hostname, f"'validator-00' != '{hostname}'"
+
+    installer.wait_until_succeeds("ssh -o StrictHostKeyChecking=no root@192.168.42.2 -- exit 0 >&2")
+    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes dry-update >&2")
+    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes update >&2")
+    installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes update >&2")
+    # XXX find out how we can make persist more than one profile in our test
+    #installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes rollback >&2")
   '';
 }

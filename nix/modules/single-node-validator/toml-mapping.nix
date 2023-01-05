@@ -23,6 +23,8 @@ in
     # FIXME: this should be provided by kuutamoctl
     users.extraUsers.root.openssh.authorizedKeys.keys = cfg.public_ssh_keys;
 
+    kuutamo.network.macAddress = cfg.mac_address or null;
+
     kuutamo.network.ipv4.address = cfg.ipv4_address;
     kuutamo.network.ipv4.gateway = cfg.ipv4_gateway;
     kuutamo.network.ipv4.cidr = cfg.ipv4_cidr;
