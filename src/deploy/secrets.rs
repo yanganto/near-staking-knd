@@ -2,7 +2,7 @@ use std::fs::{self, File};
 use std::io::Read;
 use std::{path::Path, process::Command};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 use tempfile::{Builder, TempDir};
 
 use crate::deploy::command::status_to_pretty_err;

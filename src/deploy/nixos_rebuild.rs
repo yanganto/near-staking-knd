@@ -4,6 +4,7 @@ use crate::deploy::command;
 
 use super::{Host, NixosFlake};
 use anyhow::{Context, Result};
+use log::warn;
 
 /// Runs nixos-rebuild on the given host
 pub fn nixos_rebuild(
@@ -41,8 +42,8 @@ pub fn nixos_rebuild(
         let status = Command::new("nixos-rebuild").args(&args).status();
         if let Err(e) = command::status_to_pretty_err(status, "nixos-rebuild", &args) {
             if i == 1 {
-                eprintln!("{}", e);
-                eprintln!("Retry...");
+                warn!("{}", e);
+                warn!("Retry...");
             } else {
                 return Err(e);
             }
@@ -52,7 +53,7 @@ pub fn nixos_rebuild(
             println!("$ nix-collect-garbage {}", gc_args.join(" "));
             let status = Command::new("nix-collect-garbage").args(gc_args).status();
             if let Err(e) = command::status_to_pretty_err(status, "nix-collect-garbage", &gc_args) {
-                eprintln!("garbage collection failed, but continue...: {}", e);
+                warn!("garbage collection failed, but continue...: {}", e);
             }
         }
     }
