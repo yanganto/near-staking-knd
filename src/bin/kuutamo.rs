@@ -21,6 +21,9 @@ struct InstallArgs {
         default_value = "https://github.com/nix-community/nixos-images/releases/download/nixos-22.11/nixos-kexec-installer-x86_64-linux.tar.gz"
     )]
     kexec_url: String,
+
+    #[clap(long, action)]
+    no_reboot: bool,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -123,7 +126,12 @@ fn install(
         return Ok(());
     }
     let hosts = filter_hosts(&install_args.hosts, &config.hosts)?;
-    deploy::install(&hosts, &install_args.kexec_url, flake)
+    deploy::install(
+        &hosts,
+        &install_args.kexec_url,
+        flake,
+        install_args.no_reboot,
+    )
 }
 fn generate_config(
     _args: &Args,
