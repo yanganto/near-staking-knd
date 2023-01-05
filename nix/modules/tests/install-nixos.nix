@@ -85,6 +85,7 @@ makeTest' {
     installer.succeed("cp -r ${self} /root/near-staking-knd")
 
     installer.succeed("${lib.getExe kuutamo} --config ${./test-config.toml} --yes install --no-reboot --kexec-url ${kexec-installer}/nixos-kexec-installer-${stdenv.hostPlatform.system}.tar.gz >&2")
+    installer.succeed("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.42.2 -- reboot >&2")
     installed.shutdown()
 
     new_machine = create_test_machine(oldmachine=installed, args={ "name": "after_install" })
