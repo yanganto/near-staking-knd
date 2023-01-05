@@ -49,10 +49,16 @@ pub fn nixos_rebuild(
             }
         }
         if collect_garbage {
-            let gc_args = ["--delete-older-than", "14d"];
-            println!("$ nix-collect-garbage {}", gc_args.join(" "));
-            let status = Command::new("nix-collect-garbage").args(gc_args).status();
-            if let Err(e) = command::status_to_pretty_err(status, "nix-collect-garbage", &gc_args) {
+            let ssh_args = [
+                &target,
+                "--",
+                "nix-collect-garbage",
+                "--delete-older-than",
+                "14d",
+            ];
+            println!("$ ssh {}", ssh_args.join(" "));
+            let status = Command::new("ssh").args(ssh_args).status();
+            if let Err(e) = command::status_to_pretty_err(status, "ssh", &ssh_args) {
                 warn!("garbage collection failed, but continue...: {}", e);
             }
         }
