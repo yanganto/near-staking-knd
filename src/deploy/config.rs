@@ -37,6 +37,8 @@ struct HostConfig {
     extra_nixos_modules: Vec<String>,
 
     #[serde(default)]
+    pub mac_address: Option<String>,
+    #[serde(default)]
     ipv6_address: Option<IpAddr>,
     #[serde(default)]
     ipv6_gateway: Option<IpAddr>,
@@ -87,6 +89,9 @@ pub struct Host {
 
     /// Extra NixOS modules to include in the system
     pub extra_nixos_modules: Vec<String>,
+
+    /// Mac address of the public interface to use
+    pub mac_address: Option<String>,
 
     /// Public ipv4 address of the host
     pub ipv4_address: IpAddr,
@@ -180,6 +185,15 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
     if !hostname_regex.is_match(&name) {
         bail!("a host's name must only contain letters from a to z, the digits from 0 to 9, and the hyphen (-). But not starting with a hyphen. got: '{}'", name);
     }
+    let mac_address = if let Some(ref a) = &host.mac_address {
+        let mac_address_regex = Regex::new(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$").unwrap();
+        if !mac_address_regex.is_match(a) {
+            bail!("mac address does match a valid format: {} (valid example value: 02:42:34:d1:18:7a)", a);
+        }
+        Some(a.clone())
+    } else {
+        None
+    };
     let ipv4_address = host
         .ipv4_address
         .or(default.ipv4_address)
@@ -329,6 +343,7 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
         extra_nixos_modules,
         install_ssh_user,
         ssh_hostname,
+        mac_address,
         ipv4_address,
         ipv4_cidr,
         ipv4_gateway,

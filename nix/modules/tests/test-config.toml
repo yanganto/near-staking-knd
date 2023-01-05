@@ -12,6 +12,8 @@ disks = [ "/dev/vdb", "/dev/vdc" ]
 extra_nixos_modules = [ "qemu-test-profile" ]
 
 [hosts.validator-00]
+# nixos tests have predictable mac addresses and our `installed` machine has the index 01 in vlan 01
+mac_address  = "52:54:00:12:01:01"
 ipv4_address = "192.168.42.2"
 ipv4_gateway = "192.168.42.255"
 ipv4_cidr = 24
