@@ -1,9 +1,6 @@
-{ self, ... }:
+{ self, lib, ... }:
 {
-  flake = { ... }:
-    let
-      inherit (self.inputs.nixpkgs) lib;
-    in
+  flake =
     {
       nixosConfigurations =
         let

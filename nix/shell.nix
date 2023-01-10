@@ -62,7 +62,7 @@
           ]
           ++ self'.packages.kuutamod.buildInputs;
         CORE_CONTRACTS = self.inputs.core-contracts;
-        nativeBuildInputs = self'.packages.kuutamod.nativeBuildInputs;
+        inherit (self'.packages.kuutamod) nativeBuildInputs;
         NEARD_VERSION = "${self'.packages.neard.version}";
         passthru = {
           inherit formatters;

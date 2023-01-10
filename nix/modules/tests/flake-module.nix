@@ -19,7 +19,7 @@
       '';
     in
     {
-      checks = lib.optionalAttrs (pkgs.stdenv.isLinux) {
+      checks = lib.optionalAttrs pkgs.stdenv.isLinux {
         kuutamod = import ./kuutamod.nix {
           inherit makeTest';
           inherit (self) nixosModules;

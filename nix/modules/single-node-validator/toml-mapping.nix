@@ -9,7 +9,7 @@ in
   options.kuutamo.deployConfig = lib.mkOption {
     default = { };
     description = lib.mdDoc "toml configuration from kuutamo cli";
-    type = settingsFormat.type;
+    inherit (settingsFormat) type;
   };
   # deployConfig is optional
   config = lib.mkIf (cfg != { }) {

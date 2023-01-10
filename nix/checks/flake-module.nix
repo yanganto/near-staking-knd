@@ -1,11 +1,11 @@
-{ ... }:
+_:
 {
   perSystem = { self', pkgs, ... }:
     {
       checks = {
         kuutamod-unit-tests = pkgs.callPackage ./kuutamod-unit-tests.nix {
-          neard = self'.packages.neard;
-          kuutamod = self'.packages.kuutamod;
+          inherit (self'.packages) neard;
+          inherit (self'.packages) kuutamod;
         };
         kuutamod-unit-tests-unstable = self'.checks.kuutamod-unit-tests.override {
           neard = self'.packages.neard-unstable;
