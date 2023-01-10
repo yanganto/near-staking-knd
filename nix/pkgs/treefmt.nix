@@ -24,7 +24,8 @@
               ''
                 export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.statix pkgs.deadnix pkgs.nixpkgs-fmt ]}
                 deadnix --edit "$@"
-                echo "$@" | xargs -P$(nproc) -n1 statix fix
+                # statix breaks flake.nix's requirement for making outputs a function
+                echo "$@" | xargs -P$(nproc) -n1 statix fix -i flake.nix node-env.nix
                 nixpkgs-fmt "$@"
               ''
               "--"
