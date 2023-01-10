@@ -18,7 +18,7 @@
 
         settings.formatter = {
           nix = {
-            command = "sh";
+            command = pkgs.runtimeShell;
             options = [
               "-eucx"
               ''
@@ -34,7 +34,7 @@
           };
 
           shell = {
-            command = "sh";
+            command = pkgs.runtimeShell;
             options = [
               "-eucx"
               ''
@@ -47,7 +47,7 @@
           };
 
           python = {
-            command = "sh";
+            command = pkgs.runtimeShell;
             options = [
               "-eucx"
               ''
