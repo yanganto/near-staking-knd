@@ -9,13 +9,13 @@ in
 {
   options.kuutamo.kuutamod = {
     validatorKeyFile = lib.mkOption {
-      type = (lib.types.either lib.types.path lib.types.str);
+      type = lib.types.either lib.types.path lib.types.str;
       description = ''
         A file which contains a public and private key for local account which belongs to the only local network validator (validator_key.json of the validator).
       '';
     };
     validatorNodeKeyFile = lib.mkOption {
-      type = (lib.types.either lib.types.path lib.types.str);
+      type = lib.types.either lib.types.path lib.types.str;
       description = ''
         A file which contains a public and private key for the validator node (node_key.json of the validator)
       '';

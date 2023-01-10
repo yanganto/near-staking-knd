@@ -1,6 +1,6 @@
 { self, inputs, ... }:
 {
-  flake = { ... }: {
+  flake = _: {
     nixosModules = {
       neard = { pkgs, lib, ... }: {
         kuutamo.neard.package = lib.mkDefault self.packages.${pkgs.system}.neard;

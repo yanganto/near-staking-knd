@@ -33,7 +33,7 @@
 
 
         # passthru as convenience for the CI.
-        nix-update = pkgs.nix-update;
+        inherit (pkgs) nix-update;
 
         default = self'.packages.kuutamod;
       }

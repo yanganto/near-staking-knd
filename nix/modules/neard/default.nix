@@ -87,7 +87,7 @@ in
     };
     users.groups.neard = { };
 
-    boot.kernel.sysctl = lib.mkIf (cfg.enableSolanaKernelTuning) {
+    boot.kernel.sysctl = lib.mkIf cfg.enableSolanaKernelTuning {
       # Increase socket buffer sizes
       "net.core.rmem_default" = 134217728;
       "net.core.rmem_max" = 134217728;
@@ -106,7 +106,7 @@ in
     ];
 
     systemd.services.neard = {
-      enable = config.kuutamo.neard.enable;
+      inherit (config.kuutamo.neard) enable;
       wantedBy = [ "multi-user.target" ];
       path = [
         pkgs.awscli2
@@ -134,7 +134,7 @@ in
             ''}
 
             if [[ ! -f /var/lib/neard/.finished ]]; then
-              ${lib.optionalString (cfg.generateNodeKey) ''
+              ${lib.optionalString cfg.generateNodeKey ''
                 runNeard ${cfg.package}/bin/neard --home /var/lib/neard init ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"}
               ''}
               ${lib.optionalString (cfg.s3.dataBackupDirectory != null) ''
@@ -199,7 +199,7 @@ in
         SystemCallArchitectures = "native";
         # blacklist some syscalls
         SystemCallFilter = [ "~@cpu-emulation @debug @keyring @mount @obsolete @privileged @setuid" ];
-      } // lib.optionalAttrs (cfg.enableSolanaKernelTuning) {
+      } // lib.optionalAttrs cfg.enableSolanaKernelTuning {
         LimitNOFILE = "1000000";
       };
     };
