@@ -6,6 +6,7 @@
   perSystem =
     { pkgs
     , config
+    , lib
     , ...
     }: {
       packages.treefmt = config.treefmt.build.wrapper;
@@ -21,10 +22,10 @@
             options = [
               "-eucx"
               ''
-                # First deadnix
-                ${pkgs.lib.getExe pkgs.deadnix} --edit "$@"
-                # Then nixpkgs-fmt
-                ${pkgs.lib.getExe pkgs.nixpkgs-fmt} "$@"
+                export PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils pkgs.statix pkgs.deadnix pkgs.nixpkgs-fmt ]}
+                deadnix --edit "$@"
+                echo "$@" | xargs -P$(nproc) -n1 statix fix
+                nixpkgs-fmt "$@"
               ''
               "--"
             ];
@@ -37,9 +38,7 @@
             options = [
               "-eucx"
               ''
-                # First shellcheck
                 ${pkgs.lib.getExe pkgs.shellcheck} --external-sources --source-path=SCRIPTDIR "$@"
-                # Then format
                 ${pkgs.lib.getExe pkgs.shfmt} -i 2 -s -w "$@"
               ''
               "--"
