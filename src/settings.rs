@@ -84,7 +84,7 @@ pub struct Settings {
     /// Kuutamod will add the configured validator node key and port number of this node to these
     /// addresses and expects each entry to be an ip address without the public key part
     #[clap(long, env = "KUUTAMO_PUBLIC_ADDRESS")]
-    pub public_address: IpAddr,
+    pub public_address: Option<IpAddr>,
 
     /// Bootnodes passed to neard
     #[clap(long, env = "KUUTAMO_NEARD_BOOTNODES")]

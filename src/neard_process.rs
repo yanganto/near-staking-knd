@@ -58,10 +58,14 @@ pub fn setup_validator(settings: &Settings) -> Result<NeardProcess> {
         &settings.neard_home.join("node_key.json"),
     )
     .context("failed to set validator node key")?;
-
+    let addresses = if let Some(addr) = settings.public_address {
+        vec![addr]
+    } else {
+        vec![]
+    };
     update_neard_config(
         settings.neard_home.join("config.json"),
-        &[settings.public_address],
+        &addresses,
         settings.validator_network_addr.port(),
         &settings.validator_node_public_key,
         &settings.validator_network_addr,
