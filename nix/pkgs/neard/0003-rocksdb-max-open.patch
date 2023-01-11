@@ -1,0 +1,44 @@
+diff --git a/core/store/src/db/rocksdb/snapshot.rs b/core/store/src/db/rocksdb/snapshot.rs
+index 2d78d19f8..c55a3f442 100644
+--- a/core/store/src/db/rocksdb/snapshot.rs
++++ b/core/store/src/db/rocksdb/snapshot.rs
+@@ -93,7 +93,10 @@ impl Snapshot {
+             return Err(SnapshotError::AlreadyExists(snapshot_path));
+         }
+ 
+-        let db = super::RocksDB::open(db_path, config, crate::Mode::ReadWriteExisting, temp)?;
++        let mut config = config.clone();
++        config.max_open_files = 500;
++        let db = super::RocksDB::open(db_path, &config, crate::Mode::ReadWriteExisting, temp)?;
++        // let db = super::RocksDB::open(db_path, config, crate::Mode::ReadWriteExisting, temp)?;
+         let cp = Checkpoint::new(&db.db).map_err(super::into_other)?;
+         cp.create_checkpoint(&snapshot_path)?;
+ 
+diff --git a/core/store/src/opener.rs b/core/store/src/opener.rs
+index 40b71e2a0..b8705ce7a 100644
+--- a/core/store/src/opener.rs
++++ b/core/store/src/opener.rs
+@@ -495,7 +495,10 @@ impl<'a> DBOpener<'a> {
+     ///
+     /// Use [`Self::create`] to create a new database.
+     fn open(&self, mode: Mode, want_version: DbVersion) -> std::io::Result<(RocksDB, DbMetadata)> {
+-        let db = RocksDB::open(&self.path, &self.config, mode, self.temp)?;
++        let mut config = self.config.clone();
++        config.max_open_files = 500;
++        let db = RocksDB::open(&self.path, &config, mode, self.temp)?;
++        // let db = RocksDB::open(&self.path, &self.config, mode, self.temp)?;
+         let metadata = DbMetadata::read(&db)?;
+         if want_version != metadata.version {
+             let msg = format!("unexpected DbVersion {}; expected {want_version}", metadata.version);
+@@ -507,7 +510,10 @@ impl<'a> DBOpener<'a> {
+ 
+     /// Creates a new database.
+     fn create(&self) -> std::io::Result<RocksDB> {
+-        RocksDB::open(&self.path, &self.config, Mode::Create, self.temp)
++        let mut config = self.config.clone();
++        config.max_open_files = 500;
++        RocksDB::open(&self.path, &config, Mode::Create, self.temp)
++        // RocksDB::open(&self.path, &self.config, Mode::Create, self.temp)
+     }
+ 
+     /// Creates a new snapshot for the database.

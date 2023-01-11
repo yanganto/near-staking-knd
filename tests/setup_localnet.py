@@ -218,6 +218,7 @@ def setup_network_config(near_home: Path, start_port: int) -> NearNetwork:
             data = json.loads(path.read_text())
             rpc_port = start_port + i * 2
             data["store"] = {"max_open_files": 512}
+            data["network"]["allow_private_ip_in_public_addrs"] = True
             data["rpc"]["addr"] = f"0.0.0.0:{rpc_port}"
             # change to track_all_shards true after this issue solved
             # https://github.com/near/nearcore/issues/4930

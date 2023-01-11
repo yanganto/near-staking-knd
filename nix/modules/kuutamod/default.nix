@@ -59,12 +59,13 @@ in
       '';
     };
 
-    publicAddresses = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
+    publicAddress = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
       description = ''
-        Comma-separated list of ip addresses to be written to neard configuration on which the validator is *directly* reachable.
-        Kuutamod will add the configured validator node key and port number of this node to these addresses.
+        The ip addresses of the validator is *directly* reachable.
+        Kuutamod will add the configured validator node key and port number of this node to these addresses and expects
+        each entry to be an ip address without the public key part
       '';
     };
   };
@@ -147,7 +148,7 @@ in
               "KUUTAMO_VALIDATOR_NODE_KEY=${cfg.validatorNodeKeyFile}"
             ]
             ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}"
-            ++ lib.optional (cfg.publicAddresses != [ ]) "KUUTAMO_PUBLIC_ADDRESSES=${lib.concatStringsSep "," cfg.publicAddresses}";
+            ++ lib.optional (cfg.publicAddress != null) "KUUTAMO_PUBLIC_ADDRESS=${cfg.publicAddress}";
 
           RuntimeDirectory = "kuutamod";
 

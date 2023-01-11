@@ -39,7 +39,7 @@ this information also by typing `kuutamod --help`):
   
 - `KUUTAMO_CONSUL_URL` (default: http://localhost:8500, optional), the consul agent url 
 - `KUUTAMO_CONSUL_TOKEN_FILE` (no default, optional), Consul token used for authentication, also see `https://www.consul.io/docs/security/acl/acl-tokens` 
-- `KUUTAMO_PUBLIC_ADDRESSES` Comma-separated list of ip addresses to be written
+- `KUUTAMO_PUBLIC_ADDRESS` Comma-separated list of ip addresses to be written
   to neard configuration on which the validator is *directly* reachable.
   Kuutamod will add the configured validator node key and port number of
   this node to these addresses.
