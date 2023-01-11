@@ -13,7 +13,7 @@
   inputs.core-contracts.url = "github:near/core-contracts";
   inputs.core-contracts.flake = false;
 
-  inputs.disko.url = "github:nix-community/disko/kuutamo";
+  inputs.disko.url = "github:nix-community/disko";
   inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
 
   inputs.nixos-remote.url = "github:numtide/nixos-remote";
