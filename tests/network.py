@@ -8,7 +8,7 @@ from typing import Optional
 
 
 def wait_for_port(
-    host: str, port: int, timeout: int = 60, proc: Optional[subprocess.Popen] = None
+    host: str, port: int, timeout: int = 90, proc: Optional[subprocess.Popen] = None
 ) -> None:
     """
     Wait for a tcp port to reachable. Optionally also checks if a server process is still alive

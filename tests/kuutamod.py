@@ -144,6 +144,10 @@ class Kuutamod:
         """Query the prometheus metrics for neard which managed by the kuutamod"""
         return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
 
+    def wait_metrics_port(self) -> None:
+        """Wait metrics port"""
+        wait_for_port("127.0.0.1", self.exporter_port)
+
     def wait_validator_port(self) -> None:
         """Wait validator port"""
         wait_for_port("127.0.0.1", self.validator_port)
