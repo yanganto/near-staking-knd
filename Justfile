@@ -13,15 +13,13 @@ create-staking-pool:
 upgrade-neard:
   nix-update --override-filename nix/pkgs/neard/stable.nix \
     --version-regex '^(\d+\.\d+\.\d+)$' \
-    -f nix/pkgs/neard/nix-update.nix \
-    --build --commit neard
+    --flake --build --commit neard
 
 # Upgrade neard-unstable package
 upgrade-neard-unstable:
   nix-update --override-filename nix/pkgs/neard/unstable.nix \
-    --version-regex '^(\d+\.\d+\.\d+-rc\.\d+)$' \
-    -f nix/pkgs/neard/nix-update.nix \
-    --build --commit neard-unstable --version=unstable
+    --version-regex '^(\d+\.\d+\.\d+-rc\.\d+)$' --version=unstable \
+    --flake --build --commit neard-unstable
 
 # Run kuutamo stack locally
 run:
