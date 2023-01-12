@@ -19,7 +19,7 @@ echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 
 
 ```console
-$ nix run github:kuutamolabs/near-staking-knd -- --version
+$ nix run github:kuutamolabs/near-staking-knd#kuutamod -- --version
 kuutamod 0.1.0
 ```
 

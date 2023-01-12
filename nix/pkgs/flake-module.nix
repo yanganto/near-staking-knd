@@ -35,7 +35,7 @@
         # passthru as convenience for the CI.
         inherit (pkgs) nix-update;
 
-        default = self'.packages.kuutamod;
+        default = self'.packages.kuutamo;
       }
       // (pkgs.lib.optionalAttrs (pkgs.system == "x86_64-linux") {
         near-bin = pkgs.callPackage ./neard/bin.nix { };
