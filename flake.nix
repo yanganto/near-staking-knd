@@ -20,6 +20,7 @@
   inputs.nixos-remote.inputs.nixpkgs.follows = "nixpkgs";
   inputs.nixos-remote.inputs.disko.follows = "disko";
   inputs.nixos-remote.inputs.nixos-images.follows = "nixos-images";
+  inputs.nixos-remote.inputs.treefmt-nix.follows = "treefmt-nix";
 
   inputs.nixos-images.url = "github:nix-community/nixos-images";
 
