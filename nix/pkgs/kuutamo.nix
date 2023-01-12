@@ -2,6 +2,8 @@
 , lib
 , runCommand
 , nix
+, openssh
+, rsync
 , cargoLock
 , nixos-remote
 , makeWrapper
@@ -23,7 +25,7 @@ rustPlatform.buildRustPackage {
   nativeBuildInputs = [ makeWrapper ];
 
   postInstall = ''
-    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-remote ]}
+    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-remote nix openssh rsync ]}
   '';
 
   checkInputs = [ nix ];

@@ -7,6 +7,7 @@ use super::{Host, NixosFlake};
 
 /// Rollback a nixos machine
 pub fn rollback(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
+    flake.show()?;
     hosts
         .iter()
         .map(|host| {

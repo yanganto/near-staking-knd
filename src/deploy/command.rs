@@ -12,21 +12,20 @@ where
     E: Sync,
     E: std::error::Error,
 {
-    let status =
-        res.with_context(|| format!("{} failed ({} {})", command, command, args.join(" ")))?;
+    let status = res.with_context(|| format!("failed to start this command: {}", command))?;
     if status.success() {
         return Ok(());
     }
     match status.code() {
         Some(code) => bail!(
-            "{} failed ({} {}) with exit code: {}",
+            "command {} failed ({} {}) with exit code: {}",
             command,
             command,
             args.join(" "),
             code
         ),
         None => bail!(
-            "{} ({} {}) was terminated by a signal",
+            "command {} ({} {}) was terminated by a signal",
             command,
             command,
             args.join(" ")

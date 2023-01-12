@@ -1,8 +1,10 @@
 use anyhow::{Context, Result};
 use std::io::Write;
+use std::process::Command;
 use std::{fs::File, path::Path};
 use tempfile::{Builder, TempDir};
 
+use super::command::status_to_pretty_err;
 use super::Config;
 
 /// The nixos flake
@@ -14,6 +16,23 @@ impl NixosFlake {
     /// Path to the nixos flake
     pub fn path(&self) -> &Path {
         self.tmp_dir.path()
+    }
+
+    /// This initializes the flake i.e. downloads all inputs but in a less
+    /// verbose way than other `nix flake` commands that will print all inputs
+    /// changed.
+    pub fn show(&self) -> Result<()> {
+        let args = vec![
+            "flake",
+            "show",
+            "--extra-experimental-features",
+            "flakes nix-command",
+            self.path()
+                .to_str()
+                .context("failed to convert temporary directory path to string")?,
+        ];
+        let status = Command::new("nix").args(&args).status();
+        status_to_pretty_err(status, "nix", &args).context("cannot show flake")
     }
 }
 

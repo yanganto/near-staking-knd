@@ -42,6 +42,7 @@ pub fn install(
     debug: bool,
     no_reboot: bool,
 ) -> Result<()> {
+    flake.show()?;
     hosts
         .iter()
         .map(|host| {
