@@ -2,7 +2,8 @@ use anyhow::{Context, Result};
 use ctrlc;
 use log::info;
 use std::{
-    process::Command,
+    fs,
+    process::{Command, ExitStatus},
     sync::mpsc::{channel, RecvTimeoutError},
     time::Duration,
 };
@@ -10,6 +11,28 @@ use std::{
 use crate::deploy::command::status_to_pretty_err;
 
 use super::{Host, NixosFlake};
+
+pub fn timeout_ssh(
+    host: &Host,
+    command: &[&str],
+    learn_known_host_key: bool,
+) -> Result<ExitStatus> {
+    let target = host.deploy_ssh_target();
+    let mut args = vec!["-o", "ConnectTimeout=10", "-o", "StrictHostKeyChecking=no"];
+    if !learn_known_host_key {
+        args.push("-o");
+        args.push("UserKnownHostsFile=/dev/null");
+    }
+    args.push(&target);
+    args.push("--");
+    args.extend(command);
+    println!("$ ssh {}", args.join(" "));
+    let status = Command::new("ssh")
+        .args(args)
+        .status()
+        .context("Failed to run ssh...")?;
+    Ok(status)
+}
 
 /// Install a Validator on a given machine
 pub fn install(
@@ -68,24 +91,28 @@ pub fn install(
             })
             .context("Error setting ctrl-C handler")?;
 
+            // wait for the machine to go down
+            loop {
+                if !timeout_ssh(host, &["exit", "0"], false)?.success() {
+                    break;
+                }
+                if !matches!(
+                    ctrlc_rx.recv_timeout(Duration::from_millis(500)),
+                    Err(RecvTimeoutError::Timeout)
+                ) {
+                    break;
+                }
+            }
+
             // Wait for the machine to come back and learn add it's ssh key to our host
-            while matches!(
-                ctrlc_rx.recv_timeout(Duration::from_millis(0)),
-                Err(RecvTimeoutError::Timeout)
-            ) {
-                let args = &[
-                    "-o",
-                    "ConnectTimeout=10",
-                    "-o",
-                    "StrictHostKeyChecking=no",
-                    &host.deploy_ssh_target(),
-                ];
-                println!("$ ssh {}", args.join(" "));
-                let status = Command::new("ssh")
-                    .args(args)
-                    .status()
-                    .context("Failed to run ssh...")?;
-                if status.success() {
+            loop {
+                if timeout_ssh(host, &["exit", "0"], true)?.success() {
+                    break;
+                }
+                if !matches!(
+                    ctrlc_rx.recv_timeout(Duration::from_millis(500)),
+                    Err(RecvTimeoutError::Timeout)
+                ) {
                     break;
                 }
             }
