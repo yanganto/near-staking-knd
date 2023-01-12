@@ -5,11 +5,9 @@
 
   perSystem =
     { pkgs
-    , config
     , lib
     , ...
     }: {
-      packages.treefmt = config.treefmt.build.wrapper;
       treefmt = {
         # Used to find the project root
         projectRootFile = "flake.lock";
