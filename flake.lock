@@ -110,11 +110,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1673538395,
-        "narHash": "sha256-hec6QYJ+0VuN5jeNOka0AWPthoGcscR3TjHU6RM2IEk=",
+        "lastModified": 1673543020,
+        "narHash": "sha256-fSUwh26H2Jlk9m137apSiWQcXTbrCH7ngS5Agi7dMJI=",
         "owner": "numtide",
         "repo": "nixos-remote",
-        "rev": "f9c0e28f12b815351454a2af29b9fd3a17826914",
+        "rev": "4294a471ba24ce2cb516d57e7fdbc65c3b9d5bdd",
         "type": "github"
       },
       "original": {
