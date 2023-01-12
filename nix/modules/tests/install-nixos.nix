@@ -47,6 +47,13 @@ makeTest' {
         validator-system.config.system.build.disko
         # make all flake inputs available
       ] ++ builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
+
+      # do not try to fetch stuff from the internet
+      nix.settings = {
+        substituters = lib.mkForce [ ];
+        hashed-mirrors = null;
+        connect-timeout = 1;
+      };
     };
     installed = {
       imports = [ shared ];

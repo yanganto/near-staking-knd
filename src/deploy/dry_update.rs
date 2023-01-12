@@ -7,6 +7,7 @@ use super::{Host, NixosFlake};
 
 /// Push update to server but do not activate it yet.
 pub fn dry_update(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
+    flake.show()?;
     hosts
         .iter()
         .map(|host| {

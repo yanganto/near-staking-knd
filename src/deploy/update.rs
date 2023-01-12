@@ -7,6 +7,7 @@ use super::{Host, NixosFlake};
 
 /// Update Validator on a given machine
 pub fn update(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
+    flake.show()?;
     hosts
         .iter()
         .map(|host| {
