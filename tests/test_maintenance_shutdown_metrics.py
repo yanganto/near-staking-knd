@@ -30,10 +30,11 @@ def test_maintenance_shutdown_metrics(
         debug=False,
     )
 
+    leader.wait_metrics_port()
+
     with Section("Wait leader validating"):
         while True:
             try:
-
                 res = leader.metrics()
                 if res.get('kuutamod_state{type="Validating"}') == "1":
                     break
