@@ -110,15 +110,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1673512139,
-        "narHash": "sha256-gnPdkML+BqlolVJBBw0+knd1Z++6anjdmHQzXiz+tBw=",
+        "lastModified": 1673538395,
+        "narHash": "sha256-hec6QYJ+0VuN5jeNOka0AWPthoGcscR3TjHU6RM2IEk=",
         "owner": "numtide",
         "repo": "nixos-remote",
-        "rev": "61a3eaa8dbf665cd82b74a7b5db91414f5e2d063",
+        "rev": "f9c0e28f12b815351454a2af29b9fd3a17826914",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
+        "ref": "detect-nixos-installer",
         "repo": "nixos-remote",
         "type": "github"
       }

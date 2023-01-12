@@ -105,6 +105,12 @@ pub fn install(
                 }
             }
 
+            // remove potential old ssh keys before adding new ones...
+            let _ = Command::new("ssh-keygen")
+                .args(["-R", &host.ssh_hostname])
+                .status()
+                .context("Failed to run ssh-keygen to remove old keys...")?;
+
             // Wait for the machine to come back and learn add it's ssh key to our host
             loop {
                 if timeout_ssh(host, &["exit", "0"], true)?.success() {
