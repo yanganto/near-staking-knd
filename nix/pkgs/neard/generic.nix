@@ -63,6 +63,13 @@ rustPlatform.buildRustPackage rec {
       )
     )
 
+    # patch cargo lock version
+    (
+      lib.optional (lib.versionAtLeast version "1.31.0-rc.2") (
+        ./0004-1.30.0-rc.2-cargo.lock.patch
+      )
+    )
+
     (
       lib.optional (lib.versionAtLeast version "1.31.0-rc.1") (
         fetchpatch {

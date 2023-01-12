@@ -1,0 +1,13 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 039b03841..97719a94b 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -3718,7 +3718,7 @@ dependencies = [
+ 
+ [[package]]
+ name = "neard"
+-version = "1.31.0-rc.1"
++version = "1.31.0-rc.2"
+ dependencies = [
+  "actix",
+  "ansi_term",
