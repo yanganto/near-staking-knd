@@ -50,12 +50,12 @@ fn force_symlink<P: AsRef<Path>, Q: AsRef<Path>>(original: P, link: Q) -> Result
 pub fn setup_validator(settings: &Settings) -> Result<NeardProcess> {
     force_symlink(
         &settings.validator_key,
-        &settings.neard_home.join("validator_key.json"),
+        settings.neard_home.join("validator_key.json"),
     )
     .context("failed to set validator key")?;
     force_symlink(
         &settings.validator_node_key,
-        &settings.neard_home.join("node_key.json"),
+        settings.neard_home.join("node_key.json"),
     )
     .context("failed to set validator node key")?;
     let addresses = if let Some(addr) = settings.public_address {
@@ -84,12 +84,12 @@ pub fn setup_validator(settings: &Settings) -> Result<NeardProcess> {
 /// Setup a neard process as a voter (neard process without a validator key)
 pub fn setup_voter(settings: &Settings) -> Result<NeardProcess> {
     // remove any old validator key as we start in non-validation mode.
-    force_unlink(&settings.neard_home.join("validator_key.json"))
+    force_unlink(settings.neard_home.join("validator_key.json"))
         .context("failed to remove validator")?;
 
     force_symlink(
         &settings.voter_node_key,
-        &settings.neard_home.join("node_key.json"),
+        settings.neard_home.join("node_key.json"),
     )
     .context("failed to set validator node key")?;
 

@@ -55,7 +55,7 @@ pub fn install(
 
             let secrets = host.secrets()?;
             let ssh_keys = flake.path().join(format!("{}-ssh-keys.pub", host.name));
-            fs::write(&ssh_keys, &host.public_ssh_keys.join("\n"))
+            fs::write(&ssh_keys, host.public_ssh_keys.join("\n"))
                 .context("Unable to write file")?;
             let flake_uri = format!("{}#{}", flake.path().display(), host.name);
             let extra_files = format!("{}", secrets.path().display());
