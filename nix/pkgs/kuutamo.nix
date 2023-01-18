@@ -8,6 +8,8 @@
 , nixos-remote
 , makeWrapper
 , neard
+, git
+, nixos-rebuild
 }:
 # FIXME: refactor this repository to have multiple workspaces
 rustPlatform.buildRustPackage {
@@ -31,7 +33,7 @@ rustPlatform.buildRustPackage {
 
   # neard is for generating the key
   postInstall = ''
-    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-remote nix openssh rsync neard ]}
+    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-remote nixos-rebuild nix git openssh rsync neard ]}
   '';
 
   checkInputs = [ nix ];

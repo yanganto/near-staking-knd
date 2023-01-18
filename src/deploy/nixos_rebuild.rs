@@ -38,29 +38,32 @@ pub fn nixos_rebuild(
         args.push("--rollback");
     }
     for i in 1..3 {
-        println!("$ nixos-remote {}", &args.join(" "));
+        println!("$ nixos-rebuild {}", &args.join(" "));
         let status = Command::new("nixos-rebuild").args(&args).status();
-        if let Err(e) = command::status_to_pretty_err(status, "nixos-rebuild", &args) {
-            if i == 1 {
-                warn!("{}", e);
-                warn!("Retry...");
-            } else {
-                return Err(e);
+        match command::status_to_pretty_err(status, "nixos-rebuild", &args) {
+            Ok(_) => break,
+            Err(e) => {
+                if i == 1 {
+                    warn!("{}", e);
+                    warn!("Retry...");
+                } else {
+                    return Err(e);
+                }
             }
-        }
-        if collect_garbage {
-            let ssh_args = [
-                &target,
-                "--",
-                "nix-collect-garbage",
-                "--delete-older-than",
-                "14d",
-            ];
-            println!("$ ssh {}", ssh_args.join(" "));
-            let status = Command::new("ssh").args(ssh_args).status();
-            if let Err(e) = command::status_to_pretty_err(status, "ssh", &ssh_args) {
-                warn!("garbage collection failed, but continue...: {}", e);
-            }
+        };
+    }
+    if collect_garbage {
+        let ssh_args = [
+            &target,
+            "--",
+            "nix-collect-garbage",
+            "--delete-older-than",
+            "14d",
+        ];
+        println!("$ ssh {}", ssh_args.join(" "));
+        let status = Command::new("ssh").args(ssh_args).status();
+        if let Err(e) = command::status_to_pretty_err(status, "ssh", &ssh_args) {
+            warn!("garbage collection failed, but continue...: {}", e);
         }
     }
     Ok(())
