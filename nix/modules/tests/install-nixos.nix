@@ -122,6 +122,7 @@ makeTest' {
       new_machine.succeed("test -f /var/lib/secrets/node_key.json")
       new_machine.succeed("test -f /var/lib/secrets/validator_key.json")
       new_machine.succeed("rm /var/lib/secrets/validator_key.json")
+      new_machine.wait_for_unit("consul.service")
 
       installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes dry-update >&2")
       # redeploying uploads the key
