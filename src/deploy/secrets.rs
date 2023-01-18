@@ -1,3 +1,6 @@
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::os::unix::fs::OpenOptionsExt;
 use std::path::PathBuf;
 use std::process::Command;
 use std::{fs, path::Path};
@@ -21,6 +24,10 @@ impl Secrets {
             .tempdir()
             .context("cannot create temporary directory")?;
 
+        let mut options = OpenOptions::new();
+        options.mode(0o600);
+        options.write(true);
+        options.create(true);
         for (to, content) in secrets {
             let secret_path = tmp_dir.path().join(to.strip_prefix("/").unwrap_or(to));
             let dir = secret_path.parent().with_context(|| {
@@ -28,7 +35,10 @@ impl Secrets {
             })?;
             fs::create_dir_all(dir).with_context(|| format!("cannot create {}", dir.display()))?;
 
-            fs::write(&secret_path, content).with_context(|| {
+            let mut file = options.open(&secret_path).with_context(|| {
+                format!("Cannot open secret {} for writing.", secret_path.display())
+            })?;
+            file.write_all(content.as_bytes()).with_context(|| {
                 format!(
                     "cannot write secret to temporary location at {}",
                     secret_path.display()
@@ -50,7 +60,9 @@ impl Secrets {
             .path()
             .to_str()
             .context("Cannot convert secrets directory to string")?;
-        let args = vec!["-vrlF", path, ssh_target];
+        let rsync_target = format!("{}:/", ssh_target);
+        let rsync_path = format!("{}/", path);
+        let args = vec!["-vrlF", "-e", "ssh", &rsync_path, &rsync_target];
         let status = Command::new("rsync").args(&args).status();
         status_to_pretty_err(status, "rsync", &args)?;
         Ok(())

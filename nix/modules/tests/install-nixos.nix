@@ -118,7 +118,15 @@ makeTest' {
       assert "validator-00" == hostname, f"'validator-00' != '{hostname}'"
 
       installer.wait_until_succeeds("ssh -o StrictHostKeyChecking=no root@192.168.42.2 -- exit 0 >&2")
+
+      new_machine.succeed("test -f /var/lib/secrets/node_key.json")
+      new_machine.succeed("test -f /var/lib/secrets/validator_key.json")
+      new_machine.succeed("rm /var/lib/secrets/validator_key.json")
+
       installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes dry-update >&2")
+      # redeploying uploads the key
+      new_machine.succeed("test -f /var/lib/secrets/validator_key.json")
+
       installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes update >&2")
       installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes update >&2")
       # XXX find out how we can make persist more than one profile in our test
