@@ -38,7 +38,7 @@ pub fn nixos_rebuild(
         args.push("--rollback");
     }
     for i in 1..3 {
-        println!("$ nixos-remote {}", &args.join(" "));
+        println!("$ nixos-rebuild {}", &args.join(" "));
         let status = Command::new("nixos-rebuild").args(&args).status();
         match command::status_to_pretty_err(status, "nixos-rebuild", &args) {
             Ok(_) => break,
