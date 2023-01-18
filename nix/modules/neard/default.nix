@@ -138,7 +138,7 @@ in
                 runNeard ${cfg.package}/bin/neard --home /var/lib/neard init ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"}
               ''}
               ${lib.optionalString (cfg.s3.dataBackupDirectory != null) ''
-                runNeard aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupDirectory} /var/lib/neard/data
+                runNeard aws s3 sync ${lib.optionalString (!cfg.s3.signRequests) "--no-sign-request"} --delete ${cfg.s3.dataBackupDirectory} /var/lib/neard/data/
               ''}
               ${lib.optionalString (cfg.s3.dataBackupTarball != null) ''
                 runNeard aws s3 --no-sign-request cp ${cfg.s3.dataBackupTarball} /var/lib/neard/data.tar.gz
