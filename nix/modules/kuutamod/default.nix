@@ -138,14 +138,19 @@ in
       serviceConfig =
         config.systemd.services.neard.serviceConfig
         // {
+          LoadCredential = lib.mkDefault [
+            "validator-key-file:${cfg.validatorKeyFile}"
+            "validator-node-key-file:${cfg.validatorNodeKeyFile}"
+          ];
+
           Environment =
             [
               "KUUTAMO_NEARD_HOME=/var/lib/neard"
               "KUUTAMO_NODE_ID=${cfg.nodeId}"
               "KUUTAMO_ACCOUNT_ID=${cfg.accountId}"
               "KUUTAMO_VOTER_NODE_KEY=/var/lib/neard/voter_node_key.json"
-              "KUUTAMO_VALIDATOR_KEY=${cfg.validatorKeyFile}"
-              "KUUTAMO_VALIDATOR_NODE_KEY=${cfg.validatorNodeKeyFile}"
+              "KUUTAMO_VALIDATOR_KEY=%d/validator-key-file"
+              "KUUTAMO_VALIDATOR_NODE_KEY=%d/validator-node-key-file"
             ]
             ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}"
             ++ lib.optional (cfg.publicAddress != null) "KUUTAMO_PUBLIC_ADDRESS=${cfg.publicAddress}";
