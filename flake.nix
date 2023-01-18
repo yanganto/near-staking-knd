@@ -1,8 +1,9 @@
 {
   description = "A supervisor for neard that implements failover for NEAR validators";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
-  inputs.flake-parts.url = "github:hercules-ci/flake-parts";
+  # Switch back after https://github.com/NixOS/nixpkgs/pull/210382
+  inputs.nixpkgs.url = "github:kuutamolabs/nixpkgs/kuutamo";
+  #inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
   inputs.srvos.url = "github:numtide/srvos";
   inputs.srvos.inputs.nixpkgs.follows = "nixpkgs";
