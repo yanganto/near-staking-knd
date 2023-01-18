@@ -32,6 +32,9 @@ pub fn nixos_rebuild(
         "true",
         "--target-host",
         &target,
+        "--build-host",
+        "",
+        "--use-substitutes",
         "--fast",
     ];
     if action == "rollback" {
