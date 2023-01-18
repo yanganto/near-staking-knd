@@ -1,14 +1,19 @@
 use anyhow::{bail, Context, Result};
 use format_serde_error::SerdeError;
+use log::info;
 use regex::Regex;
 use serde::Serialize;
 use serde_derive::Deserialize;
 use std::collections::HashMap;
 use std::fs;
+use std::io::ErrorKind;
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
+use std::process::Command;
+use tempfile::TempDir;
 use toml;
 
+use super::command::status_to_pretty_err;
 use super::secrets::Secrets;
 use super::NixosFlake;
 
@@ -21,6 +26,17 @@ struct ConfigFile {
     host_defaults: HostConfig,
     #[serde(default)]
     hosts: HashMap<String, HostConfig>,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
+pub struct NearKeyFile {
+    pub account_id: String,
+    pub public_key: String,
+    // Credential files generated which near cli works with have private_key
+    // rather than secret_key field.  To make it possible to read those from
+    // neard add private_key as an alias to this field so either will work.
+    #[serde(alias = "private_key")]
+    pub secret_key: String,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -66,9 +82,9 @@ struct HostConfig {
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct ValidatorKeys {
     // Near validator key
-    pub key_file: PathBuf,
+    pub validator_key: NearKeyFile,
     // Near validator node key
-    pub node_key_file: PathBuf,
+    pub validator_node_key: NearKeyFile,
 }
 
 /// Global configuration affecting all hosts
@@ -120,6 +136,7 @@ pub struct Host {
     pub disks: Vec<PathBuf>,
 
     /// Validator keys used by neard
+    #[serde(skip_serializing)]
     pub validator_keys: Option<ValidatorKeys>,
 }
 
@@ -127,18 +144,16 @@ impl Host {
     /// Returns prepared secrets directory for host
     pub fn secrets(&self) -> Result<Secrets> {
         let mut secret_files = vec![];
-        let validator_key: Option<PathBuf>;
-        let node_key: Option<PathBuf>;
         if let Some(keys) = &self.validator_keys {
-            validator_key = Some(PathBuf::from("/var/lib/secrets/validator_key.json"));
-            node_key = Some(PathBuf::from("/var/lib/secrets/node_key.json"));
             secret_files.push((
-                validator_key.as_ref().unwrap().as_path(),
-                keys.key_file.as_path(),
+                PathBuf::from("/var/lib/secrets/validator_key.json"),
+                serde_json::to_string_pretty(&keys.validator_key)
+                    .context("failed to convert validator key to json")?,
             ));
             secret_files.push((
-                node_key.as_ref().unwrap().as_path(),
-                keys.node_key_file.as_path(),
+                PathBuf::from("/var/lib/secrets/node_key.json"),
+                serde_json::to_string_pretty(&keys.validator_node_key)
+                    .context("failed to convert validator node to json")?,
             ));
         }
 
@@ -172,7 +187,12 @@ fn validate_global(global_config: &GlobalConfig) -> Result<Global> {
     Ok(Global { flake })
 }
 
-fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<Host> {
+fn validate_host(
+    name: &str,
+    host: &HostConfig,
+    default: &HostConfig,
+    working_directory: Option<&Path>,
+) -> Result<Host> {
     let name = name.to_string();
 
     if name.is_empty() || name.len() > 63 {
@@ -316,10 +336,24 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
 
     let validator_keys = if let Some(validator_key_file) = validator_key_file {
         if let Some(validator_node_key_file) = validator_node_key_file {
-            Some(ValidatorKeys {
-                key_file: validator_key_file,
-                node_key_file: validator_node_key_file,
-            })
+            let validator_key_path = if validator_key_file.is_absolute() {
+                validator_key_file
+            } else {
+                working_directory
+                    .unwrap_or_else(|| Path::new("."))
+                    .join(validator_key_file)
+            };
+            let validator_node_key_path = if validator_node_key_file.is_absolute() {
+                validator_node_key_file
+            } else {
+                working_directory
+                    .unwrap_or_else(|| Path::new("."))
+                    .join(validator_node_key_file)
+            };
+            Some(read_validator_keys(
+                validator_key_path,
+                validator_node_key_path,
+            )?)
         } else {
             bail!(
                 "hosts.{} has a validator_key_file but not a validator_node_key_file",
@@ -355,6 +389,78 @@ fn validate_host(name: &str, host: &HostConfig, default: &HostConfig) -> Result<
     })
 }
 
+fn read_validator_keys(
+    validator_key_file: PathBuf,
+    validator_node_key_file: PathBuf,
+) -> Result<ValidatorKeys> {
+    let validator_key = fs::read_to_string(&validator_key_file).with_context(|| {
+        format!(
+            "cannot read validator key file: '{}'",
+            validator_key_file.display()
+        )
+    })?;
+
+    let validator_node_key = match fs::read_to_string(&validator_node_key_file) {
+        Ok(content) => content,
+        Err(err) if err.kind() == ErrorKind::NotFound => {
+            info!(
+                "{} does not exist yet, generate it...",
+                validator_node_key_file.display()
+            );
+            let tmp_dir = TempDir::new()?;
+            let args = &[
+                "--home",
+                tmp_dir
+                    .path()
+                    .to_str()
+                    .context("cannot convert path to string")?,
+                "init",
+            ];
+            let status = Command::new("neard").args(args).status();
+            status_to_pretty_err(status, "neard", args)
+                .context("cannot generate validator node key")?;
+            let tmp_node_key_path = tmp_dir.path().join("node_key.json");
+            let content = fs::read_to_string(&tmp_node_key_path).with_context(|| {
+                format!(
+                    "cannot read generated node_key.json: {}",
+                    tmp_node_key_path.display()
+                )
+            })?;
+            fs::write(&validator_node_key_file, &content).with_context(|| {
+                format!(
+                    "failed to write validator node key to {}",
+                    validator_node_key_file.display()
+                )
+            })?;
+            content
+        }
+        Err(err) => {
+            return Err(anyhow::Error::new(err).context(format!(
+                "cannot read validator key file: '{}'",
+                validator_node_key_file.display()
+            )));
+        }
+    };
+    Ok(ValidatorKeys {
+        validator_key: serde_json::from_str(&validator_key)
+            .map_err(|e| SerdeError::new(validator_key.to_string(), e))
+            .with_context(|| {
+                format!(
+                    "validator key file at '{}' is not valid",
+                    validator_key_file.display()
+                )
+            })?,
+        validator_node_key: serde_json::from_str(&validator_node_key)
+            .map_err(|e| SerdeError::new(validator_node_key.to_string(), e))
+            .with_context(|| {
+                format!(
+                    "validator key file at '{}' is not valid",
+                    validator_key_file.display()
+                )
+            })?,
+    })
+}
+
 /// Validated configuration
 pub struct Config {
     /// Hosts as defined in the configuration
@@ -364,7 +470,7 @@ pub struct Config {
 }
 
 /// Parse toml configuration
-pub fn parse_config(content: &str) -> Result<Config> {
+pub fn parse_config(content: &str, working_directory: Option<&Path>) -> Result<Config> {
     let config: ConfigFile = toml::from_str(content)
         // pretty print our error message.
         .map_err(|e| SerdeError::new(content.to_string(), e))?;
@@ -374,7 +480,7 @@ pub fn parse_config(content: &str) -> Result<Config> {
         .map(|(name, host)| {
             Ok((
                 name.clone(),
-                validate_host(name, host, &config.host_defaults)?,
+                validate_host(name, host, &config.host_defaults, working_directory)?,
             ))
         })
         .collect::<Result<_>>()?;
@@ -386,15 +492,21 @@ pub fn parse_config(content: &str) -> Result<Config> {
 /// Load configuration from path
 pub fn load_configuration(path: &Path) -> Result<Config> {
     let content = fs::read_to_string(path).context("Cannot read file")?;
-    parse_config(&content)
+    let working_directory = path.parent();
+    parse_config(&content, working_directory)
 }
 
 #[test]
 pub fn test_parse_config() -> Result<()> {
     use std::str::FromStr;
 
-    let config = parse_config(
-        r#"
+    let validator_key = include_str!("../../nix/modules/tests/validator_key.json");
+    let node_key = include_str!("../../nix/modules/tests/node_key.json");
+
+    fs::write("validator_key.json", validator_key).unwrap();
+    fs::write("node_key.json", node_key).unwrap();
+
+    let config_str = r#"
 [global]
 flake = "github:myfork/near-staking-knd"
 
@@ -418,8 +530,9 @@ validator_node_key_file = "node_key.json"
 [hosts.validator-01]
 ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
-"#,
-    )?;
+"#;
+
+    let config = parse_config(config_str, None)?;
     assert_eq!(config.global.flake, "github:myfork/near-staking-knd");
 
     let hosts = &config.hosts;
@@ -442,14 +555,31 @@ ipv6_address = "2605:9880:400::3"
         hosts["validator-00"].ipv6_gateway,
         IpAddr::from_str("2605:9880:400::1").unwrap()
     );
-    assert_eq!(
-        hosts["validator-00"].validator_keys,
-        Some(ValidatorKeys {
-            key_file: PathBuf::from("validator_key.json"),
-            node_key_file: PathBuf::from("node_key.json")
-        })
-    );
+    let k = hosts["validator-00"].validator_keys.as_ref().unwrap();
+    assert_eq!(k.validator_key, NearKeyFile {
+        account_id: String::from("kuutamod0"),
+        public_key: String::from("ed25519:3XGPceVrDHPaysJ2LV2iftYjnRVAJm31GkJCnG4cGLp1"),
+        secret_key: String::from("ed25519:22eQKH8uYsesa8qy5g4yCwmpr6hmy2srmUnC155EbV6vxSAkeMioZucdcGxnDQ1HHPtTRGpFGexUtPdKGEMV5BE1"),
+    });
+    let test_public_key = String::from("ed25519:CFWNpHyt3L8erkD9fjeqo1fs46H9x57EkiQ3V2YRoRbw");
+    assert_eq!(k.validator_node_key, NearKeyFile {
+        account_id: String::from("node"),
+        public_key: test_public_key.clone(),
+        secret_key: String::from("ed25519:2n3WTvm538TizGD2QFxotr3aNYbWgmoF13sb5Tx6ZC7mtsDHaPsH6dnH4n5m8pjistqbF6BY1k9bsq9mC9ZsbAy"),
+    });
 
     assert_eq!(hosts["validator-01"].validator_keys, None);
+
+    // we we delete the node_key.json, `parse-config` will generate it for us:
+    fs::remove_file("node_key.json").unwrap();
+    let config = parse_config(config_str, None)?;
+    let validator_node_key = &config.hosts["validator-00"]
+        .validator_keys
+        .as_ref()
+        .unwrap()
+        .validator_node_key;
+    assert_eq!(validator_node_key.account_id, "node");
+    assert_ne!(validator_node_key.public_key, test_public_key);
+
     Ok(())
 }

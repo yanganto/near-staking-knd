@@ -15,7 +15,10 @@
         };
       }).test;
       generated-flake = pkgs.runCommand "generated-flake" { } ''
-        ${lib.getExe self'.packages.kuutamo} --config "${./test-config.toml}" generate-config "$out"
+        cp -r ${./test-config.toml} test-config.toml
+        cp -r ${./validator_key.json} validator_key.json
+        cp -r ${./node_key.json} node_key.json
+        ${lib.getExe self'.packages.kuutamo} --config test-config.toml generate-config "$out"
       '';
     in
     {

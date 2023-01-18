@@ -26,7 +26,7 @@ clap = { version = "4.0.32", features = ["derive", "env"] }
 regex = "1"
 ctrlc = { version = "3.0", features = ["termination"] }
 # FIXME use github version for toml support
-format_serde_error = { version = "0.3.0", features = [ "colored", "toml" ], default-features = false, git = "https://github.com/AlexanderThaller/format_serde_error" }
+format_serde_error = { version = "0.3.0", features = [ "colored", "serde_json", "toml" ], default-features = false, git = "https://github.com/AlexanderThaller/format_serde_error" }
 
 [[bin]]
 name = "kuutamod"

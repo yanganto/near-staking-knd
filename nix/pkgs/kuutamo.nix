@@ -7,6 +7,7 @@
 , cargoLock
 , nixos-remote
 , makeWrapper
+, neard
 }:
 # FIXME: refactor this repository to have multiple workspaces
 rustPlatform.buildRustPackage {
@@ -15,7 +16,11 @@ rustPlatform.buildRustPackage {
   src = runCommand "src" { } ''
     install -D ${../../Cargo.toml} $out/Cargo.toml
     install -D ${../../Cargo.lock} $out/Cargo.lock
+    install -D ${../../nix/modules/tests/validator_key.json} $out/nix/modules/tests/validator_key.json
+    install -D ${../../nix/modules/tests/node_key.json} $out/nix/modules/tests/node_key.json
     cp -r ${../../src} $out/src
+    pushd $out/src/deploy
+    ls -la ../../nix/modules/tests/node_key.json
   '';
   inherit cargoLock;
 
@@ -24,8 +29,9 @@ rustPlatform.buildRustPackage {
 
   nativeBuildInputs = [ makeWrapper ];
 
+  # neard is for generating the key
   postInstall = ''
-    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-remote nix openssh rsync ]}
+    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-remote nix openssh rsync neard ]}
   '';
 
   checkInputs = [ nix ];

@@ -1,6 +1,6 @@
-use std::fs::{self, File};
-use std::io::Read;
-use std::{path::Path, process::Command};
+use std::path::PathBuf;
+use std::process::Command;
+use std::{fs, path::Path};
 
 use anyhow::{Context, Result};
 use tempfile::{Builder, TempDir};
@@ -14,25 +14,19 @@ pub struct Secrets {
 impl Secrets {
     pub fn new<'a, I>(secrets: I) -> Result<Self>
     where
-        I: Iterator<Item = &'a (&'a Path, &'a Path)>,
+        I: Iterator<Item = &'a (PathBuf, String)>,
     {
         let tmp_dir = Builder::new()
             .prefix("kuutamo-secrets.")
             .tempdir()
             .context("cannot create temporary directory")?;
 
-        for (to, from) in secrets {
+        for (to, content) in secrets {
             let secret_path = tmp_dir.path().join(to.strip_prefix("/").unwrap_or(to));
             let dir = secret_path.parent().with_context(|| {
                 format!("Cannot get parent of directory: {}", secret_path.display())
             })?;
             fs::create_dir_all(dir).with_context(|| format!("cannot create {}", dir.display()))?;
-            let mut content = Vec::new();
-            // read the whole file
-            let mut f =
-                File::open(from).with_context(|| format!("cannot open {}", from.display()))?;
-            f.read_to_end(&mut content)
-                .with_context(|| format!("failed to read secret: {}", from.display()))?;
 
             fs::write(&secret_path, content).with_context(|| {
                 format!(

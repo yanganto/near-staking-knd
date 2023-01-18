@@ -7,6 +7,7 @@
     { self'
     , inputs'
     , pkgs
+    , config
     , ...
     }:
     let
@@ -29,6 +30,7 @@
         kuutamo = pkgs.callPackage ./kuutamo.nix {
           inherit cargoLock;
           inherit (inputs'.nixos-remote.packages) nixos-remote;
+          inherit (config.packages) neard;
         };
 
 

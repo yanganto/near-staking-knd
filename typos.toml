@@ -3,4 +3,5 @@ arbitor = "arbitor"
 substituters = "substituters"
 
 [files]
-extend-exclude = ["*validator_key.json"]
+# ignore files with secret keys
+extend-exclude = ["*validator_key.json", "config.rs"]

@@ -456,6 +456,7 @@ source = "git+https://github.com/AlexanderThaller/format_serde_error#b114501c468
 dependencies = [
  "colored",
  "serde",
+ "serde_json",
  "toml",
 ]
 
