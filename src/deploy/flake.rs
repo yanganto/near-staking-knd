@@ -96,6 +96,14 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
         r#"{{
   inputs.near-staking-knd.url = "{nixos_flake}";
 
+  nixConfig.extra-substituters = [
+    "https://cache.garnix.io"
+  ];
+
+  nixConfig.extra-trusted-public-keys = [
+    "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+  ];
+
   outputs = inputs: import ./configurations.nix inputs;
 }}
 "#
