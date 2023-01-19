@@ -69,7 +69,7 @@ makeTest' {
       virtualisation.memorySize = 4096;
       networking.nameservers = [ "127.0.0.1" ];
       services.openssh.enable = true;
-      services.openssh.useDns = false;
+      services.openssh.settings.useDns = false;
       users.users.root.openssh.authorizedKeys.keyFiles = [ ./ssh-keys/ssh.pub ];
     };
   };
