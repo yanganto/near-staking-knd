@@ -18,7 +18,7 @@ in
         We found those to be effective to avoid bottlenecks and missing blocks
         on near validators as well.
       '';
-      default = false;
+      default = true;
     };
     package = lib.mkOption {
       type = lib.types.package;
