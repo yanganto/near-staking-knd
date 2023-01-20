@@ -8,7 +8,7 @@
     # Upstream this?
     kuutamo.disko.disks = lib.mkOption {
       type = lib.types.listOf lib.types.path;
-      default = [ "/dev/nvme1n1" "/dev/nvme0n1" ];
+      default = [ "/dev/nvme0n1" "/dev/nvme1n1" ];
       description = lib.mdDoc "Disks formatted by disko";
     };
   };

@@ -25,6 +25,9 @@
 
   inputs.nixos-images.url = "github:nix-community/nixos-images";
 
+  inputs.npmlock2nix.url = "github:nix-community/npmlock2nix";
+  inputs.npmlock2nix.flake = false;
+
   nixConfig.extra-substituters = [
     "https://cache.garnix.io"
   ];
