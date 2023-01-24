@@ -25,7 +25,7 @@
   inputs.nixos-remote.inputs.treefmt-nix.follows = "treefmt-nix";
   inputs.nixos-remote.inputs.flake-parts.follows = "flake-parts";
 
-  inputs.nixos-images.url = "github:nix-community/nixos-images/sudo-user";
+  inputs.nixos-images.url = "github:nix-community/nixos-images";
 
   nixConfig.extra-substituters = [
     "https://cache.garnix.io"
