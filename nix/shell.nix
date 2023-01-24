@@ -3,12 +3,13 @@
     { self'
     , inputs'
     , pkgs
+    , config
     , ...
     }:
     let
       formatters = [
         # our meta-formatter
-        self'.packages.treefmt
+        config.treefmt.build.wrapper
         pkgs.clippy
       ];
       stdenv' = if pkgs.stdenv.hostPlatform.isGnu then pkgs.fastStdenv else pkgs.stdenv;

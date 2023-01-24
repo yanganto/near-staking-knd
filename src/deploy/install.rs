@@ -70,6 +70,9 @@ pub fn install(
                 kexec_url,
                 "--flake",
                 &flake_uri,
+                "--option",
+                "accept-flake-config",
+                "true",
             ];
             if debug {
                 args.push("--debug");
