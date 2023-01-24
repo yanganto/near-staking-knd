@@ -78,16 +78,15 @@
         "nixos-unstable": "nixos-unstable"
       },
       "locked": {
-        "lastModified": 1674572083,
+        "lastModified": 1674574673,
         "narHash": "sha256-Bttq9LGgSaqjC7nn8AHRbuKYqe2foDK+0EXWTn9tZQw=",
         "owner": "nix-community",
         "repo": "nixos-images",
-        "rev": "950f1e5ce849e80474a9c4b8b31036495b3993f7",
+        "rev": "b9b667b8b4a8d0c379b39c46408a8a5832195609",
         "type": "github"
       },
       "original": {
         "owner": "nix-community",
-        "ref": "sudo-user",
         "repo": "nixos-images",
         "type": "github"
       }
