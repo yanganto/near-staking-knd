@@ -16,7 +16,7 @@
   inputs.disko.url = "github:nix-community/disko";
   inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
 
-  inputs.nixos-remote.url = "github:numtide/nixos-remote/detect-nixos-installer";
+  inputs.nixos-remote.url = "github:numtide/nixos-remote";
   inputs.nixos-remote.inputs.nixpkgs.follows = "nixpkgs";
   inputs.nixos-remote.inputs.disko.follows = "disko";
   inputs.nixos-remote.inputs.nixos-images.follows = "nixos-images";
