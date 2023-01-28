@@ -110,16 +110,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1674572551,
-        "narHash": "sha256-2IlGVpLdX+OokDAy+4Gdkw6m2sk/glw/TljcfJsr+U4=",
+        "lastModified": 1674822635,
+        "narHash": "sha256-iBpSG53pOaThuN5Cp0Ro/Vm8F9V5LvQ9NVS0W/IKWNg=",
         "owner": "numtide",
         "repo": "nixos-remote",
-        "rev": "647882649b4c8ff22ec28705581fe9308eb80f6a",
+        "rev": "6fdd010b5185572986b03b430c7182af3a58c9d6",
         "type": "github"
       },
       "original": {
         "owner": "numtide",
-        "ref": "detect-nixos-installer",
         "repo": "nixos-remote",
         "type": "github"
       }
@@ -142,16 +141,16 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1674121712,
-        "narHash": "sha256-/D16E4oW07Y+GsFkVT5OpsE+Ni9hI/mJnl5HBazrVTs=",
-        "owner": "kuutamolabs",
+        "lastModified": 1674798626,
+        "narHash": "sha256-6qHfldrneolG+fMqUg5jpXfRYv//izZg/XzXvKiA9iU=",
+        "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "616f15eea1f007bda84484d5e8f4e6f88907d4cd",
+        "rev": "3875a3e3e1ca2fa7e17fc45a1dbf92551f1b9db7",
         "type": "github"
       },
       "original": {
-        "owner": "kuutamolabs",
-        "ref": "kuutamo",
+        "owner": "NixOS",
+        "ref": "nixos-unstable-small",
         "repo": "nixpkgs",
         "type": "github"
       }

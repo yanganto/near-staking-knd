@@ -1,9 +1,7 @@
 {
   description = "A supervisor for neard that implements failover for NEAR validators";
 
-  # Switch back after https://github.com/NixOS/nixpkgs/pull/210382
-  inputs.nixpkgs.url = "github:kuutamolabs/nixpkgs/kuutamo";
-  #inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
   inputs.srvos.url = "github:numtide/srvos";
   inputs.srvos.inputs.nixpkgs.follows = "nixpkgs";
@@ -18,7 +16,7 @@
   inputs.disko.url = "github:nix-community/disko";
   inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
 
-  inputs.nixos-remote.url = "github:numtide/nixos-remote/detect-nixos-installer";
+  inputs.nixos-remote.url = "github:numtide/nixos-remote";
   inputs.nixos-remote.inputs.nixpkgs.follows = "nixpkgs";
   inputs.nixos-remote.inputs.disko.follows = "disko";
   inputs.nixos-remote.inputs.nixos-images.follows = "nixos-images";
