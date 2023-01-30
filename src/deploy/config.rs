@@ -471,9 +471,7 @@ pub struct Config {
 
 /// Parse toml configuration
 pub fn parse_config(content: &str, working_directory: Option<&Path>) -> Result<Config> {
-    let config: ConfigFile = toml::from_str(content)
-        // pretty print our error message.
-        .map_err(|e| SerdeError::new(content.to_string(), e))?;
+    let config: ConfigFile = toml::from_str(content)?;
     let hosts = config
         .hosts
         .iter()
