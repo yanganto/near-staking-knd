@@ -5,7 +5,7 @@ let
 in
 generic {
   version = "1.30.0";
-  rev = "2e27b0791de731b4ec31e15d5c896033f0315ebc";
-  sha256 = "sha256-nY31ebYOHnBKvLPldQw1rCRxGZ6pcm01+UHHwCYv0WI=";
-  cargoSha256 = "sha256-URRC63rBPjfopt/pwfyOwA5DMPT+Z1snItStg6z3CSI=";
+  rev = "036b3ca7fd30a92b77c9fd4101481f511243f8fd";
+  sha256 = "sha256-KFuinUTkG5S9Mm8U+Gj1JmsWxBjjkQS1FISvFUv2tS4=";
+  cargoSha256 = "sha256-bUgkND82/a9yko9/2JJGcdPixvZxcax6z+2ZvIEi+y0=";
 }
