@@ -51,6 +51,53 @@ impl Drop for DisableTerminalEcho {
     }
 }
 
+/// IpV6 string which allows unique local address format
+type IpV6String = String;
+
+trait AsIpAddr {
+    fn is_ipv6(&self) -> bool;
+    fn to_ipv6(&self) -> Result<IpAddr>;
+}
+
+impl AsIpAddr for IpV6String {
+    fn is_ipv6(&self) -> bool {
+        if let Some(idx) = self.find('/') {
+            if idx + 1 >= self.len()
+                || unsafe { self.get_unchecked(idx + 1..self.len()) }
+                    .parse::<usize>()
+                    .is_err()
+            {
+                false
+            } else {
+                format!("{}1", unsafe { self.get_unchecked(0..idx) })
+                    .parse::<IpAddr>()
+                    .map(|ip| ip.is_ipv6())
+                    .unwrap_or(false)
+            }
+        } else {
+            self.parse::<IpAddr>()
+                .map(|ip| ip.is_ipv6())
+                .unwrap_or(false)
+        }
+    }
+
+    fn to_ipv6(&self) -> Result<IpAddr> {
+        if let Some(idx) = self.find('/') {
+            if idx + 1 < self.len()
+                && unsafe { self.get_unchecked(idx + 1..self.len()) }
+                    .parse::<usize>()
+                    .is_ok()
+            {
+                Ok(format!("{}1", unsafe { self.get_unchecked(0..idx) }).parse::<IpAddr>()?)
+            } else {
+                bail!("incorrect ipv6 format")
+            }
+        } else {
+            Ok(self.parse::<IpAddr>()?)
+        }
+    }
+}
+
 #[derive(Debug, Deserialize)]
 struct ConfigFile {
     #[serde(default)]
@@ -89,7 +136,7 @@ struct HostConfig {
     #[serde(default)]
     pub mac_address: Option<String>,
     #[serde(default)]
-    ipv6_address: Option<IpAddr>,
+    ipv6_address: Option<IpV6String>,
     #[serde(default)]
     ipv6_gateway: Option<IpAddr>,
     #[serde(default)]
@@ -296,11 +343,14 @@ fn validate_host(
 
     let ipv6_address = host
         .ipv6_address
-        .with_context(|| format!("no ipv6_address provided for hosts.{}", name))?;
+        .as_ref()
+        .with_context(|| format!("no ipv6_address provided for host.{}", name))?;
+
     if !ipv6_address.is_ipv6() {
         format!(
             "ipv6_address provided for hosts.{} is not an ipv6 address: {}",
-            name, ipv6_address
+            name,
+            host.ipv6_address.as_ref().expect("already check is some")
         );
     }
     // FIXME: this is currently an unstable feature
@@ -414,7 +464,7 @@ fn validate_host(
         ipv4_address,
         ipv4_cidr,
         ipv4_gateway,
-        ipv6_address,
+        ipv6_address: ipv6_address.to_ipv6()?,
         ipv6_cidr,
         ipv6_gateway,
         validator_keys,
@@ -677,4 +727,26 @@ pub fn test_decrypt_and_unzip_file() {
   "private_key": "ed25519:5a8tzPJxDjEZjsrJmYqwRweQhmeHh3BTmy9aWUhyAkJ3DpVgPnDiA21GfGR7SKLcj2Z9LW7ZcYZ75JNCDa6EvsMG"
 }"#
     );
+}
+
+#[test]
+fn test_valid_ip_string_for_ipv6() {
+    let ip: IpV6String = "2607:5300:203:5cdf::1".into();
+    assert!(ip.is_ipv6());
+
+    let scoped_address: IpV6String = "2607:5300:203:5cdf::/64".into();
+    assert!(scoped_address.is_ipv6());
+    assert_eq!(scoped_address.to_ipv6().unwrap(), ip.to_ipv6().unwrap());
+
+    let ip_v4: IpV6String = "192.168.0.1".into();
+    assert!(!ip_v4.is_ipv6());
+}
+
+#[test]
+fn test_invalid_string_for_ipv6() {
+    let mut invalid_str: IpV6String = "2607:5300:203:7cdf::/".into();
+    assert!(!invalid_str.is_ipv6());
+
+    invalid_str = "/2607:5300:203:7cdf::".into();
+    assert!(!invalid_str.is_ipv6());
 }
