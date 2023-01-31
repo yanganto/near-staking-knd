@@ -51,7 +51,13 @@ impl Drop for DisableTerminalEcho {
     }
 }
 
-/// IpV6 string which allows unique local address format
+/// IpV6 string which allows scoped address format
+///
+/// Cloud service may giving `2607:5300:203:5cdf::/64` as ipv6 address, and route `2607:5300:203:5cdf::1` to it.
+/// `2607:5300:203:5cdf::/64` is invalid value for `IpAddr` in Rust.
+/// Currently, the cloud service we suggested do this way, we use the structure to allow user fills
+/// `2607:5300:203:5cdf::/64` in `kuutamo.toml`, and treated as `2607:5300:203:5cdf::1`, such that
+/// it will not be painful for user.
 type IpV6String = String;
 
 trait AsIpAddr {
