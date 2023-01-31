@@ -22,5 +22,4 @@ status = [
   "package neard [x86_64-linux]",
   "package neard-unstable [x86_64-linux]",
   "package nix-update [x86_64-linux]",
-  "package treefmt [x86_64-linux]"
 ]
