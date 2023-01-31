@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use format_serde_error::SerdeError;
 use log::info;
 use nix::libc::STDIN_FILENO;
@@ -62,18 +62,13 @@ trait AsIpAddr {
 impl AsIpAddr for IpV6String {
     fn is_ipv6(&self) -> bool {
         if let Some(idx) = self.find('/') {
-            if idx + 1 >= self.len()
-                || unsafe { self.get_unchecked(idx + 1..self.len()) }
-                    .parse::<usize>()
-                    .is_err()
-            {
-                false
-            } else {
-                format!("{}1", unsafe { self.get_unchecked(0..idx) })
-                    .parse::<IpAddr>()
-                    .map(|ip| ip.is_ipv6())
+            self.get(idx + 1..self.len())
+                .map(|i| i.parse::<usize>().is_ok())
+                .unwrap_or(false)
+                && self
+                    .get(0..idx)
+                    .map(|addr| format!("{}1", addr).parse::<IpAddr>().is_ok())
                     .unwrap_or(false)
-            }
         } else {
             self.parse::<IpAddr>()
                 .map(|ip| ip.is_ipv6())
@@ -83,15 +78,14 @@ impl AsIpAddr for IpV6String {
 
     fn to_ipv6(&self) -> Result<IpAddr> {
         if let Some(idx) = self.find('/') {
-            if idx + 1 < self.len()
-                && unsafe { self.get_unchecked(idx + 1..self.len()) }
-                    .parse::<usize>()
-                    .is_ok()
-            {
-                Ok(format!("{}1", unsafe { self.get_unchecked(0..idx) }).parse::<IpAddr>()?)
-            } else {
-                bail!("incorrect ipv6 format")
-            }
+            let _ = self
+                .get(idx + 1..self.len())
+                .map(|i| i.parse::<usize>().is_ok())
+                .with_context(|| "no ipv6_address should '/' a unsign intager")?;
+
+            self.get(0..idx)
+                .map(|addr| format!("{}1", addr).parse::<IpAddr>().map_err(|e| e.into()))
+                .unwrap_or(Err(anyhow!("ipv6_address invalid")))
         } else {
             Ok(self.parse::<IpAddr>()?)
         }
