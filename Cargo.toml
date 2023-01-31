@@ -22,7 +22,7 @@ toml = "0.7.0"
 serde_json = "1.0.91"
 near-primitives = "0.15.0"
 log = { version = "0.4.17", features = ["std"] }
-clap = { version = "4.1.1", features = ["derive", "env"] }
+clap = { version = "4.1.4", features = ["derive", "env"] }
 regex = "1"
 ctrlc = { version = "3.0", features = ["termination"] }
 # FIXME use github version for toml support
