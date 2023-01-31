@@ -18,7 +18,8 @@ rustPlatform.buildRustPackage rec {
 
   # https://github.com/near/nearcore/tags
   src = fetchFromGitHub {
-    owner = "near";
+    # TODO: remove this once we no longer need the hotfix feature
+    owner = if rev == null then "near" else "kuutamolabs";
     repo = "nearcore";
     # there is also a branch for this version number, so we need to be explicit
     rev = if rev == null then "refs/tags/${version}" else rev;
