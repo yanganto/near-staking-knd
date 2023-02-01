@@ -5,6 +5,7 @@
 use anyhow::{bail, Context, Result};
 use clap::Parser;
 use kuutamod::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
+use kuutamod::proxy;
 use std::collections::HashMap;
 use std::io::{self, BufRead};
 use std::path::PathBuf;
@@ -58,6 +59,17 @@ struct RollbackArgs {
     hosts: String,
 }
 
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+struct ProxyArgs {
+    /// The host to proxy rpc
+    #[clap(long, default_value = "")]
+    host: String,
+
+    /// Proxy to local port
+    #[clap(long, action, default_value = "3030")]
+    local_port: u16,
+}
+
 /// Subcommand to run
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(clap::Subcommand, PartialEq, Debug, Clone)]
@@ -72,6 +84,8 @@ enum Command {
     Update(UpdateArgs),
     /// Rollback validator
     Rollback(RollbackArgs),
+    /// Proxy remote rpc to local
+    Proxy(ProxyArgs),
 }
 
 #[derive(Parser)]
@@ -178,7 +192,13 @@ fn rollback(
     deploy::rollback(&hosts, flake)
 }
 
-fn run_deploy() -> Result<()> {
+fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
+    let hosts = filter_hosts(&proxy_args.host, &config.hosts)?;
+    proxy::rpc(&hosts[0], proxy_args.local_port)
+}
+
+/// The kuutamo program entry point
+pub fn main() -> Result<()> {
     let args = Args::parse();
     let config = deploy::load_configuration(&args.config).with_context(|| {
         format!(
@@ -198,10 +218,6 @@ fn run_deploy() -> Result<()> {
         }
         Command::Update(ref update_args) => update(&args, update_args, &config, &flake),
         Command::Rollback(ref rollback_args) => rollback(&args, rollback_args, &config, &flake),
+        Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
     }
-}
-
-/// The kuutamo program entry point
-pub fn main() -> Result<()> {
-    run_deploy()
 }
