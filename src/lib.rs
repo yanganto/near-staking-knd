@@ -15,6 +15,7 @@ pub mod neard_process;
 pub mod oom_score;
 pub mod proc;
 pub mod prometheus;
+pub mod proxy;
 pub mod scoped_consul_session;
 pub mod settings;
 pub mod supervisor;
