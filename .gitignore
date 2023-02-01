@@ -19,3 +19,8 @@ __pycache__/
 
 # direnv
 .direnv
+
+# kuutamo test configuration
+kuutamo.toml
+node_key.json
+validator_key.json
