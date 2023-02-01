@@ -1,6 +1,6 @@
 use anyhow::{anyhow, bail, Context, Result};
 use format_serde_error::SerdeError;
-use log::info;
+use log::{info, warn};
 use nix::libc::STDIN_FILENO;
 use nix::sys::termios;
 use regex::Regex;
@@ -51,13 +51,14 @@ impl Drop for DisableTerminalEcho {
     }
 }
 
-/// IpV6 string which allows scoped address format
+/// IpV6String allows prefix only address format and normal ipv6 address
 ///
-/// Cloud service may giving `2607:5300:203:5cdf::/64` as ipv6 address, and route `2607:5300:203:5cdf::1` to it.
-/// `2607:5300:203:5cdf::/64` is invalid value for `IpAddr` in Rust.
-/// Currently, the cloud service we suggested do this way, we use the structure to allow user fills
-/// `2607:5300:203:5cdf::/64` in `kuutamo.toml`, and treated as `2607:5300:203:5cdf::1`, such that
-/// it will not be painful for user.
+/// Cloud service give a segament having all prefix but without interface ID as address, ie. `2607:5300:203:5cdf::/64`.
+/// `2607:5300:203:5cdf::/64` is invalid value for `IpAddr` in Rust, and `2607:5300:203:5cdf::` is.
+///
+/// This structure allows to fill `2607:5300:203:5cdf::/64` in `kuutamo.toml`,
+/// and treated as `2607:5300:203:5cdf::` with warning message for the known issue,
+/// such that it will not be painful for our user.
 type IpV6String = String;
 
 trait AsIpAddr {
@@ -73,7 +74,7 @@ impl AsIpAddr for IpV6String {
                 .unwrap_or(false)
                 && self
                     .get(0..idx)
-                    .map(|addr| format!("{}1", addr).parse::<IpAddr>().is_ok())
+                    .map(|addr| addr.parse::<IpAddr>().is_ok())
                     .unwrap_or(false)
         } else {
             self.parse::<IpAddr>()
@@ -82,6 +83,7 @@ impl AsIpAddr for IpV6String {
         }
     }
 
+    /// Handle ipv6 segament to a valide ip address
     fn to_ipv6(&self) -> Result<IpAddr> {
         if let Some(idx) = self.find('/') {
             let _ = self
@@ -89,9 +91,17 @@ impl AsIpAddr for IpV6String {
                 .map(|i| i.parse::<usize>().is_ok())
                 .with_context(|| "no ipv6_address should '/' a unsign intager")?;
 
-            self.get(0..idx)
-                .map(|addr| format!("{}1", addr).parse::<IpAddr>().map_err(|e| e.into()))
-                .unwrap_or(Err(anyhow!("ipv6_address invalid")))
+            match self.get(0..idx) {
+                Some(addr_str) => {
+                    if let Ok(addr) = addr_str.parse::<IpAddr>() {
+                        warn!("{self:} is a ipv6 segament will use {addr:} for ipv6 address");
+                        Ok(addr)
+                    } else {
+                        Err(anyhow!("ipv6_address invalid"))
+                    }
+                }
+                _ => Err(anyhow!("ipv6_address invalid")),
+            }
         } else {
             Ok(self.parse::<IpAddr>()?)
         }
@@ -731,12 +741,15 @@ pub fn test_decrypt_and_unzip_file() {
 
 #[test]
 fn test_valid_ip_string_for_ipv6() {
-    let ip: IpV6String = "2607:5300:203:5cdf::1".into();
+    let ip: IpV6String = "2607:5300:203:5cdf::".into();
     assert!(ip.is_ipv6());
 
-    let scoped_address: IpV6String = "2607:5300:203:5cdf::/64".into();
-    assert!(scoped_address.is_ipv6());
-    assert_eq!(scoped_address.to_ipv6().unwrap(), ip.to_ipv6().unwrap());
+    let prefix_only_segament: IpV6String = "2607:5300:203:5cdf::/64".into();
+    assert!(prefix_only_segament.is_ipv6());
+    assert_eq!(
+        prefix_only_segament.to_ipv6().unwrap(),
+        ip.to_ipv6().unwrap()
+    );
 
     let ip_v4: IpV6String = "192.168.0.1".into();
     assert!(!ip_v4.is_ipv6());
