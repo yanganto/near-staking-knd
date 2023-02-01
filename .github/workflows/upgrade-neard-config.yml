@@ -16,7 +16,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN_FOR_CI }}
       - name: Upgrade neard configuration
         run: |
-          curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/config.json | jq 'setpath(["telemetry", "endpoints"]; [])' > nix/modules/neard/${{matrix.network}}/config.json
+          curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/config.json | jq 'setpath(["rpc", "enable_debug_rpc"]; true)' | jq 'setpath(["telemetry", "endpoints"]; [])' > nix/modules/neard/${{matrix.network}}/config.json
       - name: Upgrade neard-configuration
         run: |
           bash -x ./.github/workflows/update-neard-configuration.sh ${{matrix.network}}
