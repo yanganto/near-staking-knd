@@ -1,6 +1,8 @@
 use anyhow::{bail, Context, Result};
 use format_serde_error::SerdeError;
 use log::info;
+use nix::libc::STDIN_FILENO;
+use nix::sys::termios;
 use regex::Regex;
 use serde::Serialize;
 use serde_derive::Deserialize;
@@ -16,6 +18,38 @@ use toml;
 use super::command::status_to_pretty_err;
 use super::secrets::Secrets;
 use super::NixosFlake;
+
+struct DisableTerminalEcho {
+    flags: Option<termios::Termios>,
+}
+
+impl DisableTerminalEcho {
+    fn new() -> Self {
+        let old_flags = match termios::tcgetattr(STDIN_FILENO) {
+            Ok(flags) => flags,
+            Err(_) => {
+                // Not a terminal, just make this a NOOP
+                return DisableTerminalEcho { flags: None };
+            }
+        };
+        let mut new_flags = old_flags.clone();
+        new_flags.local_flags &= !termios::LocalFlags::ECHO;
+        match termios::tcsetattr(STDIN_FILENO, termios::SetArg::TCSANOW, &new_flags) {
+            Ok(_) => DisableTerminalEcho {
+                flags: Some(old_flags),
+            },
+            Err(_) => DisableTerminalEcho { flags: None },
+        }
+    }
+}
+
+impl Drop for DisableTerminalEcho {
+    fn drop(&mut self) {
+        if let Some(ref flags) = self.flags {
+            let _ = termios::tcsetattr(STDIN_FILENO, termios::SetArg::TCSANOW, flags);
+        }
+    }
+}
 
 #[derive(Debug, Deserialize)]
 struct ConfigFile {
@@ -389,19 +423,22 @@ fn validate_host(
     })
 }
 
-fn ask_password_for(file: &PathBuf) -> Result<String> {
+fn ask_password_for(file: &Path) -> Result<String> {
     let file_name = file
         .file_name()
         .unwrap_or_default()
         .to_str()
         .unwrap_or_default();
     println!("Please give your password for {}", file_name);
+
+    let disable_terminal_echo = DisableTerminalEcho::new();
+
     let stdin = io::stdin();
     let mut line = String::new();
-    if stdin.lock().read_line(&mut line).is_err() {
-        println!("Please give your password for {}", file_name);
-    }
-    Ok(line.trim_end_matches('\n').to_string())
+    stdin.lock().read_line(&mut line)?;
+    drop(disable_terminal_echo);
+
+    Ok(line.trim_end().to_string())
 }
 
 fn decrypt_and_unzip_file(file: &PathBuf, password: String) -> Result<String> {
