@@ -6,7 +6,7 @@ use serde::Serialize;
 use serde_derive::Deserialize;
 use std::collections::HashMap;
 use std::fs;
-use std::io::ErrorKind;
+use std::io::{self, BufRead, Read};
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -389,58 +389,95 @@ fn validate_host(
     })
 }
 
+fn ask_password_and_unzip_file(file: &PathBuf) -> Result<String> {
+    let mut content = String::new();
+    let file_name = file
+        .file_name()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
+    println!("Please give your password for {}", file_name);
+    let stdin = io::stdin();
+    let mut line = String::new();
+    if stdin.lock().read_line(&mut line).is_err() {
+        println!("Please give your password for {}", file_name);
+    }
+    let password = line.trim_end_matches('\n').to_string();
+    let mut archive = fs::File::open(file)
+        .map(zip::ZipArchive::new)
+        .with_context(|| format!("{file_name:} could not treat as zip archive"))??;
+    if let Ok(Ok(mut zip)) = archive
+        .by_index_decrypt(0, password.as_bytes())
+        .with_context(|| format!("password for {file_name:} is incorrect"))
+    {
+        zip.read_to_string(&mut content)?;
+    }
+    Ok(content)
+}
+
 fn read_validator_keys(
     validator_key_file: PathBuf,
     validator_node_key_file: PathBuf,
 ) -> Result<ValidatorKeys> {
-    let validator_key = fs::read_to_string(&validator_key_file).with_context(|| {
-        format!(
-            "cannot read validator key file: '{}'",
-            validator_key_file.display()
-        )
-    })?;
-
-    let validator_node_key = match fs::read_to_string(&validator_node_key_file) {
-        Ok(content) => content,
-        Err(err) if err.kind() == ErrorKind::NotFound => {
-            info!(
-                "{} does not exist yet, generate it...",
-                validator_node_key_file.display()
-            );
-            let tmp_dir = TempDir::new()?;
-            let args = &[
-                "--home",
-                tmp_dir
-                    .path()
-                    .to_str()
-                    .context("cannot convert path to string")?,
-                "init",
-            ];
-            let status = Command::new("neard").args(args).status();
-            status_to_pretty_err(status, "neard", args)
-                .context("cannot generate validator node key")?;
-            let tmp_node_key_path = tmp_dir.path().join("node_key.json");
-            let content = fs::read_to_string(&tmp_node_key_path).with_context(|| {
-                format!(
-                    "cannot read generated node_key.json: {}",
-                    tmp_node_key_path.display()
-                )
-            })?;
-            fs::write(&validator_node_key_file, &content).with_context(|| {
-                format!(
-                    "failed to write validator node key to {}",
-                    validator_node_key_file.display()
-                )
-            })?;
-            content
-        }
-        Err(err) => {
-            return Err(anyhow::Error::new(err).context(format!(
+    let validator_key = if let Some("zip") = validator_key_file
+        .extension()
+        .map(|s| s.to_str().unwrap_or_default())
+    {
+        ask_password_and_unzip_file(&validator_key_file)?
+    } else {
+        fs::read_to_string(&validator_key_file).with_context(|| {
+            format!(
                 "cannot read validator key file: '{}'",
-                validator_node_key_file.display()
-            )));
-        }
+                validator_key_file.display()
+            )
+        })?
     };
+
+    let validator_node_key = if let Some("zip") = validator_node_key_file
+        .extension()
+        .map(|s| s.to_str().unwrap_or_default())
+    {
+        ask_password_and_unzip_file(&validator_node_key_file)?
+    } else if validator_node_key_file.exists() {
+        fs::read_to_string(&validator_node_key_file).with_context(|| {
+            format!(
+                "cannot read validator node key file: '{}'",
+                validator_key_file.display()
+            )
+        })?
+    } else {
+        info!(
+            "{} does not exist yet, generate it...",
+            validator_node_key_file.display()
+        );
+        let tmp_dir = TempDir::new()?;
+        let args = &[
+            "--home",
+            tmp_dir
+                .path()
+                .to_str()
+                .context("cannot convert path to string")?,
+            "init",
+        ];
+        let status = Command::new("neard").args(args).status();
+        status_to_pretty_err(status, "neard", args)
+            .context("cannot generate validator node key")?;
+        let tmp_node_key_path = tmp_dir.path().join("node_key.json");
+        let content = fs::read_to_string(&tmp_node_key_path).with_context(|| {
+            format!(
+                "cannot read generated node_key.json: {}",
+                tmp_node_key_path.display()
+            )
+        })?;
+        fs::write(&validator_node_key_file, &content).with_context(|| {
+            format!(
+                "failed to write validator node key to {}",
+                validator_node_key_file.display()
+            )
+        })?;
+        content
+    };
+
     Ok(ValidatorKeys {
         validator_key: serde_json::from_str(&validator_key)
             .map_err(|e| SerdeError::new(validator_key.to_string(), e))
@@ -568,7 +605,7 @@ ipv6_address = "2605:9880:400::3"
 
     assert_eq!(hosts["validator-01"].validator_keys, None);
 
-    // we we delete the node_key.json, `parse-config` will generate it for us:
+    // we delete the node_key.json, `parse-config` will generate it for us:
     fs::remove_file("node_key.json").unwrap();
     let config = parse_config(config_str, None)?;
     let validator_node_key = &config.hosts["validator-00"]
