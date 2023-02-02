@@ -1,12 +1,14 @@
 use anyhow::{bail, Context, Result};
 use format_serde_error::SerdeError;
 use log::info;
+use nix::libc::STDIN_FILENO;
+use nix::sys::termios;
 use regex::Regex;
 use serde::Serialize;
 use serde_derive::Deserialize;
 use std::collections::HashMap;
 use std::fs;
-use std::io::ErrorKind;
+use std::io::{self, BufRead, Read};
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -16,6 +18,38 @@ use toml;
 use super::command::status_to_pretty_err;
 use super::secrets::Secrets;
 use super::NixosFlake;
+
+struct DisableTerminalEcho {
+    flags: Option<termios::Termios>,
+}
+
+impl DisableTerminalEcho {
+    fn new() -> Self {
+        let old_flags = match termios::tcgetattr(STDIN_FILENO) {
+            Ok(flags) => flags,
+            Err(_) => {
+                // Not a terminal, just make this a NOOP
+                return DisableTerminalEcho { flags: None };
+            }
+        };
+        let mut new_flags = old_flags.clone();
+        new_flags.local_flags &= !termios::LocalFlags::ECHO;
+        match termios::tcsetattr(STDIN_FILENO, termios::SetArg::TCSANOW, &new_flags) {
+            Ok(_) => DisableTerminalEcho {
+                flags: Some(old_flags),
+            },
+            Err(_) => DisableTerminalEcho { flags: None },
+        }
+    }
+}
+
+impl Drop for DisableTerminalEcho {
+    fn drop(&mut self) {
+        if let Some(ref flags) = self.flags {
+            let _ = termios::tcsetattr(STDIN_FILENO, termios::SetArg::TCSANOW, flags);
+        }
+    }
+}
 
 #[derive(Debug, Deserialize)]
 struct ConfigFile {
@@ -389,58 +423,108 @@ fn validate_host(
     })
 }
 
+fn ask_password_for(file: &Path) -> Result<String> {
+    let file_name = file
+        .file_name()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
+    println!("Please give your password for {}", file_name);
+
+    let disable_terminal_echo = DisableTerminalEcho::new();
+
+    let stdin = io::stdin();
+    let mut line = String::new();
+    stdin.lock().read_line(&mut line)?;
+    drop(disable_terminal_echo);
+
+    Ok(line.trim_end().to_string())
+}
+
+fn decrypt_and_unzip_file(file: &PathBuf, password: String) -> Result<String> {
+    let mut content = String::new();
+    let file_name = file
+        .file_name()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
+    let mut archive = fs::File::open(file)
+        .map(zip::ZipArchive::new)
+        .with_context(|| format!("{file_name:} could not treat as zip archive"))??;
+    if let Ok(Ok(mut zip)) = archive
+        .by_index_decrypt(0, password.as_bytes())
+        .with_context(|| format!("password for {file_name:} is incorrect"))
+    {
+        zip.read_to_string(&mut content)?;
+    }
+    Ok(content)
+}
+
 fn read_validator_keys(
     validator_key_file: PathBuf,
     validator_node_key_file: PathBuf,
 ) -> Result<ValidatorKeys> {
-    let validator_key = fs::read_to_string(&validator_key_file).with_context(|| {
-        format!(
-            "cannot read validator key file: '{}'",
-            validator_key_file.display()
-        )
-    })?;
-
-    let validator_node_key = match fs::read_to_string(&validator_node_key_file) {
-        Ok(content) => content,
-        Err(err) if err.kind() == ErrorKind::NotFound => {
-            info!(
-                "{} does not exist yet, generate it...",
-                validator_node_key_file.display()
-            );
-            let tmp_dir = TempDir::new()?;
-            let args = &[
-                "--home",
-                tmp_dir
-                    .path()
-                    .to_str()
-                    .context("cannot convert path to string")?,
-                "init",
-            ];
-            let status = Command::new("neard").args(args).status();
-            status_to_pretty_err(status, "neard", args)
-                .context("cannot generate validator node key")?;
-            let tmp_node_key_path = tmp_dir.path().join("node_key.json");
-            let content = fs::read_to_string(&tmp_node_key_path).with_context(|| {
-                format!(
-                    "cannot read generated node_key.json: {}",
-                    tmp_node_key_path.display()
-                )
-            })?;
-            fs::write(&validator_node_key_file, &content).with_context(|| {
-                format!(
-                    "failed to write validator node key to {}",
-                    validator_node_key_file.display()
-                )
-            })?;
-            content
-        }
-        Err(err) => {
-            return Err(anyhow::Error::new(err).context(format!(
+    let validator_key = if let Some("zip") = validator_key_file
+        .extension()
+        .map(|s| s.to_str().unwrap_or_default())
+    {
+        let password = ask_password_for(&validator_key_file)?;
+        decrypt_and_unzip_file(&validator_key_file, password)?
+    } else {
+        fs::read_to_string(&validator_key_file).with_context(|| {
+            format!(
                 "cannot read validator key file: '{}'",
-                validator_node_key_file.display()
-            )));
-        }
+                validator_key_file.display()
+            )
+        })?
     };
+
+    let validator_node_key = if let Some("zip") = validator_node_key_file
+        .extension()
+        .map(|s| s.to_str().unwrap_or_default())
+    {
+        let password = ask_password_for(&validator_node_key_file)?;
+        decrypt_and_unzip_file(&validator_node_key_file, password)?
+    } else if validator_node_key_file.exists() {
+        fs::read_to_string(&validator_node_key_file).with_context(|| {
+            format!(
+                "cannot read validator node key file: '{}'",
+                validator_key_file.display()
+            )
+        })?
+    } else {
+        info!(
+            "{} does not exist yet, generate it...",
+            validator_node_key_file.display()
+        );
+        let tmp_dir = TempDir::new()?;
+        let args = &[
+            "--home",
+            tmp_dir
+                .path()
+                .to_str()
+                .context("cannot convert path to string")?,
+            "init",
+        ];
+        let status = Command::new("neard").args(args).status();
+        status_to_pretty_err(status, "neard", args)
+            .context("cannot generate validator node key")?;
+        let tmp_node_key_path = tmp_dir.path().join("node_key.json");
+        let content = fs::read_to_string(&tmp_node_key_path).with_context(|| {
+            format!(
+                "cannot read generated node_key.json: {}",
+                tmp_node_key_path.display()
+            )
+        })?;
+        fs::write(&validator_node_key_file, &content).with_context(|| {
+            format!(
+                "failed to write validator node key to {}",
+                validator_node_key_file.display()
+            )
+        })?;
+        content
+    };
+
     Ok(ValidatorKeys {
         validator_key: serde_json::from_str(&validator_key)
             .map_err(|e| SerdeError::new(validator_key.to_string(), e))
@@ -568,7 +652,7 @@ ipv6_address = "2605:9880:400::3"
 
     assert_eq!(hosts["validator-01"].validator_keys, None);
 
-    // we we delete the node_key.json, `parse-config` will generate it for us:
+    // we delete the node_key.json, `parse-config` will generate it for us:
     fs::remove_file("node_key.json").unwrap();
     let config = parse_config(config_str, None)?;
     let validator_node_key = &config.hosts["validator-00"]
@@ -580,4 +664,17 @@ ipv6_address = "2605:9880:400::3"
     assert_ne!(validator_node_key.public_key, test_public_key);
 
     Ok(())
+}
+
+#[test]
+pub fn test_decrypt_and_unzip_file() {
+    let validator_key_file = PathBuf::from("tests/assets/validator_key.zip");
+    assert_eq!(
+        decrypt_and_unzip_file(&validator_key_file, "1234".into()).unwrap(),
+        r#"{
+  "account_id": "test.pool.devnet",
+  "public_key": "ed25519:9E2PD1zw7YE2oyaNwSEXj54GcayiZiMQX5bfgzCzqpHk",
+  "private_key": "ed25519:5a8tzPJxDjEZjsrJmYqwRweQhmeHh3BTmy9aWUhyAkJ3DpVgPnDiA21GfGR7SKLcj2Z9LW7ZcYZ75JNCDa6EvsMG"
+}"#
+    );
 }

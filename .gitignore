@@ -24,3 +24,5 @@ __pycache__/
 kuutamo.toml
 node_key.json
 validator_key.json
+node_key.zip
+validator_key.zip
