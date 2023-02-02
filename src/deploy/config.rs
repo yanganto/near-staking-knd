@@ -389,8 +389,7 @@ fn validate_host(
     })
 }
 
-fn ask_password_and_unzip_file(file: &PathBuf) -> Result<String> {
-    let mut content = String::new();
+fn ask_password_for(file: &PathBuf) -> Result<String> {
     let file_name = file
         .file_name()
         .unwrap_or_default()
@@ -402,7 +401,16 @@ fn ask_password_and_unzip_file(file: &PathBuf) -> Result<String> {
     if stdin.lock().read_line(&mut line).is_err() {
         println!("Please give your password for {}", file_name);
     }
-    let password = line.trim_end_matches('\n').to_string();
+    Ok(line.trim_end_matches('\n').to_string())
+}
+
+fn decrypt_and_unzip_file(file: &PathBuf, password: String) -> Result<String> {
+    let mut content = String::new();
+    let file_name = file
+        .file_name()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
     let mut archive = fs::File::open(file)
         .map(zip::ZipArchive::new)
         .with_context(|| format!("{file_name:} could not treat as zip archive"))??;
@@ -423,7 +431,8 @@ fn read_validator_keys(
         .extension()
         .map(|s| s.to_str().unwrap_or_default())
     {
-        ask_password_and_unzip_file(&validator_key_file)?
+        let password = ask_password_for(&validator_key_file)?;
+        decrypt_and_unzip_file(&validator_key_file, password)?
     } else {
         fs::read_to_string(&validator_key_file).with_context(|| {
             format!(
@@ -437,7 +446,8 @@ fn read_validator_keys(
         .extension()
         .map(|s| s.to_str().unwrap_or_default())
     {
-        ask_password_and_unzip_file(&validator_node_key_file)?
+        let password = ask_password_for(&validator_node_key_file)?;
+        decrypt_and_unzip_file(&validator_node_key_file, password)?
     } else if validator_node_key_file.exists() {
         fs::read_to_string(&validator_node_key_file).with_context(|| {
             format!(
@@ -617,4 +627,17 @@ ipv6_address = "2605:9880:400::3"
     assert_ne!(validator_node_key.public_key, test_public_key);
 
     Ok(())
+}
+
+#[test]
+pub fn test_decrypt_and_unzip_file() {
+    let validator_key_file = PathBuf::from("tests/assets/validator_key.zip");
+    assert_eq!(
+        decrypt_and_unzip_file(&validator_key_file, "1234".into()).unwrap(),
+        r#"{
+  "account_id": "test.pool.devnet",
+  "public_key": "ed25519:9E2PD1zw7YE2oyaNwSEXj54GcayiZiMQX5bfgzCzqpHk",
+  "private_key": "ed25519:5a8tzPJxDjEZjsrJmYqwRweQhmeHh3BTmy9aWUhyAkJ3DpVgPnDiA21GfGR7SKLcj2Z9LW7ZcYZ75JNCDa6EvsMG"
+}"#
+    );
 }
