@@ -18,11 +18,10 @@ rustPlatform.buildRustPackage rec {
 
   # https://github.com/near/nearcore/tags
   src = fetchFromGitHub {
-    # TODO: remove this once we no longer need the hotfix feature
-    owner = if rev == null then "near" else "kuutamolabs";
+    owner = "near";
     repo = "nearcore";
     # there is also a branch for this version number, so we need to be explicit
-    rev = if rev == null then "refs/tags/${version}" else rev;
+    rev = "refs/tags/${version}";
     inherit sha256;
   };
 
@@ -40,7 +39,7 @@ rustPlatform.buildRustPackage rec {
     # - Maintenance RPC
     #   - https://github.com/near/nearcore/pull/7887
     (
-      lib.optional (lib.versionOlder version "1.30.0-rc.5") (
+      lib.optional (lib.versionOlder version "1.31.0") (
         fetchpatch {
           name = "maintenance_patch-1.30.0-rc.5";
           url = "https://github.com/kuutamolabs/nearcore/commit/8671b358052461a26a42f90d4d8b30a5f8ba4a79.patch";
