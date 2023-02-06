@@ -59,40 +59,24 @@ impl Drop for DisableTerminalEcho {
 type IpV6String = String;
 
 trait AsIpAddr {
-    fn is_ipv6(&self) -> bool;
-    fn to_ipv6(&self) -> Result<IpAddr>;
+    /// Handle ipv6 subnet identifier and normalize to a valide ip address and a mask.
+    fn normalize(&self) -> Result<(IpAddr, Option<u8>)>;
 }
 
 impl AsIpAddr for IpV6String {
-    fn is_ipv6(&self) -> bool {
+    fn normalize(&self) -> Result<(IpAddr, Option<u8>)> {
         if let Some(idx) = self.find('/') {
-            self.get(idx + 1..self.len())
-                .map(|i| i.parse::<usize>().is_ok())
-                .unwrap_or(false)
-                && self
-                    .get(0..idx)
-                    .map(|addr| addr.parse::<IpAddr>().is_ok())
-                    .unwrap_or(false)
-        } else {
-            self.parse::<IpAddr>()
-                .map(|ip| ip.is_ipv6())
-                .unwrap_or(false)
-        }
-    }
-
-    /// Handle ipv6 segament to a valide ip address
-    fn to_ipv6(&self) -> Result<IpAddr> {
-        if let Some(idx) = self.find('/') {
-            let _ = self
+            let mask = self
                 .get(idx + 1..self.len())
-                .map(|i| i.parse::<usize>().is_ok())
-                .with_context(|| "no ipv6_address should '/' a unsign intager")?;
+                .map(|i| i.parse::<u8>())
+                .with_context(|| "no ipv6_address should '/' a unsign intager")?
+                .ok();
 
             match self.get(0..idx) {
-                Some(addr_str) => {
+                Some(addr_str) if mask.is_some() => {
                     if let Ok(addr) = addr_str.parse::<IpAddr>() {
-                        warn!("{self:} is a ipv6 segament will use {addr:} for ipv6 address");
-                        Ok(addr)
+                        warn!("{self:} is a ipv6 subnet identifier will use {addr:} for ipv6 address and {:} for ipv6_cidr", mask.unwrap_or_default());
+                        Ok((addr, mask))
                     } else {
                         Err(anyhow!("ipv6_address invalid"))
                     }
@@ -100,7 +84,7 @@ impl AsIpAddr for IpV6String {
                 _ => Err(anyhow!("ipv6_address invalid")),
             }
         } else {
-            Ok(self.parse::<IpAddr>()?)
+            Ok((self.parse::<IpAddr>()?, None))
         }
     }
 }
@@ -353,6 +337,7 @@ fn validate_host(
         .as_ref()
         .with_context(|| format!("no ipv6_address provided for host.{}", name))?;
 
+    let (ipv6_address, mask) = ipv6_address.normalize()?;
     if !ipv6_address.is_ipv6() {
         format!(
             "ipv6_address provided for hosts.{} is not an ipv6 address: {}",
@@ -471,8 +456,8 @@ fn validate_host(
         ipv4_address,
         ipv4_cidr,
         ipv4_gateway,
-        ipv6_address: ipv6_address.to_ipv6()?,
-        ipv6_cidr,
+        ipv6_address,
+        ipv6_cidr: mask.unwrap_or(ipv6_cidr),
         ipv6_gateway,
         validator_keys,
         public_ssh_keys,
@@ -739,24 +724,21 @@ pub fn test_decrypt_and_unzip_file() {
 #[test]
 fn test_valid_ip_string_for_ipv6() {
     let ip: IpV6String = "2607:5300:203:5cdf::".into();
-    assert!(ip.is_ipv6());
+    assert_eq!(ip.normalize().unwrap().1, None);
 
-    let prefix_only_segament: IpV6String = "2607:5300:203:5cdf::/64".into();
-    assert!(prefix_only_segament.is_ipv6());
+    let subnet_identifire: IpV6String = "2607:5300:203:5cdf::/64".into();
     assert_eq!(
-        prefix_only_segament.to_ipv6().unwrap(),
-        ip.to_ipv6().unwrap()
+        subnet_identifire.normalize().unwrap().0,
+        ip.normalize().unwrap().0
     );
-
-    let ip_v4: IpV6String = "192.168.0.1".into();
-    assert!(!ip_v4.is_ipv6());
+    assert_eq!(subnet_identifire.normalize().unwrap().1, Some(64));
 }
 
 #[test]
 fn test_invalid_string_for_ipv6() {
     let mut invalid_str: IpV6String = "2607:5300:203:7cdf::/".into();
-    assert!(!invalid_str.is_ipv6());
+    assert!(invalid_str.normalize().is_err());
 
     invalid_str = "/2607:5300:203:7cdf::".into();
-    assert!(!invalid_str.is_ipv6());
+    assert!(invalid_str.normalize().is_err());
 }
