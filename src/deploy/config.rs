@@ -53,12 +53,9 @@ impl Drop for DisableTerminalEcho {
 
 /// IpV6String allows prefix only address format and normal ipv6 address
 ///
-/// Cloud service give a segament having all prefix but without interface ID as address, ie. `2607:5300:203:5cdf::/64`.
-/// `2607:5300:203:5cdf::/64` is invalid value for `IpAddr` in Rust, and `2607:5300:203:5cdf::` is.
-///
-/// This structure allows to fill `2607:5300:203:5cdf::/64` in `kuutamo.toml`,
-/// and treated as `2607:5300:203:5cdf::` with warning message for the known issue,
-/// such that it will not be painful for our user.
+/// Some providers include the subnet in their address shown in the webinterface i.e. 2607:5300:203:5cdf::/64
+/// This format is rejected by IpAddr in Rust and we store subnets in a different configuration option.
+/// This struct detects such cashes in the kuutamo.toml file and converting it to 2607:5300:203:5cdf:: with a warning message, providing a more user-friendly experience.
 type IpV6String = String;
 
 trait AsIpAddr {
