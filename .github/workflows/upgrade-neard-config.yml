@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN_FOR_CI }}
       - name: Upgrade neard configuration
         run: |
           curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/config.json | jq 'setpath(["rpc", "enable_debug_rpc"]; true)' | jq 'setpath(["telemetry", "endpoints"]; [])' > nix/modules/neard/${{matrix.network}}/config.json
@@ -26,7 +24,6 @@ jobs:
         with:
           commit-message: Upgrade near configuration for ${{matrix.network}}
           branch: near-config-${{matrix.network}}
-          token: ${{ secrets.GH_TOKEN_FOR_CI }}
           delete-branch: true
           title: Upgrade near configuration for ${{matrix.network}}
           body: |
@@ -43,8 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN_FOR_CI }}
       - name: Upgrade neard configuration
         run: |
           curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/genesis.json > nix/modules/neard/${{matrix.network}}/genesis.json
@@ -54,7 +49,6 @@ jobs:
         with:
           commit-message: Upgrade near configuration for ${{matrix.network}}
           branch: near-genesis-${{matrix.network}}
-          token: ${{ secrets.GH_TOKEN_FOR_CI }}
           delete-branch: true
           title: Upgrade genesis.json for ${{matrix.network}}
           body: |
