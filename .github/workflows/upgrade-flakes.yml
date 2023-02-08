@@ -6,6 +6,7 @@ on:
     - cron:  '51 2 * * 0,4'
 permissions:
   pull-requests: write
+  contents: write
 jobs:
   createPullRequest:
     runs-on: ubuntu-latest
