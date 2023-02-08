@@ -30,54 +30,18 @@ rustPlatform.buildRustPackage rec {
   patches = [ ];
 
   cargoPatches = [
-    # Stateviewer has a test dependency on the wasm contracts.
-    # Since we are not building tests, we can skip those.
-    ./0001-make-near-test-contracts-optional.patch
-
-    # - Expected shutdown
-    #   - https://github.com/near/nearcore/pull/7872
-    # - Maintenance RPC
-    #   - https://github.com/near/nearcore/pull/7887
-    (
-      lib.optional (lib.versionOlder version "1.31.0") (
-        fetchpatch {
-          name = "maintenance_patch-1.30.0-rc.5";
-          url = "https://github.com/kuutamolabs/nearcore/commit/8671b358052461a26a42f90d4d8b30a5f8ba4a79.patch";
-          sha256 = "sha256-QGn76On3j7WJZ3USTPs0VKE99jvNTL6w/QZ2T+zTDt4=";
-        }
-      )
-    )
-
     # Remove test dependency on contract
     # Since we are not building tests, we can skip those.
-    (
-      lib.optional (lib.versionAtLeast version "1.31.0-rc.1") (
-        ./0002-rm-near-test-contracts.patch
-      )
-    )
+    ./0001-rm-near-test-contracts.patch
 
-    # Limit RocksDB file open numbers
-    (
-      lib.optional (lib.versionAtLeast version "1.31.0-rc.1") (
-        ./0003-rocksdb-max-open.patch
-      )
-    )
+    ./0002-rocksdb-max-open.patch
 
-    # patch cargo lock version
-    (
-      lib.optional (lib.versionAtLeast version "1.31.0-rc.2") (
-        ./0004-1.30.0-rc.2-cargo.lock.patch
-      )
-    )
-
-    (
-      lib.optional (lib.versionAtLeast version "1.31.0-rc.1") (
-        fetchpatch {
-          name = "maintenance_patch-1.31.0-rc.5";
-          url = "https://github.com/kuutamolabs/nearcore/commit/e045bee17716140e53dcb53bcae43bc4f3c4d8d7.patch";
-          sha256 = "sha256-fKX+LvASNa0FR97qquUxIDXv91KKYKMaKRTNPuQF41w=";
-        }
-      )
+    (fetchpatch
+      {
+        name = "maintenance_patch-1.31.0-rc.5";
+        url = "https://github.com/kuutamolabs/nearcore/commit/e045bee17716140e53dcb53bcae43bc4f3c4d8d7.patch";
+        sha256 = "sha256-fKX+LvASNa0FR97qquUxIDXv91KKYKMaKRTNPuQF41w=";
+      }
     )
   ];
 

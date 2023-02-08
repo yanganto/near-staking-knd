@@ -1,5 +1,5 @@
 diff --git a/Cargo.lock b/Cargo.lock
-index 039b03841..07cf98477 100644
+index 1bb5f266f..6f63b0ec3 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
 @@ -1946,7 +1946,6 @@ dependencies = [
@@ -26,7 +26,34 @@ index 039b03841..07cf98477 100644
   "nearcore",
   "node-runtime",
   "num-rational",
-@@ -3647,7 +3644,6 @@ dependencies = [
+@@ -3550,18 +3547,6 @@ dependencies = [
+  "tracing",
+ ]
+ 
+-[[package]]
+-name = "near-test-contracts"
+-version = "0.0.0"
+-dependencies = [
+- "arbitrary",
+- "once_cell",
+- "rand 0.8.5",
+- "wasm-encoder",
+- "wasm-smith",
+- "wat",
+-]
+-
+ [[package]]
+ name = "near-vm-errors"
+ version = "0.0.0"
+@@ -3615,7 +3600,6 @@ dependencies = [
+  "near-cache",
+  "near-primitives",
+  "near-stable-hasher",
+- "near-test-contracts",
+  "near-vm-errors",
+  "near-vm-logic",
+  "once_cell",
+@@ -3647,7 +3631,6 @@ dependencies = [
   "arbitrary",
   "libfuzzer-sys",
   "near-primitives",
@@ -34,7 +61,7 @@ index 039b03841..07cf98477 100644
   "near-vm-errors",
   "near-vm-logic",
   "near-vm-runner",
-@@ -3783,7 +3779,6 @@ dependencies = [
+@@ -3783,7 +3766,6 @@ dependencies = [
   "near-o11y",
   "near-primitives",
   "near-store",
@@ -42,7 +69,15 @@ index 039b03841..07cf98477 100644
   "near-vm-errors",
   "near-vm-logic",
   "near-vm-runner",
-@@ -4940,7 +4935,6 @@ dependencies = [
+@@ -4908,7 +4890,6 @@ dependencies = [
+  "near-o11y",
+  "near-primitives",
+  "near-store",
+- "near-test-contracts",
+  "near-vm-logic",
+  "near-vm-runner",
+  "nearcore",
+@@ -4940,7 +4921,6 @@ dependencies = [
   "near-o11y",
   "near-primitives",
   "near-store",
@@ -50,7 +85,15 @@ index 039b03841..07cf98477 100644
   "nearcore",
   "serde",
   "serde_json",
-@@ -5632,7 +5626,6 @@ dependencies = [
+@@ -5446,7 +5426,6 @@ dependencies = [
+  "near-primitives",
+  "near-primitives-core",
+  "near-store",
+- "near-test-contracts",
+  "nearcore",
+  "node-runtime",
+  "once_cell",
+@@ -5632,7 +5611,6 @@ dependencies = [
   "near-chain-configs",
   "near-crypto",
   "near-primitives",
@@ -81,6 +124,30 @@ index 3b5fd21bd..bc0675bdb 100644
  near-performance-metrics = { path = "../utils/near-performance-metrics" }
  near-vm-errors = { path = "../runtime/near-vm-errors" }
  near-vm-runner = { path = "../runtime/near-vm-runner" }
+diff --git a/runtime/near-test-contracts/Cargo.toml b/runtime/near-test-contracts/Cargo.toml
+index 35f665712..71f8d9379 100644
+--- a/runtime/near-test-contracts/Cargo.toml
++++ b/runtime/near-test-contracts/Cargo.toml
+@@ -1,5 +1,5 @@
+ [package]
+-name = "near-test-contracts"
++name = "not-use-near-test-contracts"
+ version = "0.0.0"
+ publish = false
+ authors = ["Near Inc <hello@nearprotocol.com>"]
+diff --git a/runtime/near-vm-runner/Cargo.toml b/runtime/near-vm-runner/Cargo.toml
+index 8dd600167..c73c55221 100644
+--- a/runtime/near-vm-runner/Cargo.toml
++++ b/runtime/near-vm-runner/Cargo.toml
+@@ -62,7 +62,7 @@ wasm-smith.workspace = true
+ wasmprinter.workspace = true
+ wat.workspace = true
+ 
+-near-test-contracts = { path = "../near-test-contracts" }
++# near-test-contracts = { path = "../near-test-contracts" }
+ 
+ [features]
+ # all vms enabled for now
 diff --git a/runtime/near-vm-runner/fuzz/Cargo.toml b/runtime/near-vm-runner/fuzz/Cargo.toml
 index 7af395066..884cfdfd8 100644
 --- a/runtime/near-vm-runner/fuzz/Cargo.toml
@@ -94,6 +161,28 @@ index 7af395066..884cfdfd8 100644
  near-vm-errors = { path = "../../near-vm-errors" }
  near-vm-logic = { path = "../../near-vm-logic", default-features = false }
  near-vm-runner = { path = ".." }
+diff --git a/runtime/runtime-params-estimator/Cargo.toml b/runtime/runtime-params-estimator/Cargo.toml
+index 368ec24d8..6999096b9 100644
+--- a/runtime/runtime-params-estimator/Cargo.toml
++++ b/runtime/runtime-params-estimator/Cargo.toml
+@@ -39,7 +39,7 @@ near-crypto = { path = "../../core/crypto" }
+ near-o11y = { path = "../../core/o11y" }
+ near-primitives = { path = "../../core/primitives" }
+ near-store = { path = "../../core/store" }
+-near-test-contracts = { path = "../near-test-contracts" }
++# near-test-contracts = { path = "../near-test-contracts" }
+ near-vm-logic = {path = "../../runtime/near-vm-logic"  }
+ near-vm-runner = {path = "../../runtime/near-vm-runner" }
+ nearcore = { path = "../../nearcore" }
+@@ -67,7 +67,7 @@ nightly = [
+ ]
+ nightly_protocol = [
+   "near-primitives/nightly_protocol",
+-  "near-test-contracts/nightly",
++  # "near-test-contracts/nightly",
+   "protocol_feature_ed25519_verify"
+ ]
+ sandbox = ["node-runtime/sandbox"]
 diff --git a/runtime/runtime/Cargo.toml b/runtime/runtime/Cargo.toml
 index 08f6cd99f..aa41d4fde 100644
 --- a/runtime/runtime/Cargo.toml
@@ -143,3 +232,16 @@ index 539b9d792..5741b8f85 100644
 +# near-test-contracts = { path = "../../runtime/near-test-contracts" }
  nearcore = { path = "../../nearcore" }
  node-runtime = { path = "../../runtime/runtime" }
+diff --git a/tools/state-viewer/Cargo.toml b/tools/state-viewer/Cargo.toml
+index a457d692c..71a8f8964 100644
+--- a/tools/state-viewer/Cargo.toml
++++ b/tools/state-viewer/Cargo.toml
+@@ -27,7 +27,7 @@ near-network = { path = "../../chain/network" }
+ near-primitives = { path = "../../core/primitives" }
+ near-primitives-core = { path = "../../core/primitives-core" }
+ near-store = { path = "../../core/store" }
+-near-test-contracts = { path = "../../runtime/near-test-contracts" }
++# near-test-contracts = { path = "../../runtime/near-test-contracts" }
+ nearcore = { path = "../../nearcore" }
+ node-runtime = { path = "../../runtime/runtime" }
+ 
