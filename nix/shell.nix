@@ -28,7 +28,7 @@
             self'.packages.near-cli
             pkgs.nix-update
 
-            inputs'.nixos-remote.packages.nixos-remote
+            inputs'.nixos-anywhere.packages.nixos-anywhere
 
             # Benchmark tools
             #pkgs.fio

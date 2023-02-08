@@ -23,7 +23,7 @@ struct InstallArgs {
     )]
     kexec_url: String,
 
-    /// Enables debug output in nixos-remote
+    /// Enables debug output in nixos-anywhere
     #[clap(long, action)]
     debug: bool,
 

@@ -73,9 +73,9 @@ pub fn install(
                 args.push("--no-reboot");
             }
             args.push(&connection_string);
-            println!("$ nixos-remote {}", args.join(" "));
-            let status = Command::new("nixos-remote").args(&args).status();
-            status_to_pretty_err(status, "nixos-remote", &args)?;
+            println!("$ nixos-anywhere {}", args.join(" "));
+            let status = Command::new("nixos-anywhere").args(&args).status();
+            status_to_pretty_err(status, "nixos-anywhere", &args)?;
 
             if no_reboot {
                 return Ok(());

@@ -51,7 +51,7 @@ let
     ({ fst, snd }: qemu-common.qemuNICFlags snd fst config.virtualisation.test.nodeNumber);
 in
 makeTest' {
-  name = "nixos-remote";
+  name = "nixos-anywhere";
   nodes = {
     installer = { pkgs, ... }: {
       imports = [ shared ];

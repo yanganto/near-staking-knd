@@ -127,15 +127,12 @@ in
             }
 
             install -d -o neard -g neard /var/lib/neard
-            ${lib.optionalString (cfg.genesisFile == null && cfg.chainId != null) ''
-              if [[ ! -e /var/lib/neard/genesis.json ]]; then
-                runNeard aws s3 --no-sign-request cp s3://build.nearprotocol.com/nearcore-deploy/${cfg.chainId}/genesis.json /var/lib/neard/genesis.json
-              fi
-            ''}
 
             if [[ ! -f /var/lib/neard/.finished ]]; then
               ${lib.optionalString cfg.generateNodeKey ''
-                runNeard ${cfg.package}/bin/neard --home /var/lib/neard init ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId}"}
+                # If those keys already exist but no genesis than neard would just do nothing and fail...
+                rm -rf /var/lib/neard/{config.json,node_key.json}
+                runNeard ${cfg.package}/bin/neard --home /var/lib/neard init ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId} --download-genesis"}
               ''}
               ${lib.optionalString (cfg.s3.dataBackupDirectory != null) ''
                 runNeard aws s3 sync \

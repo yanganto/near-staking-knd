@@ -7,6 +7,7 @@
   inputs.srvos.inputs.nixpkgs.follows = "nixpkgs";
 
   inputs.treefmt-nix.url = "github:numtide/treefmt-nix";
+  inputs.treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
 
   inputs.flake-parts.url = "github:hercules-ci/flake-parts";
   inputs.flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -16,12 +17,12 @@
   inputs.disko.url = "github:nix-community/disko";
   inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
 
-  inputs.nixos-remote.url = "github:numtide/nixos-remote";
-  inputs.nixos-remote.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.nixos-remote.inputs.disko.follows = "disko";
-  inputs.nixos-remote.inputs.nixos-images.follows = "nixos-images";
-  inputs.nixos-remote.inputs.treefmt-nix.follows = "treefmt-nix";
-  inputs.nixos-remote.inputs.flake-parts.follows = "flake-parts";
+  inputs.nixos-anywhere.url = "github:numtide/nixos-anywhere";
+  inputs.nixos-anywhere.inputs.nixpkgs.follows = "nixpkgs";
+  inputs.nixos-anywhere.inputs.disko.follows = "disko";
+  inputs.nixos-anywhere.inputs.nixos-images.follows = "nixos-images";
+  inputs.nixos-anywhere.inputs.treefmt-nix.follows = "treefmt-nix";
+  inputs.nixos-anywhere.inputs.flake-parts.follows = "flake-parts";
 
   inputs.nixos-images.url = "github:nix-community/nixos-images";
 
