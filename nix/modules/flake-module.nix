@@ -59,6 +59,34 @@
         ];
       };
 
+      single-node-archiver = { pkgs, ... }: {
+        imports = [
+          self.nixosModules.disko-partitioning-script
+          self.nixosModules.networkd
+          self.nixosModules.kuutamo-binary-cache
+          inputs.srvos.nixosModules.server
+          inputs.disko.nixosModules.disko
+        ];
+        kuutamo.near-staking-analytics.package = self.packages.${pkgs.stdenv.hostPlatform.system}.near-staking-analytics;
+        nixpkgs.config.allowUnfree = true;
+      };
+
+      single-node-archiver-mainnet = {
+        imports = [
+          self.nixosModules.single-node-archiver
+          self.nixosModules.neard-mainnet
+          ./single-node-archiver/mainnet.nix
+        ];
+      };
+
+      single-node-archiver-testnet = {
+        imports = [
+          self.nixosModules.single-node-archiver
+          self.nixosModules.neard-testnet
+          ./single-node-archiver/testnet.nix
+        ];
+      };
+
       default = self.nixosModules.kuutamod;
     };
   };

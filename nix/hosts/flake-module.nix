@@ -24,6 +24,13 @@
           };
         in
         {
+          single-node-archiver-mainnet = lib.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+              dummyConfig
+              self.nixosModules.single-node-archiver-mainnet
+            ];
+          };
           single-node-validator-mainnet = lib.nixosSystem {
             system = "x86_64-linux";
             modules = [
@@ -41,6 +48,13 @@
           #  ];
           #};
 
+          single-node-archiver-testnet = lib.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+              dummyConfig
+              self.nixosModules.single-node-archiver-testnet
+            ];
+          };
           single-node-validator-testnet = lib.nixosSystem {
             system = "x86_64-linux";
             modules = [

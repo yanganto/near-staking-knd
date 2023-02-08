@@ -32,9 +32,5 @@ in
     kuutamo.network.ipv6.address = cfg.ipv6_address;
     kuutamo.network.ipv6.gateway = cfg.ipv6_gateway;
     kuutamo.network.ipv6.cidr = cfg.ipv6_cidr;
-
-    # FIXME: how to upload these?
-    kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
-    kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
   };
 }

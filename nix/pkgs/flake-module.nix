@@ -1,4 +1,5 @@
-{ ...
+{ inputs
+, ...
 }: {
   imports = [
     ./treefmt.nix
@@ -33,6 +34,9 @@
           inherit (config.packages) neard;
         };
 
+        near-staking-analytics = pkgs.callPackage ./near-staking-analytics {
+          npmlock2nix = pkgs.callPackage inputs.npmlock2nix { };
+        };
 
         # passthru as convenience for the CI.
         inherit (pkgs) nix-update;

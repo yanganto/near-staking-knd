@@ -3,7 +3,7 @@ let
   cfg = config.kuutamo.network;
 in
 {
-  imports = [ ../networkd.nix ];
+  imports = [ ./networkd.nix ];
 
   options = {
     kuutamo.network.interface = lib.mkOption {
