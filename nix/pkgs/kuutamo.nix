@@ -5,7 +5,7 @@
 , openssh
 , rsync
 , cargoLock
-, nixos-remote
+, nixos-anywhere
 , makeWrapper
 , neard
 , git
@@ -33,7 +33,7 @@ rustPlatform.buildRustPackage {
 
   # neard is for generating the key
   postInstall = ''
-    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-remote nixos-rebuild nix git openssh rsync neard ]}
+    wrapProgram $out/bin/kuutamo --prefix PATH : ${lib.makeBinPath [ nixos-anywhere nixos-rebuild nix git openssh rsync neard ]}
   '';
 
   checkInputs = [ nix ];

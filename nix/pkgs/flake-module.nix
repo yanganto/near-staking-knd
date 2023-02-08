@@ -30,7 +30,7 @@
         };
         kuutamo = pkgs.callPackage ./kuutamo.nix {
           inherit cargoLock;
-          inherit (inputs'.nixos-remote.packages) nixos-remote;
+          inherit (inputs'.nixos-anywhere.packages) nixos-anywhere;
           inherit (config.packages) neard;
         };
 
