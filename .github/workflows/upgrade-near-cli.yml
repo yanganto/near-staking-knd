@@ -1,4 +1,6 @@
 name: "Update near-cli"
+permissions:
+  pull-requests: write
 on:
   repository_dispatch:
   workflow_dispatch:
@@ -9,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN_FOR_CI }}
       - uses: cachix/install-nix-action@v18
         with:
           extra_nix_config: |
@@ -28,12 +28,10 @@ jobs:
         with:
           commit-message: Upgrade near-cli
           branch: near-cli
-          token: ${{ secrets.GH_TOKEN_FOR_CI }}
           delete-branch: true
           title: Upgrade near-cli
           body: |
             See changelog https://github.com/near/near-cli
-
       - name: Check outputs
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
