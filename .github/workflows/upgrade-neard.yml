@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
   schedule:
     - cron:  '51 2 * * *'
+permissions:
+  pull-requests: write
 jobs:
   createPullRequest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GH_TOKEN_FOR_CI }}
       - uses: cachix/install-nix-action@v18
         with:
           nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixpkgs-unstable.tar.gz
@@ -27,7 +27,6 @@ jobs:
         with:
           commit-message: Upgrade neard
           branch: neard-updates
-          token: ${{ secrets.GH_TOKEN_FOR_CI }}
           delete-branch: true
           title: Upgrade neard
           body: |
