@@ -29,6 +29,10 @@
   inputs.npmlock2nix.url = "github:nix-community/npmlock2nix";
   inputs.npmlock2nix.flake = false;
 
+  inputs.near-staking-ui.url = "github:kuutamolabs/near-staking-ui";
+  inputs.near-staking-ui.flake = false;
+
+
   nixConfig.extra-substituters = [
     "https://cache.garnix.io"
   ];
