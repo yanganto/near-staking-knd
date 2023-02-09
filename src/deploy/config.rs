@@ -69,19 +69,21 @@ impl AsIpAddr for IpV6String {
             let mask = self
                 .get(idx + 1..self.len())
                 .map(|i| i.parse::<u8>())
-                .with_context(|| "no ipv6_address should '/' a unsign intager")?
+                .with_context(|| {
+                    format!("ipv6_address contains invalid subnet identifier: {}", self)
+                })?
                 .ok();
 
             match self.get(0..idx) {
                 Some(addr_str) if mask.is_some() => {
                     if let Ok(addr) = addr_str.parse::<IpAddr>() {
-                        warn!("{self:} is a ipv6 subnet identifier will use {addr:} for ipv6 address and {:} for ipv6_cidr", mask.unwrap_or_default());
+                        warn!("{self:} contains a ipv6 subnet identifier... will use {addr:} for ipv6_address and {:} for ipv6_cidr", mask.unwrap_or_default());
                         Ok((addr, mask))
                     } else {
-                        Err(anyhow!("ipv6_address invalid"))
+                        Err(anyhow!("ipv6_address is not invalid"))
                     }
                 }
-                _ => Err(anyhow!("ipv6_address invalid")),
+                _ => Err(anyhow!("ipv6_address is not invalid")),
             }
         } else {
             Ok((self.parse::<IpAddr>()?, None))
@@ -337,12 +339,14 @@ fn validate_host(
         .as_ref()
         .with_context(|| format!("no ipv6_address provided for host.{}", name))?;
 
-    let (ipv6_address, mask) = ipv6_address.normalize()?;
+    let (ipv6_address, mask) = ipv6_address
+        .normalize()
+        .with_context(|| format!("ipv6_address provided for host.{name:} is not valid"))?;
     if !ipv6_address.is_ipv6() {
-        format!(
-            "ipv6_address provided for hosts.{} is not an ipv6 address: {}",
+        bail!(
+            "value provided in ipv6_address for hosts.{} is not an ipv6 address: {}",
             name,
-            host.ipv6_address.as_ref().expect("already check is some")
+            ipv6_address
         );
     }
     // FIXME: this is currently an unstable feature
