@@ -1,6 +1,6 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use format_serde_error::SerdeError;
-use log::info;
+use log::{info, warn};
 use nix::libc::STDIN_FILENO;
 use nix::sys::termios;
 use regex::Regex;
@@ -51,6 +51,46 @@ impl Drop for DisableTerminalEcho {
     }
 }
 
+/// IpV6String allows prefix only address format and normal ipv6 address
+///
+/// Some providers include the subnet in their address shown in the webinterface i.e. 2607:5300:203:5cdf::/64
+/// This format is rejected by IpAddr in Rust and we store subnets in a different configuration option.
+/// This struct detects such cashes in the kuutamo.toml file and converting it to 2607:5300:203:5cdf:: with a warning message, providing a more user-friendly experience.
+type IpV6String = String;
+
+trait AsIpAddr {
+    /// Handle ipv6 subnet identifier and normalize to a valide ip address and a mask.
+    fn normalize(&self) -> Result<(IpAddr, Option<u8>)>;
+}
+
+impl AsIpAddr for IpV6String {
+    fn normalize(&self) -> Result<(IpAddr, Option<u8>)> {
+        if let Some(idx) = self.find('/') {
+            let mask = self
+                .get(idx + 1..self.len())
+                .map(|i| i.parse::<u8>())
+                .with_context(|| {
+                    format!("ipv6_address contains invalid subnet identifier: {}", self)
+                })?
+                .ok();
+
+            match self.get(0..idx) {
+                Some(addr_str) if mask.is_some() => {
+                    if let Ok(addr) = addr_str.parse::<IpAddr>() {
+                        warn!("{self:} contains a ipv6 subnet identifier... will use {addr:} for ipv6_address and {:} for ipv6_cidr", mask.unwrap_or_default());
+                        Ok((addr, mask))
+                    } else {
+                        Err(anyhow!("ipv6_address is not invalid"))
+                    }
+                }
+                _ => Err(anyhow!("ipv6_address is not invalid")),
+            }
+        } else {
+            Ok((self.parse::<IpAddr>()?, None))
+        }
+    }
+}
+
 #[derive(Debug, Deserialize)]
 struct ConfigFile {
     #[serde(default)]
@@ -89,7 +129,7 @@ struct HostConfig {
     #[serde(default)]
     pub mac_address: Option<String>,
     #[serde(default)]
-    ipv6_address: Option<IpAddr>,
+    ipv6_address: Option<IpV6String>,
     #[serde(default)]
     ipv6_gateway: Option<IpAddr>,
     #[serde(default)]
@@ -296,11 +336,17 @@ fn validate_host(
 
     let ipv6_address = host
         .ipv6_address
-        .with_context(|| format!("no ipv6_address provided for hosts.{}", name))?;
+        .as_ref()
+        .with_context(|| format!("no ipv6_address provided for host.{}", name))?;
+
+    let (ipv6_address, mask) = ipv6_address
+        .normalize()
+        .with_context(|| format!("ipv6_address provided for host.{name:} is not valid"))?;
     if !ipv6_address.is_ipv6() {
-        format!(
-            "ipv6_address provided for hosts.{} is not an ipv6 address: {}",
-            name, ipv6_address
+        bail!(
+            "value provided in ipv6_address for hosts.{} is not an ipv6 address: {}",
+            name,
+            ipv6_address
         );
     }
     // FIXME: this is currently an unstable feature
@@ -415,7 +461,7 @@ fn validate_host(
         ipv4_cidr,
         ipv4_gateway,
         ipv6_address,
-        ipv6_cidr,
+        ipv6_cidr: mask.unwrap_or(ipv6_cidr),
         ipv6_gateway,
         validator_keys,
         public_ssh_keys,
@@ -677,4 +723,26 @@ pub fn test_decrypt_and_unzip_file() {
   "private_key": "ed25519:5a8tzPJxDjEZjsrJmYqwRweQhmeHh3BTmy9aWUhyAkJ3DpVgPnDiA21GfGR7SKLcj2Z9LW7ZcYZ75JNCDa6EvsMG"
 }"#
     );
+}
+
+#[test]
+fn test_valid_ip_string_for_ipv6() {
+    let ip: IpV6String = "2607:5300:203:5cdf::".into();
+    assert_eq!(ip.normalize().unwrap().1, None);
+
+    let subnet_identifire: IpV6String = "2607:5300:203:5cdf::/64".into();
+    assert_eq!(
+        subnet_identifire.normalize().unwrap().0,
+        ip.normalize().unwrap().0
+    );
+    assert_eq!(subnet_identifire.normalize().unwrap().1, Some(64));
+}
+
+#[test]
+fn test_invalid_string_for_ipv6() {
+    let mut invalid_str: IpV6String = "2607:5300:203:7cdf::/".into();
+    assert!(invalid_str.normalize().is_err());
+
+    invalid_str = "/2607:5300:203:7cdf::".into();
+    assert!(invalid_str.normalize().is_err());
 }
