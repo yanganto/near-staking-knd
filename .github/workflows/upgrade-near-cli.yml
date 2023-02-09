@@ -6,7 +6,7 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron:  '51 2 * * *'
+    - cron:  '38 0 * * *'
 jobs:
   createPullRequest:
     runs-on: ubuntu-latest
