@@ -36,6 +36,7 @@
 
         near-staking-analytics = pkgs.callPackage ./near-staking-analytics {
           npmlock2nix = pkgs.callPackage inputs.npmlock2nix { };
+          inherit (inputs) near-staking-ui;
         };
 
         # passthru as convenience for the CI.

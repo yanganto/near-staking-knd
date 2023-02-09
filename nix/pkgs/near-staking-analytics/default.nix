@@ -1,12 +1,7 @@
-{ fetchFromGitHub, stdenv, npmlock2nix, nodejs }:
+{ near-staking-ui, stdenv, npmlock2nix, nodejs }:
 stdenv.mkDerivation rec {
   name = "near-staking-analytics";
-  src = fetchFromGitHub {
-    owner = "kuutamolabs";
-    repo = "near-staking-ui";
-    rev = "ee405e928f98d3b356bd0a5b0af75af4d8b57bd9";
-    hash = "sha256-F2nQhmqEF3xYsFEYWRxLxtzJKWEsA1Rp9k2UrRzuV7E=";
-  };
+  src = near-staking-ui;
   node_modules = npmlock2nix.v2.node_modules {
     src = src + "/backend";
   };

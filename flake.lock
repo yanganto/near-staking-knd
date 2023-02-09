@@ -56,6 +56,22 @@
         "type": "github"
       }
     },
+    "near-staking-ui": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1675928846,
+        "narHash": "sha256-qX7eXlF5QOeJxKTlc7vTR/HrKgwunnQs7jl6XVqwJWg=",
+        "owner": "kuutamolabs",
+        "repo": "near-staking-ui",
+        "rev": "fc9216990140ceca07cc75a9624035b47e1f7639",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kuutamolabs",
+        "repo": "near-staking-ui",
+        "type": "github"
+      }
+    },
     "nixos-2211": {
       "locked": {
         "lastModified": 1675903181,
@@ -176,6 +192,7 @@
         "core-contracts": "core-contracts",
         "disko": "disko",
         "flake-parts": "flake-parts",
+        "near-staking-ui": "near-staking-ui",
         "nixos-anywhere": "nixos-anywhere",
         "nixos-images": "nixos-images",
         "nixpkgs": "nixpkgs",
