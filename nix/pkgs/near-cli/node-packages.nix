@@ -589,13 +589,13 @@ let
         sha512 = "5tK7EtrZ0N+OLFMthtqOj4fI2Jeb88C4CAZPu25LDVUgXJ0A3Js4PMGqrn0JU1W0Mh1/Z8wZzYPxqUrXeBboCQ==";
       };
     };
-    "ci-info-3.7.1" = {
+    "ci-info-3.8.0" = {
       name = "ci-info";
       packageName = "ci-info";
-      version = "3.7.1";
+      version = "3.8.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/ci-info/-/ci-info-3.7.1.tgz";
-        sha512 = "4jYS4MOAaCIStSRwiuxc4B8MYhIe676yO1sYGzARnjXkWpmzZMMYxY6zu8WYWDhSuth5zhrQ1rhNSibyyvv4/w==";
+        url = "https://registry.npmjs.org/ci-info/-/ci-info-3.8.0.tgz";
+        sha512 = "eXTggHWSooYhq49F2opQhuHWgzucfF2YgODK4e1566GQs5BIfP30B0oenwBJHfWxAs2fyPB1s7Mg949zLf61Yw==";
       };
     };
     "cipher-base-1.0.4" = {
@@ -1678,13 +1678,13 @@ let
         sha512 = "NpmrnejpY1AdlRpDZ0schJQJtfBaoUheRfiYtQpcq9TkwPgqKZCRULV5L3hHmLc0ep7KRtikbPQ9R2ztN/3cyQ==";
       };
     };
-    "node-abi-3.32.0" = {
+    "node-abi-3.33.0" = {
       name = "node-abi";
       packageName = "node-abi";
-      version = "3.32.0";
+      version = "3.33.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.32.0.tgz";
-        sha512 = "HkwdiLzE/LeuOMIQq/dJq70oNyRc88+wt5CH/RXYseE00LkA/c4PkS6Ti1vE4OHYUiKjkwuxjWq9pItgrz8UJw==";
+        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.33.0.tgz";
+        sha512 = "7GGVawqyHF4pfd0YFybhv/eM9JwTtPqx0mAanQ146O3FlSh3pA24zf9IRQTOsfTSqXTNzPSP5iagAJ94jjuVog==";
       };
     };
     "node-addon-api-3.2.1" = {
@@ -2667,7 +2667,7 @@ in
       sources."jest-mock-27.5.1"
       (sources."jest-util-27.5.1" // {
         dependencies = [
-          sources."ci-info-3.7.1"
+          sources."ci-info-3.8.0"
         ];
       })
       sources."join-component-1.1.0"
@@ -2706,7 +2706,7 @@ in
       sources."near-hd-key-1.2.1"
       sources."near-ledger-js-0.2.1"
       sources."near-seed-phrase-0.2.0"
-      sources."node-abi-3.32.0"
+      sources."node-abi-3.33.0"
       sources."node-addon-api-3.2.1"
       sources."node-fetch-2.6.9"
       sources."node-gyp-build-4.6.0"
