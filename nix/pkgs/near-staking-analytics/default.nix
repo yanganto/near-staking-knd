@@ -10,6 +10,7 @@ stdenv.mkDerivation rec {
     mkdir -p "$out/bin"
     mkdir -p "$out/share/near-staking-analytics"
     install -D package.json $out/share/near-staking-analytics/package.json
+    cp -r public $out/share/near-staking-analytics/public
     cp -r src $out/share/near-staking-analytics/src
     ln -s ${node_modules}/node_modules "$out"/node_modules
     cat > "$out"/bin/near-staking-analytics <<EOF
