@@ -4,6 +4,7 @@
 
 use anyhow::{bail, Context, Result};
 use clap::Parser;
+use kuutamod::commands::control_commands;
 use kuutamod::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
 use kuutamod::proxy;
 use std::collections::HashMap;
@@ -86,6 +87,8 @@ enum Command {
     Rollback(RollbackArgs),
     /// Proxy remote rpc to local
     Proxy(ProxyArgs),
+    /// Shutdown neard in maintenance windows
+    MaintenanceShutdown(control_commands::MaintenanceShutdownArgs),
 }
 
 #[derive(Parser)]
@@ -197,6 +200,41 @@ fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
     proxy::rpc(&hosts[0], proxy_args.local_port)
 }
 
+fn maintenance_shutdown(
+    args: &control_commands::MaintenanceShutdownArgs,
+    config: &Config,
+) -> Result<()> {
+    let hosts = filter_hosts(&args.host, &config.hosts)?;
+    match (args.minimum_length, args.shutdown_at) {
+        (Some(_), Some(_)) => bail!(
+            "We can not guarantee minimum maintenance window for a specified shutdown block height"
+        ),
+        (Some(minimum_length), None) => deploy::utils::timeout_ssh(
+            &hosts[0],
+            &[
+                "kuutamoctl",
+                "maintenance-shutdown",
+                &minimum_length.to_string(),
+            ],
+            true,
+        )?,
+        (None, None) => {
+            deploy::utils::timeout_ssh(&hosts[0], &["kuutamoctl", "maintenance-shutdown"], true)?
+        }
+        (None, Some(shutdown_at)) => deploy::utils::timeout_ssh(
+            &hosts[0],
+            &[
+                "kuutamoctl",
+                "maintenance-shutdown",
+                "--shutdown-at",
+                &shutdown_at.to_string(),
+            ],
+            true,
+        )?,
+    };
+    Ok(())
+}
+
 /// The kuutamo program entry point
 pub fn main() -> Result<()> {
     let args = Args::parse();
@@ -219,5 +257,6 @@ pub fn main() -> Result<()> {
         Command::Update(ref update_args) => update(&args, update_args, &config, &flake),
         Command::Rollback(ref rollback_args) => rollback(&args, rollback_args, &config, &flake),
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
+        Command::MaintenanceShutdown(ref args) => maintenance_shutdown(args, &config),
     }
 }

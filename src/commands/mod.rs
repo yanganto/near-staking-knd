@@ -2,6 +2,7 @@
 
 mod active_validator;
 mod client;
+pub mod control_commands;
 mod server;
 
 use serde::{Deserialize, Serialize};
