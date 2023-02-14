@@ -87,8 +87,9 @@ enum Command {
     Rollback(RollbackArgs),
     /// Proxy remote rpc to local
     Proxy(ProxyArgs),
-    /// Shutdown neard in maintenance windows
-    MaintenanceShutdown(control_commands::MaintenanceShutdownArgs),
+    /// Ask Kuutamod to schedule a shutdown in maintenance windows, then it will be restart
+    /// due to supervision by kuutamod
+    MaintenanceRestart(control_commands::MaintenanceShutdownArgs),
 }
 
 #[derive(Parser)]
@@ -257,6 +258,6 @@ pub fn main() -> Result<()> {
         Command::Update(ref update_args) => update(&args, update_args, &config, &flake),
         Command::Rollback(ref rollback_args) => rollback(&args, rollback_args, &config, &flake),
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
-        Command::MaintenanceShutdown(ref args) => maintenance_shutdown(args, &config),
+        Command::MaintenanceRestart(ref args) => maintenance_shutdown(args, &config),
     }
 }
