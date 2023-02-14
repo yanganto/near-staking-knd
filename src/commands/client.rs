@@ -77,8 +77,11 @@ impl CommandClient {
         let res = Client::unix().request(req).await?;
 
         let code = res.status();
-        if !code.is_success() {
-            let v: ApiResponse = parse_response(res).await?;
+        let v: ApiResponse = parse_response(res).await?;
+
+        if code.is_success() {
+            println!("{}", v.message);
+        } else {
             bail!(
                 "Request to initiate maintainace shutdown failed: {} (status: {})",
                 v.message,

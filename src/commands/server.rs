@@ -122,9 +122,18 @@ impl CommandServer {
         }
 
         match rx.recv().await {
-            Some(_) => Ok(Response::new(Body::from(
-                r#"{"status": 200, "message": "OK"}"#,
-            ))),
+            Some(r) => match r.shutdown_at_blockheight {
+                Ok(Some(height)) => Ok(Response::new(Body::from(format!(
+                    "{{\"status\": 200, \"message\": \"shutdown at block height: {:}\"}}",
+                    height
+                )))),
+                Ok(None) => Ok(Response::new(Body::from(
+                    r#"{"status": 200, "message": "shutdown at current block"}"#,
+                ))),
+                Err(e) => Ok(server_error(format!(
+                    "fail to setup maintenance window: {e:}"
+                ))),
+            },
             None => Ok(server_error("channel to supervisor was closed")),
         }
     }

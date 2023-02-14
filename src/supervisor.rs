@@ -298,7 +298,26 @@ async fn schedule_maintenance_shutdown(
                 );
             }
         },
-        (None, None) => None,
+        (None, None) => {
+            let mut windows_size = 0;
+            let mut windows_start = 0;
+            for (start, end) in neard_client
+                .maintenance_windows(account_id)
+                .await?
+                .0
+                .into_iter()
+            {
+                if start - end > windows_size {
+                    windows_size = start - end;
+                    windows_start = start;
+                }
+            }
+            if windows_start > 0 {
+                Some(windows_start + 2)
+            } else {
+                bail!("Neard has no maintenance window of in current epoch, please wait");
+            }
+        }
     };
     if let Some(expect_shutdown_at) = expect_shutdown_at {
         apply_dynamic_config(&neard_client, pid, near_home, expect_shutdown_at).await?;
