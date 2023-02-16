@@ -191,11 +191,11 @@ pub struct Host {
     pub ipv4_gateway: IpAddr,
 
     /// Public ipv6 address of the host
-    pub ipv6_address: IpAddr,
+    pub ipv6_address: Option<IpAddr>,
     /// Cidr of the public ipv6 address
-    pub ipv6_cidr: u8,
+    pub ipv6_cidr: Option<u8>,
     /// Public ipv6 gateway address of the host
-    pub ipv6_gateway: IpAddr,
+    pub ipv6_gateway: Option<IpAddr>,
 
     /// SSH Username used when connecting during installation
     pub install_ssh_user: String,
@@ -327,32 +327,40 @@ fn validate_host(
         .or(default.ipv4_gateway)
         .with_context(|| format!("no ipv4_gateway provided for hosts.{name}"))?;
 
-    let ipv6_address = host
-        .ipv6_address
-        .as_ref()
-        .with_context(|| format!("no ipv6_address provided for host.{name}",))?;
+    let ipv6_cidr = host.ipv6_cidr.or(default.ipv6_cidr);
 
-    let (ipv6_address, mask) = ipv6_address
-        .normalize()
-        .with_context(|| format!("ipv6_address provided for host.{name:} is not valid"))?;
-    if !ipv6_address.is_ipv6() {
-        bail!("value provided in ipv6_address for hosts.{name} is not an ipv6 address: {ipv6_address}");
-    }
-    // FIXME: this is currently an unstable feature
-    //if ipv6_address.is_global() {
-    //    warn!("ipv6_address provided for hosts.{} is not a public ipv6 address: {}. This might not work with near mainnet", name, ipv6_address);
-    //}
-    let ipv6_cidr = host
-        .ipv6_cidr
-        .or(default.ipv6_cidr)
-        .with_context(|| format!("no ipv6_cidr provided for hosts.{name}"))?;
-    if !(0..128_u8).contains(&ipv6_cidr) {
-        bail!("ipv6_cidr for hosts.{name} is not between 0 and 128: {ipv6_cidr}")
-    }
-    let ipv6_gateway = host
-        .ipv6_gateway
-        .or(default.ipv6_gateway)
-        .with_context(|| format!("no ipv6_gateway provided for hosts.{name}"))?;
+    let ipv6_gateway = host.ipv6_gateway.or(default.ipv6_gateway);
+
+    let (ipv6_address, mask) = if let Some(ipv6_address) = host.ipv6_address.as_ref() {
+        let (ipv6_address, mask) = ipv6_address
+            .normalize()
+            .with_context(|| format!("ipv6_address provided for host.{name:} is not valid"))?;
+        if !ipv6_address.is_ipv6() {
+            bail!("value provided in ipv6_address for hosts.{name} is not an ipv6 address: {ipv6_address}");
+        }
+
+        if let Some(ipv6_cidr) = ipv6_cidr {
+            if !(0..128_u8).contains(&ipv6_cidr) {
+                bail!("ipv6_cidr for hosts.{name} is not between 0 and 128: {ipv6_cidr}")
+            }
+        } else if mask.is_none() {
+            bail!("no ipv6_cidr provided for hosts.{name}");
+        }
+
+        if ipv6_gateway.is_none() {
+            bail!("no ipv6_gateway provided for hosts.{name}")
+        }
+
+        // FIXME: this is currently an unstable feature
+        //if ipv6_address.is_global() {
+        //    warn!("ipv6_address provided for hosts.{} is not a public ipv6 address: {}. This might not work with near mainnet", name, ipv6_address);
+        //}
+
+        (Some(ipv6_address), mask)
+    } else {
+        warn!("Please provide ipv6_address, which enable IPSec by default, and will provide a better authentication and confidentiality for you");
+        (None, None)
+    };
 
     let ssh_hostname = host
         .ssh_hostname
@@ -440,7 +448,7 @@ fn validate_host(
         ipv4_cidr,
         ipv4_gateway,
         ipv6_address,
-        ipv6_cidr: mask.unwrap_or(ipv6_cidr),
+        ipv6_cidr: mask.or(ipv6_cidr),
         ipv6_gateway,
         validator_keys,
         public_ssh_keys,
@@ -655,12 +663,12 @@ ipv6_address = "2605:9880:400::3"
     );
     assert_eq!(
         hosts["validator-00"].ipv6_address,
-        IpAddr::from_str("2605:9880:400::2").unwrap()
+        IpAddr::from_str("2605:9880:400::2").ok()
     );
-    assert_eq!(hosts["validator-00"].ipv6_cidr, 48);
+    assert_eq!(hosts["validator-00"].ipv6_cidr, Some(48));
     assert_eq!(
         hosts["validator-00"].ipv6_gateway,
-        IpAddr::from_str("2605:9880:400::1").unwrap()
+        IpAddr::from_str("2605:9880:400::1").ok()
     );
     let k = hosts["validator-00"].validator_keys.as_ref().unwrap();
     assert_eq!(k.validator_key, NearKeyFile {

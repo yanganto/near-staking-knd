@@ -29,8 +29,8 @@ in
     kuutamo.network.ipv4.gateway = cfg.ipv4_gateway;
     kuutamo.network.ipv4.cidr = cfg.ipv4_cidr;
 
-    kuutamo.network.ipv6.address = cfg.ipv6_address;
-    kuutamo.network.ipv6.gateway = cfg.ipv6_gateway;
-    kuutamo.network.ipv6.cidr = cfg.ipv6_cidr;
+    kuutamo.network.ipv6.address = cfg.ipv6_address or null;
+    kuutamo.network.ipv6.gateway = cfg.ipv6_gateway or null;
+    kuutamo.network.ipv6.cidr = cfg.ipv6_cidr or null;
   };
 }
