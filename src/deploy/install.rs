@@ -73,7 +73,7 @@ pub fn install(
 
             // wait for the machine to go down
             loop {
-                if !timeout_ssh(host, &["exit", "0"], false)?.success() {
+                if !timeout_ssh(host, &["exit", "0"], false)?.status.success() {
                     break;
                 }
                 if !matches!(
@@ -92,7 +92,7 @@ pub fn install(
 
             // Wait for the machine to come back and learn add it's ssh key to our host
             loop {
-                if timeout_ssh(host, &["exit", "0"], true)?.success() {
+                if timeout_ssh(host, &["exit", "0"], true)?.status.success() {
                     break;
                 }
                 if !matches!(

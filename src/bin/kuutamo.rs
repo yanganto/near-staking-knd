@@ -8,7 +8,7 @@ use kuutamod::commands::control_commands;
 use kuutamod::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
 use kuutamod::proxy;
 use std::collections::HashMap;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -206,7 +206,7 @@ fn maintenance_shutdown(
     config: &Config,
 ) -> Result<()> {
     let hosts = filter_hosts(&args.host, &config.hosts)?;
-    match (args.minimum_length, args.shutdown_at) {
+    let output = match (args.minimum_length, args.shutdown_at) {
         (Some(_), Some(_)) => bail!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
         ),
@@ -233,7 +233,18 @@ fn maintenance_shutdown(
             true,
         )?,
     };
-    Ok(())
+
+    io::stdout()
+        .write_all(&output.stdout)
+        .with_context(|| "Fail to dump stdout of kuutamctl")?;
+    if output.status.success() {
+        Ok(())
+    } else {
+        io::stdout()
+            .write_all(&output.stderr)
+            .with_context(|| "Fail to dump stderr of kuutamctl")?;
+        bail!("Fail to setup maintenance shutdown");
+    }
 }
 
 /// The kuutamo program entry point
@@ -247,7 +258,7 @@ pub fn main() -> Result<()> {
     })?;
     let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
 
-    match args.action {
+    if let Err(e) = match args.action {
         Command::GenerateConfig(ref config_args) => {
             generate_config(&args, config_args, &config, &flake)
         }
@@ -259,5 +270,8 @@ pub fn main() -> Result<()> {
         Command::Rollback(ref rollback_args) => rollback(&args, rollback_args, &config, &flake),
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
         Command::MaintenanceRestart(ref args) => maintenance_shutdown(args, &config),
+    } {
+        bail!("kuutmo fail on action: {:?}, {e}", args.action);
     }
+    Ok(())
 }

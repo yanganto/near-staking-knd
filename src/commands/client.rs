@@ -74,10 +74,17 @@ impl CommandClient {
             .body(Body::from(body))
             .context("failed to build request")?;
 
-        let res = Client::unix().request(req).await?;
+        let res = Client::unix().request(req).await.with_context(|| {
+            format!(
+                "failed to connect to kuutamod via {}",
+                self.socket_path.display()
+            )
+        })?;
 
         let code = res.status();
-        let v: ApiResponse = parse_response(res).await?;
+        let v: ApiResponse = parse_response(res)
+            .await
+            .context("failed to parse response")?;
 
         if code.is_success() {
             println!("{}", v.message);
