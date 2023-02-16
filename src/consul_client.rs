@@ -78,7 +78,7 @@ pub enum ConsulError {
 impl std::error::Error for ConsulError {}
 impl fmt::Display for ConsulError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -186,7 +186,7 @@ impl ConsulClient {
         let mut map = HashMap::new();
         map.insert("Name", session_name);
         // How long the session persists until locks are release
-        let ttl = format!("{}s", ttl);
+        let ttl = format!("{ttl}s");
         map.insert("TTL", &ttl);
         // Delete old locks
         map.insert("Behavior", "delete");
@@ -245,7 +245,7 @@ impl ConsulClient {
     pub async fn get_session(&self, uuid: &str) -> Result<Option<ConsulSession>> {
         let url = self
             .url
-            .join(&format!("/v1/session/info/{}", uuid))
+            .join(&format!("/v1/session/info/{uuid}"))
             .context("Failed to get session url")?;
         let res = self
             .client
@@ -340,7 +340,7 @@ impl ConsulClient {
     pub async fn get(&self, key: &str) -> Result<Option<ConsulValue>> {
         let url = self
             .url
-            .join(&format!("/v1/kv/{}", key))
+            .join(&format!("/v1/kv/{key}"))
             .context("Failed to create kv url")?;
         let res = self
             .client
@@ -384,7 +384,7 @@ impl ConsulClient {
     {
         let mut url = self
             .url
-            .join(&format!("/v1/kv/{}", key))
+            .join(&format!("/v1/kv/{key}"))
             .context("Failed to create kv url")?;
         url.set_query(Some(&format!("acquire={}", session.id())));
 

@@ -12,7 +12,7 @@ async fn parse_response<T: DeserializeOwned>(req: Response<Body>) -> Result<T> {
     let body =
         String::from_utf8(body_bytes.to_vec()).context("Cannot decode api response as string")?;
     serde_json::from_str(&body)
-        .with_context(|| format!("Cannot decodee api response as json: {}", body))
+        .with_context(|| format!("Cannot decodee api response as json: {body}"))
 }
 
 /// A client interact with kuutamo

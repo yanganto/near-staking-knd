@@ -14,6 +14,6 @@ pub fn adjust_oom_score(score: u32) -> io::Result<()> {
     let mut f = OpenOptions::new()
         .write(true)
         .open("/proc/self/oom_score_adj")?;
-    f.write_all(format!("{}", score).as_bytes())?;
+    f.write_all(format!("{score}").as_bytes())?;
     Ok(())
 }

@@ -72,7 +72,7 @@ pub async fn spawn_prometheus_exporter(exporter_address: &str) -> Result<()> {
         make_service_fn(|_| async { Ok::<_, hyper::Error>(service_fn(response_examples)) });
     let server = Server::bind(&addr).serve(make_service);
 
-    println!("Listening on http://{}", addr);
+    println!("Listening on http://{addr}");
 
     server.await.context("Failed to start server")
 }

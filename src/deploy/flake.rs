@@ -45,11 +45,11 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
 
     let nixos_flake = &config.global.flake;
     for (name, host) in &config.hosts {
-        let host_path = tmp_dir.path().join(format!("{}.toml", name));
+        let host_path = tmp_dir.path().join(format!("{name}.toml"));
         let mut host_file = File::create(&host_path)
             .with_context(|| format!("could not create {}", host_path.display()))?;
         let host_toml =
-            toml::to_string(&host).with_context(|| format!("cannot serialize {} to toml", name))?;
+            toml::to_string(&host).with_context(|| format!("cannot serialize {name} to toml"))?;
         host_file
             .write_all(host_toml.as_bytes())
             .with_context(|| format!("Cannot write {}", host_path.display()))?;
@@ -64,7 +64,7 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
 
             let modules = nixos_modules
                 .iter()
-                .map(|m| format!("      near-staking-knd.nixosModules.\"{}\"", m))
+                .map(|m| format!("      near-staking-knd.nixosModules.\"{m}\""))
                 .collect::<Vec<_>>()
                 .join("\n");
 

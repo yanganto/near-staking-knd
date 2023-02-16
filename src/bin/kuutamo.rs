@@ -104,7 +104,7 @@ struct Args {
 }
 
 fn ask_yes_no(prompt_text: &str) -> bool {
-    println!("{} ", prompt_text);
+    println!("{prompt_text} ");
     let stdin = io::stdin();
     let mut line = String::new();
     if stdin.lock().read_line(&mut line).is_err() {

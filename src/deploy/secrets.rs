@@ -60,8 +60,8 @@ impl Secrets {
             .path()
             .to_str()
             .context("Cannot convert secrets directory to string")?;
-        let rsync_target = format!("{}:/", ssh_target);
-        let rsync_path = format!("{}/", path);
+        let rsync_target = format!("{ssh_target}:/");
+        let rsync_path = format!("{path}/");
         let args = vec!["-vrlF", "-e", "ssh", &rsync_path, &rsync_target];
         let status = Command::new("rsync").args(&args).status();
         status_to_pretty_err(status, "rsync", &args)?;

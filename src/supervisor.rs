@@ -87,7 +87,7 @@ fn initialize_state_gauge() {
 
 impl fmt::Display for StateType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -277,7 +277,7 @@ async fn schedule_maintenance_shutdown(
     minimum_length: Option<u64>,
     shutdown_window: Option<u64>,
 ) -> Result<Option<BlockHeight>> {
-    let neard_client = NeardClient::new(&format!("http://127.0.0.1:{}", near_rpc_port))?;
+    let neard_client = NeardClient::new(&format!("http://127.0.0.1:{near_rpc_port}"))?;
     let expect_shutdown_at = match (minimum_length, shutdown_window) {
         (Some(_), Some(_)) => {
             bail!("We can not guarantee minimum maintenance window for a specified shutdown block height");

@@ -31,7 +31,7 @@ impl Log for LogFmtLogger {
         let level = record.level();
         let level_name = level.to_string().to_lowercase();
 
-        print!("level={}", level_name);
+        print!("level={level_name}");
         print!(" pid={}", process::id());
         print!(" message=\"{}\"", record.args());
         print!(" target=\"{}\"", record.target());

@@ -70,7 +70,7 @@ impl AsIpAddr for IpV6String {
                 .get(idx + 1..self.len())
                 .map(|i| i.parse::<u8>())
                 .with_context(|| {
-                    format!("ipv6_address contains invalid subnet identifier: {}", self)
+                    format!("ipv6_address contains invalid subnet identifier: {self}")
                 })?
                 .ok();
 
@@ -291,17 +291,14 @@ fn validate_host(
 
     let ipv4_address = host
         .ipv4_address
-        .with_context(|| format!("no ipv4_address provided for host.{}", name))?;
+        .with_context(|| format!("no ipv4_address provided for host.{name}"))?;
     let ipv4_cidr = host
         .ipv4_cidr
         .or(default.ipv4_cidr)
-        .with_context(|| format!("no ipv4_cidr provided for hosts.{}", name))?;
+        .with_context(|| format!("no ipv4_cidr provided for hosts.{name}"))?;
 
     if !ipv4_address.is_ipv4() {
-        format!(
-            "ipv4_address provided for hosts.{} is not an ipv4 address: {}",
-            name, ipv4_address
-        );
+        format!("ipv4_address provided for hosts.{name} is not an ipv4 address: {ipv4_address}");
     }
 
     // FIXME: this is currently an unstable feature
@@ -310,11 +307,7 @@ fn validate_host(
     //}
 
     if !(0..32_u8).contains(&ipv4_cidr) {
-        bail!(
-            "ipv4_cidr for hosts.{} is not between 0 and 32: {}",
-            name,
-            ipv4_cidr
-        )
+        bail!("ipv4_cidr for hosts.{name} is not between 0 and 32: {ipv4_cidr}")
     }
 
     let default_module = "single-node-validator-mainnet";
@@ -332,22 +325,18 @@ fn validate_host(
     let ipv4_gateway = host
         .ipv4_gateway
         .or(default.ipv4_gateway)
-        .with_context(|| format!("no ipv4_gateway provided for hosts.{}", name))?;
+        .with_context(|| format!("no ipv4_gateway provided for hosts.{name}"))?;
 
     let ipv6_address = host
         .ipv6_address
         .as_ref()
-        .with_context(|| format!("no ipv6_address provided for host.{}", name))?;
+        .with_context(|| format!("no ipv6_address provided for host.{name}",))?;
 
     let (ipv6_address, mask) = ipv6_address
         .normalize()
         .with_context(|| format!("ipv6_address provided for host.{name:} is not valid"))?;
     if !ipv6_address.is_ipv6() {
-        bail!(
-            "value provided in ipv6_address for hosts.{} is not an ipv6 address: {}",
-            name,
-            ipv6_address
-        );
+        bail!("value provided in ipv6_address for hosts.{name} is not an ipv6 address: {ipv6_address}");
     }
     // FIXME: this is currently an unstable feature
     //if ipv6_address.is_global() {
@@ -356,18 +345,14 @@ fn validate_host(
     let ipv6_cidr = host
         .ipv6_cidr
         .or(default.ipv6_cidr)
-        .with_context(|| format!("no ipv6_cidr provided for hosts.{}", name))?;
+        .with_context(|| format!("no ipv6_cidr provided for hosts.{name}"))?;
     if !(0..128_u8).contains(&ipv6_cidr) {
-        bail!(
-            "ipv6_cidr for hosts.{} is not between 0 and 128: {}",
-            name,
-            ipv6_cidr
-        )
+        bail!("ipv6_cidr for hosts.{name} is not between 0 and 128: {ipv6_cidr}")
     }
     let ipv6_gateway = host
         .ipv6_gateway
         .or(default.ipv6_gateway)
-        .with_context(|| format!("no ipv6_gateway provided for hosts.{}", name))?;
+        .with_context(|| format!("no ipv6_gateway provided for hosts.{name}"))?;
 
     let ssh_hostname = host
         .ssh_hostname
@@ -387,7 +372,7 @@ fn validate_host(
     public_ssh_keys.extend_from_slice(&host.public_ssh_keys);
     public_ssh_keys.extend_from_slice(&default.public_ssh_keys);
     if public_ssh_keys.is_empty() {
-        bail!("no public_ssh_keys provided for hosts.{}", name);
+        bail!("no public_ssh_keys provided for hosts.{name}");
     }
 
     let default_disks = vec![PathBuf::from("/dev/nvme0n1"), PathBuf::from("/dev/nvme1n1")];
@@ -399,7 +384,7 @@ fn validate_host(
         .to_vec();
 
     if disks.is_empty() {
-        bail!("no disks specified for hosts.{}", name);
+        bail!("no disks specified for hosts.{name}");
     }
 
     let validator_key_file = host
@@ -435,17 +420,11 @@ fn validate_host(
                 validator_node_key_path,
             )?)
         } else {
-            bail!(
-                "hosts.{} has a validator_key_file but not a validator_node_key_file",
-                name
-            );
+            bail!("hosts.{name} has a validator_key_file but not a validator_node_key_file");
         }
     } else {
         if validator_node_key_file.is_some() {
-            bail!(
-                "hosts.{} has a validator_node_key_file but not a validator_key_file",
-                name
-            );
+            bail!("hosts.{name} has a validator_node_key_file but not a validator_key_file");
         }
         None
     };
@@ -475,7 +454,7 @@ fn ask_password_for(file: &Path) -> Result<String> {
         .unwrap_or_default()
         .to_str()
         .unwrap_or_default();
-    println!("Please give your password for {}", file_name);
+    println!("Please give your password for {file_name}");
 
     let disable_terminal_echo = DisableTerminalEcho::new();
 

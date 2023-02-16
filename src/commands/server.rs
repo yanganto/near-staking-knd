@@ -20,7 +20,7 @@ where
     T: Display,
 {
     warn!("server error '{}'", msg);
-    let res = serde_json::to_vec(&json!({"status": 500, "message": format!("{}", msg)}));
+    let res = serde_json::to_vec(&json!({"status": 500, "message": format!("{msg}")}));
     // FIXME: Set header: Content-Type: application/json
     let mut resp: Response<Body> = Response::default();
 
@@ -28,7 +28,7 @@ where
     *resp.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
     let body = match res {
         Err(e) => {
-            warn!("Failed to serialize json: {}", e);
+            warn!("Failed to serialize json: {e}");
             Body::from(r#"{"status": 500, "message": "Cannot serialize json"}"#)
         }
         Ok(body) => Body::from(body),
@@ -117,8 +117,7 @@ impl CommandServer {
 
         if let Err(e) = self.supervisor_request_chan.send(req).await {
             return Ok(server_error(format!(
-                "channel to supervisor was already closed before sending: {}",
-                e
+                "channel to supervisor was already closed before sending: {e}"
             )));
         }
 

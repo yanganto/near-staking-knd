@@ -56,7 +56,7 @@ pub fn read_near_config<P: AsRef<Path>>(path: P) -> Result<NearConfig> {
         .unwrap_or("0.0.0.0:3030");
     let rpc_addr = rpc_addr_string
         .parse::<SocketAddr>()
-        .with_context(|| format!("failed to parse rpc addr {}", rpc_addr_string))?;
+        .with_context(|| format!("failed to parse rpc addr {rpc_addr_string}"))?;
 
     Ok(NearConfig { rpc_addr })
 }
@@ -86,9 +86,9 @@ pub fn update_neard_config<P: AsRef<Path>>(
                 .iter()
                 .map(|ip| {
                     if ip.is_ipv6() {
-                        format!("{}@[{}]:{}", node_key, ip, port)
+                        format!("{node_key}@[{ip}]:{port}")
                     } else {
-                        format!("{}@{}:{}", node_key, ip, port)
+                        format!("{node_key}@{ip}:{port}")
                     }
                 })
                 .collect::<Vec<_>>();

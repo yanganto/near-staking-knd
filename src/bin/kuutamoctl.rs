@@ -80,7 +80,7 @@ pub async fn main() {
         }
     };
     if let Err(e) = res {
-        eprintln!("{}", e);
+        eprintln!("{e}");
         std::process::exit(1);
     }
 }
