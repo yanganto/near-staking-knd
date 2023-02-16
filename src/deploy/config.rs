@@ -733,3 +733,53 @@ fn test_invalid_string_for_ipv6() {
     invalid_str = "/2607:5300:203:7cdf::".into();
     assert!(invalid_str.normalize().is_err());
 }
+
+#[test]
+fn test_validate_host() {
+    let mut config = HostConfig {
+        ipv4_address: Some("192.168.0.1".parse::<IpAddr>().unwrap()),
+        ipv4_cidr: Some(0),
+        ipv4_gateway: Some("192.168.255.255".parse::<IpAddr>().unwrap()),
+        ipv6_address: None,
+        ipv6_gateway: None,
+        ipv6_cidr: None,
+        public_ssh_keys: vec!["".to_string()],
+        ..Default::default()
+    };
+    assert_eq!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None).unwrap(),
+        Host {
+            name: "ipv4-only".to_string(),
+            nixos_module: "single-node-validator-mainnet".to_string(),
+            extra_nixos_modules: Vec::new(),
+            mac_address: None,
+            ipv4_address: "192.168.0.1".parse::<IpAddr>().unwrap(),
+            ipv4_cidr: 0,
+            ipv4_gateway: "192.168.255.255".parse::<IpAddr>().unwrap(),
+            ipv6_address: None,
+            ipv6_cidr: None,
+            ipv6_gateway: None,
+            install_ssh_user: "root".to_string(),
+            ssh_hostname: "192.168.0.1".to_string(),
+            public_ssh_keys: vec!["".to_string()],
+            disks: vec!["/dev/nvme0n1".into(), "/dev/nvme1n1".into()],
+            validator_keys: None,
+        }
+    );
+
+    // If `ipv6_address` is provied, the `ipv6_gateway` and `ipv6_cidr` should be provided too,
+    // else the error will raise
+    config.ipv6_address = Some("2607:5300:203:6cdf::".into());
+    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None).is_err());
+
+    config.ipv6_gateway = Some(
+        "2607:5300:0203:6cff:00ff:00ff:00ff:00ff"
+            .parse::<IpAddr>()
+            .unwrap(),
+    );
+    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None).is_err());
+
+    // The `ipv6_cidr` could be provided by subnet in address field
+    config.ipv6_address = Some("2607:5300:203:6cdf::/64".into());
+    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None).is_ok());
+}
