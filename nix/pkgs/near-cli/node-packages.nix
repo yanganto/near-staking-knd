@@ -1759,13 +1759,13 @@ let
         sha512 = "lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==";
       };
     };
-    "open-8.4.1" = {
+    "open-8.4.2" = {
       name = "open";
       packageName = "open";
-      version = "8.4.1";
+      version = "8.4.2";
       src = fetchurl {
-        url = "https://registry.npmjs.org/open/-/open-8.4.1.tgz";
-        sha512 = "/4b7qZNhv6Uhd7jjnREh1NjnPxlTq+XNWPG88Ydkj5AILcA5m3ajvcg57pB24EQjKv0dK62XnDqk9c/hkIG5Kg==";
+        url = "https://registry.npmjs.org/open/-/open-8.4.2.tgz";
+        sha512 = "7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==";
       };
     };
     "p-cancelable-1.1.0" = {
@@ -2714,7 +2714,7 @@ in
       sources."normalize-url-4.5.1"
       sources."o3-1.0.3"
       sources."once-1.4.0"
-      sources."open-8.4.1"
+      sources."open-8.4.2"
       sources."p-cancelable-1.1.0"
       (sources."package-json-6.5.0" // {
         dependencies = [
