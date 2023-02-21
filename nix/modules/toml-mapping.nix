@@ -31,6 +31,6 @@ in
 
     kuutamo.network.ipv6.address = cfg.ipv6_address or null;
     kuutamo.network.ipv6.gateway = cfg.ipv6_gateway or null;
-    kuutamo.network.ipv6.cidr = cfg.ipv6_cidr or null;
+    kuutamo.network.ipv6.cidr = cfg.ipv6_cidr or 128;
   };
 }
