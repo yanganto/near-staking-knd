@@ -358,7 +358,7 @@ fn validate_host(
 
         (Some(ipv6_address), mask)
     } else {
-        warn!("Please provide ipv6_address, which enable IPSec by default, and will provide a better authentication and confidentiality for you");
+        warn!("No ipv6_address provided");
         (None, None)
     };
 
