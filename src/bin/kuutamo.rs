@@ -271,7 +271,7 @@ pub fn main() -> Result<()> {
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
         Command::MaintenanceRestart(ref args) => maintenance_shutdown(args, &config),
     } {
-        bail!("kuutmo fail on action: {:?}, {e}", args.action);
+        bail!("kuutamo failed doing {:?}: {e}", args.action);
     }
     Ok(())
 }
