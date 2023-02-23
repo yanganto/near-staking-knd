@@ -298,6 +298,7 @@ async fn schedule_maintenance_shutdown(
                 );
             }
         },
+        // No requirement specified, we will try to use the largest window in current epoch
         (None, None) => {
             let mut windows_size = 0;
             let mut windows_start = 0;
