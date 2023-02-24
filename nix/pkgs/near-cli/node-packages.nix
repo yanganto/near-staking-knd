@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-18.14.0" = {
+    "@types/node-18.14.1" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "18.14.0";
+      version = "18.14.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-18.14.0.tgz";
-        sha512 = "5EWrvLmglK+imbCJY0+INViFWUHg1AHel1sq4ZVSfdcNqGy9Edv3UB9IIzzg+xPaUcAgZYcfVs2fBcwDeZzU0A==";
+        url = "https://registry.npmjs.org/@types/node/-/node-18.14.1.tgz";
+        sha512 = "QH+37Qds3E0eDlReeboBxfHbX9omAcBCXEzswCu6jySP642jiM3cYSIkU/REqwhCUqXdonHFuBfJDiAJxMNhaQ==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -1903,13 +1903,13 @@ let
         sha512 = "w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==";
       };
     };
-    "readable-stream-3.6.0" = {
+    "readable-stream-3.6.1" = {
       name = "readable-stream";
       packageName = "readable-stream";
-      version = "3.6.0";
+      version = "3.6.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/readable-stream/-/readable-stream-3.6.0.tgz";
-        sha512 = "BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==";
+        url = "https://registry.npmjs.org/readable-stream/-/readable-stream-3.6.1.tgz";
+        sha512 = "+rQmrWMYGA90yenhTYsLWAsLsqVC8osOw6PKE1HDYiO0gdPeKe/xDHNzIAIn4C91YQ6oenEhfYqqc1883qHbjQ==";
       };
     };
     "registry-auth-token-4.2.2" = {
@@ -2535,7 +2535,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-18.14.0"
+      sources."@types/node-18.14.1"
       sources."@types/stack-utils-2.0.1"
       sources."@types/yargs-16.0.5"
       sources."@types/yargs-parser-21.0.0"
@@ -2742,7 +2742,7 @@ in
         ];
       })
       sources."react-is-17.0.2"
-      sources."readable-stream-3.6.0"
+      sources."readable-stream-3.6.1"
       sources."registry-auth-token-4.2.2"
       sources."registry-url-5.1.0"
       sources."remove-trailing-slash-0.1.1"
