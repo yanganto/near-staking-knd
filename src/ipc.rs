@@ -14,12 +14,13 @@ pub struct MaintenanceShutdownResponse {
 
 /// Request to send to the supervisor
 pub enum Request {
-    /// Schedule maintenance shutdown for a maintainace window of given size or book a block
-    /// height to shutdown at
+    /// Schedule maintenance shutdown for a maintainace window of given size, book a block
+    /// height to shutdown at or cancel previous shutdon setting
     /// + Channel where the supervisor will respond to once the request is finished
     MaintenanceShutdown(
         Option<u64>,
         Option<u64>,
+        bool,
         mpsc::Sender<MaintenanceShutdownResponse>,
     ),
 }

@@ -152,7 +152,7 @@ pub async fn apply_dynamic_config(
     client: &NeardClient,
     pid: Pid,
     neard_home: &Path,
-    expected_shutdown: BlockHeight,
+    expected_shutdown: Option<BlockHeight>,
 ) -> Result<()> {
     // We need neard metric to make sure the dyn config is correctly applied.
     // If we can not get the neard metric at this moment, we will not try to apply the dynamic
@@ -233,7 +233,7 @@ struct DynConfig {
 }
 
 impl DynConfig {
-    pub async fn new(neard_home: &Path, expected_shutdown: BlockHeight) -> Result<Self> {
+    pub async fn new(neard_home: &Path, expected_shutdown: Option<BlockHeight>) -> Result<Self> {
         let dyn_config_path = neard_home.join("dyn_config.json");
         let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
 

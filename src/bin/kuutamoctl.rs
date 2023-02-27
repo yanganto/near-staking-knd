@@ -52,13 +52,14 @@ pub async fn main() {
         Command::MaintenanceShutdown(MaintenanceShutdownArgs {
             minimum_length,
             shutdown_at,
+            cancel,
             ..
         }) => {
             if minimum_length.is_some() && shutdown_at.is_some() {
                 Err(anyhow!("We can not guarantee minimum maintenance window for a specified shutdown block height"))
             } else {
                 kuutamo_client
-                    .maintenance_shutdown(minimum_length, shutdown_at)
+                    .maintenance_shutdown(minimum_length, shutdown_at, cancel)
                     .await
             }
         }

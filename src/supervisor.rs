@@ -320,11 +320,18 @@ async fn schedule_maintenance_shutdown(
             }
         }
     };
-    if let Some(expect_shutdown_at) = expect_shutdown_at {
-        apply_dynamic_config(&neard_client, pid, near_home, expect_shutdown_at).await?;
-    }
-
+    apply_dynamic_config(&neard_client, pid, near_home, expect_shutdown_at).await?;
     Ok(expect_shutdown_at)
+}
+
+async fn cancel_maintenance_shutdown(
+    near_rpc_port: u16,
+    pid: Pid,
+    near_home: &Path,
+) -> Result<Option<BlockHeight>> {
+    let neard_client = NeardClient::new(&format!("http://127.0.0.1:{}", near_rpc_port))?;
+    apply_dynamic_config(&neard_client, pid, near_home, None).await?;
+    Ok(None)
 }
 
 // validator_pid should be only set if we are in validator state
@@ -343,8 +350,24 @@ async fn handle_request(
         Some(req) => req,
     };
     match req {
-        ipc::Request::MaintenanceShutdown(window_length, shutdown_at, resp_chan) => {
-            if let Some(pid) = validator_pid {
+        ipc::Request::MaintenanceShutdown(window_length, shutdown_at, cancel, resp_chan) => {
+            if cancel {
+                if let Some(pid) = validator_pid {
+                    let res = cancel_maintenance_shutdown(near_rpc_port, pid, near_home);
+                    if let Err(e) = resp_chan
+                        .send(ipc::MaintenanceShutdownResponse {
+                            shutdown_at_blockheight: res.await,
+                        })
+                        .await
+                    {
+                        warn!(
+                            "Failed to respond to ipc request for canceling maintenance shutdown: {}",
+                            e
+                        );
+                    };
+                }
+                None
+            } else if let Some(pid) = validator_pid {
                 let res = schedule_maintenance_shutdown(
                     near_rpc_port,
                     pid,
@@ -359,7 +382,7 @@ async fn handle_request(
                     })
                     .await
                 {
-                    warn!("Failed to respond to ipc request: {}", e);
+                    warn!("Failed to respond to ipc request for setting up maintenance shutdown on active node: {}", e);
                 };
                 None
             } else {
@@ -369,7 +392,7 @@ async fn handle_request(
                     })
                     .await
                 {
-                    warn!("Failed to respond to ipc request: {}", e);
+                    warn!("Failed to respond to ipc request for setting up maintenance shutdown on passive node: {}", e);
                 };
                 // If we are already in startup phase, this would not actually trigger a
                 // restart... which should be fine.

@@ -61,12 +61,14 @@ impl CommandClient {
         &self,
         minimum_length: Option<u64>,
         shutdown_at: Option<u64>,
+        cancel: bool,
     ) -> Result<()> {
         let url = hyperlocal::Uri::new(&self.socket_path, "/maintenance_shutdown");
 
         let body = serde_json::to_string(&MaintenanceShutdown {
             minimum_length,
             shutdown_at,
+            cancel,
         })?;
         let req = Request::builder()
             .method(Method::POST)
