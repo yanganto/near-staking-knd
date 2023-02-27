@@ -1,5 +1,5 @@
 {
-  description = "A supervisor for neard that implements failover for NEAR validators";
+  description = "A NEAR Staking node distribution by kuutamo";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
