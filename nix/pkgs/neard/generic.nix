@@ -8,8 +8,15 @@
 , lib
 , stdenv
 , darwin
+, makeRustPlatform
 }:
-{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], rustPlatform, toolchain }:
+{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile }:
+let
+  rustPlatform = makeRustPlatform {
+    cargo = toolchain;
+    rustc = toolchain;
+  };
+in
 # based on https://github.com/ZentriaMC/neard-nix/blob/master/neardtynix
 rustPlatform.buildRustPackage rec {
   pname = "neard";

@@ -10,6 +10,7 @@
     , inputs'
     , config
     , system
+    , pkgs
     , ...
     }:
     let
@@ -19,15 +20,15 @@
           "format_serde_error-0.3.0" = "sha256-R4zD1dAfB8OmlfYUDsDjevMkjfIWGtwLRRYGGRvZ8F4=";
         };
       };
-      overlays = [ (import inputs.rust-overlay) ];
-      pkgs = import inputs.nixpkgs {
-        inherit system overlays;
-      };
     in
     {
       packages = {
-        neard = pkgs.callPackage ./neard/stable.nix { };
-        neard-unstable = pkgs.callPackage ./neard/unstable.nix { };
+        neard = pkgs.callPackage ./neard/stable.nix {
+          inherit (inputs') fenix;
+        };
+        neard-unstable = pkgs.callPackage ./neard/unstable.nix {
+          inherit (inputs') fenix;
+        };
         inherit (pkgs.callPackages ./near-cli/overrides.nix { }) near-cli;
 
         kuutamod = pkgs.callPackage ./kuutamod.nix {
