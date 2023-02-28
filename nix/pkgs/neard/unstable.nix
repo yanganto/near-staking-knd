@@ -11,4 +11,5 @@ generic {
   sha256 = "sha256-SZLMrUV0tSOsHlufM2Ycr5fswE3WJjjDmFcftfEH2nU=";
   cargoSha256 = "sha256-HRNsoHGqvArHBRIxGFlBZd362kDhNJt/X2Mr4r0jVQI=";
   inherit rustPlatform;
+  toolchain = pkgs.rust-bin.stable."1.65.0".minimal;
 }
