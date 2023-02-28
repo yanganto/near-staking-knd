@@ -4,13 +4,12 @@
 , openssl
 , pkg-config
 , protobuf
-, rustPlatform
 , llvmPackages
 , lib
 , stdenv
 , darwin
 }:
-{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ] }:
+{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], rustPlatform }:
 # based on https://github.com/ZentriaMC/neard-nix/blob/master/neardtynix
 rustPlatform.buildRustPackage rec {
   pname = "neard";

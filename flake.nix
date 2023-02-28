@@ -32,6 +32,7 @@
   inputs.near-staking-ui.url = "github:kuutamolabs/near-staking-ui";
   inputs.near-staking-ui.flake = false;
 
+  inputs.rust-overlay.url = "github:oxalica/rust-overlay";
 
   nixConfig.extra-substituters = [
     "https://cache.garnix.io"

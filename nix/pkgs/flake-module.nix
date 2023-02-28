@@ -1,14 +1,15 @@
 { inputs
 , ...
-}: {
+}:
+{
   imports = [
     ./treefmt.nix
   ];
   perSystem =
     { self'
     , inputs'
-    , pkgs
     , config
+    , system
     , ...
     }:
     let
@@ -17,6 +18,10 @@
         outputHashes = {
           "format_serde_error-0.3.0" = "sha256-R4zD1dAfB8OmlfYUDsDjevMkjfIWGtwLRRYGGRvZ8F4=";
         };
+      };
+      overlays = [ (import inputs.rust-overlay) ];
+      pkgs = import inputs.nixpkgs {
+        inherit system overlays;
       };
     in
     {
