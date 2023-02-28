@@ -4,26 +4,9 @@
 
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
+use kuutamod::commands::control_commands::{Command, MaintenanceShutdownArgs};
 use kuutamod::commands::CommandClient;
 use std::path::PathBuf;
-
-/// Subcommand to run
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(clap::Subcommand, PartialEq, Debug, Clone)]
-pub enum Command {
-    /// Initiate maintenance shutdown
-    MaintenanceShutdown {
-        /// Specify the minimum length in blockheight for the maintenance shutdown
-        minimum_length: Option<u64>,
-
-        /// Specify the block height to shutdown at, and will not check on it in maintenance window or
-        /// not.
-        #[arg(long)]
-        shutdown_at: Option<u64>,
-    },
-    /// Show the current voted validator
-    ActiveValidator,
-}
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -66,15 +49,17 @@ pub async fn main() {
     let kuutamo_client = CommandClient::new(&args.control_socket);
     let res = match args.action {
         Command::ActiveValidator => show_active_validator(&kuutamo_client, &args).await,
-        Command::MaintenanceShutdown {
+        Command::MaintenanceShutdown(MaintenanceShutdownArgs {
             minimum_length,
             shutdown_at,
-        } => {
+            cancel,
+            ..
+        }) => {
             if minimum_length.is_some() && shutdown_at.is_some() {
                 Err(anyhow!("We can not guarantee minimum maintenance window for a specified shutdown block height"))
             } else {
                 kuutamo_client
-                    .maintenance_shutdown(minimum_length, shutdown_at)
+                    .maintenance_shutdown(minimum_length, shutdown_at, cancel)
                     .await
             }
         }

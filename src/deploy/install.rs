@@ -2,36 +2,14 @@ use anyhow::{Context, Result};
 use ctrlc;
 use log::info;
 use std::{
-    process::{Command, ExitStatus},
+    process::Command,
     sync::mpsc::{channel, RecvTimeoutError},
     time::Duration,
 };
 
-use crate::deploy::command::status_to_pretty_err;
+use crate::deploy::{command::status_to_pretty_err, utils::timeout_ssh};
 
 use super::{Host, NixosFlake};
-
-pub fn timeout_ssh(
-    host: &Host,
-    command: &[&str],
-    learn_known_host_key: bool,
-) -> Result<ExitStatus> {
-    let target = host.deploy_ssh_target();
-    let mut args = vec!["-o", "ConnectTimeout=10", "-o", "StrictHostKeyChecking=no"];
-    if !learn_known_host_key {
-        args.push("-o");
-        args.push("UserKnownHostsFile=/dev/null");
-    }
-    args.push(&target);
-    args.push("--");
-    args.extend(command);
-    println!("$ ssh {}", args.join(" "));
-    let status = Command::new("ssh")
-        .args(args)
-        .status()
-        .context("Failed to run ssh...")?;
-    Ok(status)
-}
 
 /// Install a Validator on a given machine
 pub fn install(
@@ -95,7 +73,7 @@ pub fn install(
 
             // wait for the machine to go down
             loop {
-                if !timeout_ssh(host, &["exit", "0"], false)?.success() {
+                if !timeout_ssh(host, &["exit", "0"], false)?.status.success() {
                     break;
                 }
                 if !matches!(
@@ -114,7 +92,7 @@ pub fn install(
 
             // Wait for the machine to come back and learn add it's ssh key to our host
             loop {
-                if timeout_ssh(host, &["exit", "0"], true)?.success() {
+                if timeout_ssh(host, &["exit", "0"], true)?.status.success() {
                     break;
                 }
                 if !matches!(

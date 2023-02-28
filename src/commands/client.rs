@@ -61,12 +61,14 @@ impl CommandClient {
         &self,
         minimum_length: Option<u64>,
         shutdown_at: Option<u64>,
+        cancel: bool,
     ) -> Result<()> {
         let url = hyperlocal::Uri::new(&self.socket_path, "/maintenance_shutdown");
 
         let body = serde_json::to_string(&MaintenanceShutdown {
             minimum_length,
             shutdown_at,
+            cancel,
         })?;
         let req = Request::builder()
             .method(Method::POST)
@@ -74,11 +76,21 @@ impl CommandClient {
             .body(Body::from(body))
             .context("failed to build request")?;
 
-        let res = Client::unix().request(req).await?;
+        let res = Client::unix().request(req).await.with_context(|| {
+            format!(
+                "failed to connect to kuutamod via {}",
+                self.socket_path.display()
+            )
+        })?;
 
         let code = res.status();
-        if !code.is_success() {
-            let v: ApiResponse = parse_response(res).await?;
+        let v: ApiResponse = parse_response(res)
+            .await
+            .context("failed to parse response")?;
+
+        if code.is_success() {
+            println!("{}", v.message);
+        } else {
             bail!(
                 "Request to initiate maintainace shutdown failed: {} (status: {})",
                 v.message,

@@ -113,7 +113,12 @@ impl CommandServer {
     ) -> hyper::Result<Response<Body>> {
         let (tx, mut rx) = mpsc::channel(1);
         let args: MaintenanceShutdown = ok_or_500!(json_request(req).await);
-        let req = ipc::Request::MaintenanceShutdown(args.minimum_length, args.shutdown_at, tx);
+        let req = ipc::Request::MaintenanceShutdown(
+            args.minimum_length,
+            args.shutdown_at,
+            args.cancel,
+            tx,
+        );
 
         if let Err(e) = self.supervisor_request_chan.send(req).await {
             return Ok(server_error(format!(
@@ -122,9 +127,17 @@ impl CommandServer {
         }
 
         match rx.recv().await {
-            Some(_) => Ok(Response::new(Body::from(
-                r#"{"status": 200, "message": "OK"}"#,
-            ))),
+            Some(r) => match r.shutdown_at_blockheight {
+                Ok(Some(height)) => Ok(Response::new(Body::from(format!(
+                    "{{\"status\": 200, \"message\": \"shutdown at block height: {height}\"}}",
+                )))),
+                Ok(None) => Ok(Response::new(Body::from(
+                    r#"{"status": 200, "message": "shutdown at current block"}"#,
+                ))),
+                Err(e) => Ok(server_error(format!(
+                    "fail to setup maintenance window: {e:}"
+                ))),
+            },
             None => Ok(server_error("channel to supervisor was closed")),
         }
     }

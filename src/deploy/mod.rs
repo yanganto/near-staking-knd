@@ -20,3 +20,6 @@ mod nixos_rebuild;
 mod rollback;
 mod secrets;
 mod update;
+
+/// utils for deploy and control remote machines
+pub mod utils;

@@ -4,10 +4,11 @@
 
 use anyhow::{bail, Context, Result};
 use clap::Parser;
+use kuutamod::commands::control_commands;
 use kuutamod::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
 use kuutamod::proxy;
 use std::collections::HashMap;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -86,6 +87,9 @@ enum Command {
     Rollback(RollbackArgs),
     /// Proxy remote rpc to local
     Proxy(ProxyArgs),
+    /// Ask Kuutamod to schedule a shutdown in maintenance windows, then it will be restart
+    /// due to supervision by kuutamod
+    MaintenanceRestart(control_commands::MaintenanceShutdownArgs),
 }
 
 #[derive(Parser)]
@@ -197,6 +201,52 @@ fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
     proxy::rpc(&hosts[0], proxy_args.local_port)
 }
 
+fn maintenance_shutdown(
+    args: &control_commands::MaintenanceShutdownArgs,
+    config: &Config,
+) -> Result<()> {
+    let hosts = filter_hosts(&args.host, &config.hosts)?;
+    let output = match (args.minimum_length, args.shutdown_at) {
+        (Some(_), Some(_)) => bail!(
+            "We can not guarantee minimum maintenance window for a specified shutdown block height"
+        ),
+        (Some(minimum_length), None) => deploy::utils::timeout_ssh(
+            &hosts[0],
+            &[
+                "kuutamoctl",
+                "maintenance-shutdown",
+                &minimum_length.to_string(),
+            ],
+            true,
+        )?,
+        (None, None) => {
+            deploy::utils::timeout_ssh(&hosts[0], &["kuutamoctl", "maintenance-shutdown"], true)?
+        }
+        (None, Some(shutdown_at)) => deploy::utils::timeout_ssh(
+            &hosts[0],
+            &[
+                "kuutamoctl",
+                "maintenance-shutdown",
+                "--shutdown-at",
+                &shutdown_at.to_string(),
+            ],
+            true,
+        )?,
+    };
+
+    io::stdout()
+        .write_all(&output.stdout)
+        .with_context(|| "Fail to dump stdout of kuutamctl")?;
+    if output.status.success() {
+        Ok(())
+    } else {
+        io::stdout()
+            .write_all(&output.stderr)
+            .with_context(|| "Fail to dump stderr of kuutamctl")?;
+        bail!("Fail to setup maintenance shutdown");
+    }
+}
+
 /// The kuutamo program entry point
 pub fn main() -> Result<()> {
     let args = Args::parse();
@@ -208,7 +258,7 @@ pub fn main() -> Result<()> {
     })?;
     let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
 
-    match args.action {
+    if let Err(e) = match args.action {
         Command::GenerateConfig(ref config_args) => {
             generate_config(&args, config_args, &config, &flake)
         }
@@ -219,5 +269,9 @@ pub fn main() -> Result<()> {
         Command::Update(ref update_args) => update(&args, update_args, &config, &flake),
         Command::Rollback(ref rollback_args) => rollback(&args, rollback_args, &config, &flake),
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
+        Command::MaintenanceRestart(ref args) => maintenance_shutdown(args, &config),
+    } {
+        bail!("kuutamo failed doing {:?}: {e}", args.action);
     }
+    Ok(())
 }
