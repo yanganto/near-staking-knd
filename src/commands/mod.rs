@@ -17,7 +17,7 @@ struct MaintenanceShutdown {
     /// neard will try to shutdown in the longest maintenance window in the current epoch
     minimum_length: Option<u64>,
 
-    /// Cancel the maintenance shutdwon setting
+    /// Cancel the maintenance shutdown setting
     #[arg(long)]
     pub cancel: bool,
 
