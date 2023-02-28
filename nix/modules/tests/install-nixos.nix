@@ -12,9 +12,12 @@
 }:
 
 let
+  inherit (self.packages.x86_64-linux) neard;
+
   dependencies = [
     validator-system.config.system.build.toplevel
     validator-system.config.system.build.disko
+    neard.rustChannelToml
   ] ++ builtins.map (i: i.outPath) (builtins.attrValues self.inputs);
 
   closureInfo = pkgs.closureInfo { rootPaths = dependencies; };
@@ -51,7 +54,7 @@ let
     ({ fst, snd }: qemu-common.qemuNICFlags snd fst config.virtualisation.test.nodeNumber);
 in
 makeTest' {
-  name = "nixos-anywhere";
+  name = "install-nixos";
   nodes = {
     installer = { pkgs, ... }: {
       imports = [ shared ];
@@ -105,8 +108,8 @@ makeTest' {
       installer.succeed("cp -r ${self} /root/near-staking-knd")
 
       # closureInfo might return incorrect checksums, so we need to force-reregister our store paths
-      installer.succeed("(echo ${self.packages.x86_64-linux.neard}; echo; echo 0) | ${pkgs.nix}/bin/nix-store --register-validity --reregister")
-      installer.succeed("${pkgs.nix}/bin/nix-store --verify-path ${self.packages.x86_64-linux.neard}")
+      installer.succeed("(echo ${neard}; echo; echo 0) | ${pkgs.nix}/bin/nix-store --register-validity --reregister")
+      installer.succeed("${pkgs.nix}/bin/nix-store --verify-path ${neard}")
 
       installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes install --debug --no-reboot --kexec-url ${kexec-installer}/nixos-kexec-installer-${stdenv.hostPlatform.system}.tar.gz >&2")
       installer.succeed("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@192.168.42.2 -- reboot >&2")

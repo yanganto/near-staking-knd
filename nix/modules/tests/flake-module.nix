@@ -1,9 +1,11 @@
-{ self, lib, ... }:
+{ self, lib, inputs, ... }:
 
 {
-  perSystem = { pkgs, self', ... }:
+  perSystem = { pkgs, inputs', self', ... }:
     let
       makeTest = import (pkgs.path + "/nixos/tests/make-test-python.nix");
+      eval-config = import (pkgs.path + "/nixos/lib/eval-config.nix");
+      kexec-installer = inputs'.nixos-images.packages.kexec-installer-nixos-unstable;
 
       makeTest' = test: (makeTest test {
         inherit pkgs;
@@ -39,14 +41,13 @@
           touch $out
         '';
 
-        # NOTE: Temp disable before the fenix download issue got fixed
-        # install-nixos = pkgs.callPackage ./install-nixos.nix {
-        #   inherit self makeTest' eval-config kexec-installer;
-        #   diskoModule = inputs.disko.nixosModules.disko;
-        #   validator-system = self.nixosConfigurations.validator-00;
-        #   inherit (self'.packages) kuutamo;
-        #   inherit (self) nixosModules;
-        # };
+        install-nixos = pkgs.callPackage ./install-nixos.nix {
+          inherit self makeTest' eval-config kexec-installer;
+          diskoModule = inputs.disko.nixosModules.disko;
+          validator-system = self.nixosConfigurations.validator-00;
+          inherit (self'.packages) kuutamo;
+          inherit (self) nixosModules;
+        };
       };
     };
   flake = {
