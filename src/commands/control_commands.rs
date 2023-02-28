@@ -14,7 +14,7 @@ pub enum Command {
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 pub struct MaintenanceShutdownArgs {
     /// Specify the minimum length in blockheight for the maintenance shutdown, if not provided,
-    /// neard will try to shutdown in the longest maintenance windows in cuttent epoch
+    /// neard will try to shutdown in the longest maintenance window in the current epoch
     pub minimum_length: Option<u64>,
 
     /// Specify the block height to shutdown at, and will not check on it in maintenance window or
