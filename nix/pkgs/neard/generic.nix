@@ -1,4 +1,5 @@
 { fetchFromGitHub
+, fetchurl
 , fetchpatch
 , zlib
 , openssl
@@ -10,11 +11,16 @@
 , darwin
 , makeRustPlatform
 }:
-{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile }:
+{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile, toolchainChecksum }:
 let
   rustPlatform = makeRustPlatform {
     cargo = toolchain;
     rustc = toolchain;
+  };
+  toolchainToml = builtins.fromTOML (builtins.readFile toolchainFile);
+  rustChannelToml = fetchurl {
+    url = "https://static.rust-lang.org/dist/channel-rust-${toolchainToml.toolchain.channel}.toml";
+    sha256 = toolchainChecksum;
   };
 in
 # based on https://github.com/ZentriaMC/neard-nix/blob/master/neardtynix
@@ -50,6 +56,11 @@ rustPlatform.buildRustPackage rec {
       }
     )
   ];
+
+  passthru = {
+    # used in tests for offline evaluation
+    inherit rustChannelToml;
+  };
 
   postPatch = ''
     substituteInPlace neard/build.rs \
