@@ -60,6 +60,13 @@ rustPlatform.buildRustPackage rec {
   installCheckPhase = ''
     $out/bin/neard --version | grep -q "nix:${version}"
   '';
+  preBuild = ''
+     diff -q ${toolchainFile} ./rust-toolchain.toml > /dev/null || {
+        echo -e "\033[0;1;31mERROR: ${toolchainFile} differs with ./rust-toolchain.toml. \033[0m" >&2
+        echo -e "\033[0;1;31mPlease update nix/pkgs/neard/unstable-rust-toolchain.toml or nix/pkgs/neard/unstable-rust-toolchain.toml\033[0m" >&2
+        exit 1
+     }
+  '';
 
   CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "1";
   CARGO_PROFILE_RELEASE_LTO = "fat";
