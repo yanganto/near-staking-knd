@@ -329,7 +329,7 @@ async fn cancel_maintenance_shutdown(
     pid: Pid,
     near_home: &Path,
 ) -> Result<Option<BlockHeight>> {
-    let neard_client = NeardClient::new(&format!("http://127.0.0.1:{}", near_rpc_port))?;
+    let neard_client = NeardClient::new(&format!("http://127.0.0.1:{near_rpc_port}"))?;
     apply_dynamic_config(&neard_client, pid, near_home, None).await?;
     Ok(None)
 }
