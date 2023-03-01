@@ -25,6 +25,16 @@ in
       defaultText = lib.literalExpression "pkgs.neard";
       description = "The neard package to use in our service";
     };
+    neardPatches = lib.mkOption {
+      type = lib.types.listOf lib.types.path;
+      default = [ ];
+      description = "The patches to apply to the neard package";
+    };
+    revisionNumber = lib.mkOption {
+      type = lib.types.nullOr lib.types.number;
+      default = null;
+      description = "The revision number of neard";
+    };
     generateNodeKey = lib.mkOption {
       type = lib.types.bool;
       description = "Whether to generate Node key on boot";

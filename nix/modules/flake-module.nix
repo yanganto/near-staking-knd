@@ -14,11 +14,12 @@
           ./neard/testnet
         ];
       };
-      neard-mainnet = { pkgs, lib, ... }: {
-        kuutamo.neard.package = lib.mkDefault self.packages.${pkgs.stdenv.hostPlatform.system}.neard;
-        imports = [
-          ./neard/mainnet
-        ];
+      neard-mainnet = { pkgs, ... }: rec {
+        kuutamo.neard.package = pkgs.callPackage ../pkgs/neard/stable.nix {
+          neardPatches = kuutamo.neard.neardPatches or [ ];
+          revisionNumber = kuutamo.neard.revisionNumber or null;
+        };
+        imports = [ ./neard/mainnet ];
       };
       kuutamo-binary-cache = ./binary-cache;
       kuutamod = { pkgs, ... }: {

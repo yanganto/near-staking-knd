@@ -10,8 +10,10 @@
 , stdenv
 , darwin
 , makeRustPlatform
+, neardPatches ? [ ]
+, revisionNumber ? null
 }:
-{ version, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile, toolchainChecksum }:
+{ ver, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile, toolchainChecksum }:
 let
   rustPlatform = makeRustPlatform {
     cargo = toolchain;
@@ -26,7 +28,7 @@ in
 # based on https://github.com/ZentriaMC/neard-nix/blob/master/neardtynix
 rustPlatform.buildRustPackage rec {
   pname = "neard";
-  inherit version;
+  version = "${ver}${lib.optionalString (revisionNumber != null) "-rev${revisionNumber}"}";
 
   # https://github.com/near/nearcore/tags
   src = fetchFromGitHub {
@@ -39,7 +41,7 @@ rustPlatform.buildRustPackage rec {
 
   inherit cargoSha256;
 
-  patches = [ ];
+  patches = neardPatches;
 
   cargoPatches = [
     # Remove test dependency on contract
