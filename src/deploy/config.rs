@@ -415,10 +415,30 @@ fn validate_host(
         validator_node_key_file,
         &host.encrypted_kuutamo_app_file,
     ) {
-        (_, _, Some(encrypted_kuutamo_app_file)) => Some(decrypt_and_unzip_file(
-            encrypted_kuutamo_app_file,
-            ask_password_for(encrypted_kuutamo_app_file)?,
-        )?),
+        (key_file, node_key_file, Some(encrypted_kuutamo_app_file)) => {
+            if let Some(ref key_file) = key_file {
+                warn!(
+                    "using {}, and ignore {}",
+                    encrypted_kuutamo_app_file
+                        .to_str()
+                        .unwrap_or("encrypted_kuutamo_app_file"),
+                    key_file.to_str().unwrap_or("validator_key_file")
+                );
+            }
+            if let Some(ref node_key_file) = node_key_file {
+                warn!(
+                    "using {}, and ignore {}",
+                    encrypted_kuutamo_app_file
+                        .to_str()
+                        .unwrap_or("encrypted_kuutamo_app_file"),
+                    node_key_file.to_str().unwrap_or("validator_node_key_file")
+                );
+            }
+            Some(decrypt_and_unzip_file(
+                encrypted_kuutamo_app_file,
+                ask_password_for(encrypted_kuutamo_app_file)?,
+            )?)
+        }
         (Some(validator_key_file), Some(validator_node_key_file), _) => {
             let validator_key_path = if validator_key_file.is_absolute() {
                 validator_key_file
