@@ -10,10 +10,8 @@
 , stdenv
 , darwin
 , makeRustPlatform
-, neardPatches ? [ ]
-, revisionNumber ? null
 }:
-{ ver, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile, toolchainChecksum }:
+{ ver, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile, toolchainChecksum, neardPatches ? [ ], revisionNumber ? null }:
 let
   rustPlatform = makeRustPlatform {
     cargo = toolchain;

@@ -15,10 +15,13 @@
         ];
       };
       neard-mainnet = { pkgs, ... }: rec {
-        kuutamo.neard.package = pkgs.callPackage ../pkgs/neard/stable.nix {
-          neardPatches = kuutamo.neard.neardPatches or [ ];
-          revisionNumber = kuutamo.neard.revisionNumber or null;
-        };
+        kuutamo.neard.package = pkgs.callPackage ../pkgs/neard/patch-stable.nix
+          {
+            # FIXME when we build on more target
+            inherit (inputs.fenix.outputs.packages.x86_64-linux) fromToolchainFile;
+            neardPatches = kuutamo.neard.neardPatches or [ ];
+            revisionNumber = kuutamo.neard.revisionNumber or null;
+          };
         imports = [ ./neard/mainnet ];
       };
       kuutamo-binary-cache = ./binary-cache;
