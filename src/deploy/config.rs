@@ -151,6 +151,9 @@ struct HostConfig {
 
     #[serde(default)]
     pub disks: Option<Vec<PathBuf>>,
+
+    #[serde(default)]
+    encrypted_kuutamo_app_file: Option<PathBuf>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
@@ -407,8 +410,36 @@ fn validate_host(
         .or(default.validator_node_key_file.as_ref())
         .map(|v| v.to_path_buf());
 
-    let validator_keys = if let Some(validator_key_file) = validator_key_file {
-        if let Some(validator_node_key_file) = validator_node_key_file {
+    let validator_keys = match (
+        validator_key_file,
+        validator_node_key_file,
+        &host.encrypted_kuutamo_app_file,
+    ) {
+        (key_file, node_key_file, Some(encrypted_kuutamo_app_file)) => {
+            if let Some(ref key_file) = key_file {
+                warn!(
+                    "using {}, and ignore {}",
+                    encrypted_kuutamo_app_file
+                        .to_str()
+                        .unwrap_or("encrypted_kuutamo_app_file"),
+                    key_file.to_str().unwrap_or("validator_key_file")
+                );
+            }
+            if let Some(ref node_key_file) = node_key_file {
+                warn!(
+                    "using {}, and ignore {}",
+                    encrypted_kuutamo_app_file
+                        .to_str()
+                        .unwrap_or("encrypted_kuutamo_app_file"),
+                    node_key_file.to_str().unwrap_or("validator_node_key_file")
+                );
+            }
+            Some(decrypt_and_unzip_file(
+                encrypted_kuutamo_app_file,
+                ask_password_for(encrypted_kuutamo_app_file)?,
+            )?)
+        }
+        (Some(validator_key_file), Some(validator_node_key_file), _) => {
             let validator_key_path = if validator_key_file.is_absolute() {
                 validator_key_file
             } else {
@@ -427,14 +458,14 @@ fn validate_host(
                 validator_key_path,
                 validator_node_key_path,
             )?)
-        } else {
-            bail!("hosts.{name} has a validator_key_file but not a validator_node_key_file");
         }
-    } else {
-        if validator_node_key_file.is_some() {
-            bail!("hosts.{name} has a validator_node_key_file but not a validator_key_file");
+        (None, Some(_), _) => {
+            bail!("hosts.{name} has a validator_node_key_file but not a validator_key_file")
         }
-        None
+        (Some(_), None, _) => {
+            bail!("hosts.{name} has a validator_key_file but not a validator_node_key_file")
+        }
+        _ => None,
     };
 
     Ok(Host {
@@ -474,8 +505,10 @@ fn ask_password_for(file: &Path) -> Result<String> {
     Ok(line.trim_end().to_string())
 }
 
-fn decrypt_and_unzip_file(file: &PathBuf, password: String) -> Result<String> {
-    let mut content = String::new();
+fn decrypt_and_unzip_file(file: &PathBuf, password: String) -> Result<ValidatorKeys> {
+    let mut key_file_content = String::new();
+    let mut node_key_file_content = String::new();
+
     let file_name = file
         .file_name()
         .unwrap_or_default()
@@ -484,41 +517,42 @@ fn decrypt_and_unzip_file(file: &PathBuf, password: String) -> Result<String> {
     let mut archive = fs::File::open(file)
         .map(zip::ZipArchive::new)
         .with_context(|| format!("{file_name:} could not treat as zip archive"))??;
+
     if let Ok(Ok(mut zip)) = archive
-        .by_index_decrypt(0, password.as_bytes())
+        .by_name_decrypt("validator_key.json", password.as_bytes())
         .with_context(|| format!("password for {file_name:} is incorrect"))
     {
-        zip.read_to_string(&mut content)?;
+        zip.read_to_string(&mut key_file_content)?;
     }
-    Ok(content)
+    if let Ok(Ok(mut zip)) = archive
+        .by_name_decrypt("node_key.json", password.as_bytes())
+        .with_context(|| format!("password for {file_name:} is incorrect"))
+    {
+        zip.read_to_string(&mut node_key_file_content)?;
+    }
+
+    Ok(ValidatorKeys {
+        validator_key: serde_json::from_str(&key_file_content)
+            .map_err(|e| SerdeError::new(key_file_content, e))
+            .with_context(|| format!("validator key file at '{file_name:}' is not valid"))?,
+        validator_node_key: serde_json::from_str(&node_key_file_content)
+            .map_err(|e| SerdeError::new(node_key_file_content, e))
+            .with_context(|| format!("validator node key file at '{file_name:}' is not valid"))?,
+    })
 }
 
 fn read_validator_keys(
     validator_key_file: PathBuf,
     validator_node_key_file: PathBuf,
 ) -> Result<ValidatorKeys> {
-    let validator_key = if let Some("zip") = validator_key_file
-        .extension()
-        .map(|s| s.to_str().unwrap_or_default())
-    {
-        let password = ask_password_for(&validator_key_file)?;
-        decrypt_and_unzip_file(&validator_key_file, password)?
-    } else {
-        fs::read_to_string(&validator_key_file).with_context(|| {
-            format!(
-                "cannot read validator key file: '{}'",
-                validator_key_file.display()
-            )
-        })?
-    };
+    let validator_key = fs::read_to_string(&validator_key_file).with_context(|| {
+        format!(
+            "cannot read validator key file: '{}'",
+            validator_key_file.display()
+        )
+    })?;
 
-    let validator_node_key = if let Some("zip") = validator_node_key_file
-        .extension()
-        .map(|s| s.to_str().unwrap_or_default())
-    {
-        let password = ask_password_for(&validator_node_key_file)?;
-        decrypt_and_unzip_file(&validator_node_key_file, password)?
-    } else if validator_node_key_file.exists() {
+    let validator_node_key = if validator_node_key_file.exists() {
         fs::read_to_string(&validator_node_key_file).with_context(|| {
             format!(
                 "cannot read validator node key file: '{}'",
@@ -571,8 +605,8 @@ fn read_validator_keys(
             .map_err(|e| SerdeError::new(validator_node_key.to_string(), e))
             .with_context(|| {
                 format!(
-                    "validator key file at '{}' is not valid",
-                    validator_key_file.display()
+                    "validator node key file at '{}' is not valid",
+                    validator_node_key_file.display()
                 )
             })?,
     })
@@ -588,10 +622,10 @@ pub struct Config {
 
 /// Parse toml configuration
 pub fn parse_config(content: &str, working_directory: Option<&Path>) -> Result<Config> {
-    let config: ConfigFile = toml::from_str(content)?;
+    let mut config: ConfigFile = toml::from_str(content)?;
     let hosts = config
         .hosts
-        .iter()
+        .iter_mut()
         .map(|(name, host)| {
             Ok((
                 name.clone(),
@@ -700,19 +734,6 @@ ipv6_address = "2605:9880:400::3"
 }
 
 #[test]
-pub fn test_decrypt_and_unzip_file() {
-    let validator_key_file = PathBuf::from("tests/assets/validator_key.zip");
-    assert_eq!(
-        decrypt_and_unzip_file(&validator_key_file, "1234".into()).unwrap(),
-        r#"{
-  "account_id": "test.pool.devnet",
-  "public_key": "ed25519:9E2PD1zw7YE2oyaNwSEXj54GcayiZiMQX5bfgzCzqpHk",
-  "private_key": "ed25519:5a8tzPJxDjEZjsrJmYqwRweQhmeHh3BTmy9aWUhyAkJ3DpVgPnDiA21GfGR7SKLcj2Z9LW7ZcYZ75JNCDa6EvsMG"
-}"#
-    );
-}
-
-#[test]
 fn test_valid_ip_string_for_ipv6() {
     let ip: IpV6String = "2607:5300:203:5cdf::".into();
     assert_eq!(ip.normalize().unwrap().1, None);
@@ -782,4 +803,25 @@ fn test_validate_host() {
     // The `ipv6_cidr` could be provided by subnet in address field
     config.ipv6_address = Some("2607:5300:203:6cdf::/64".into());
     assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None).is_ok());
+}
+
+#[test]
+pub fn test_decrypt_and_unzip_file() {
+    let keys = decrypt_and_unzip_file(
+        &PathBuf::from("tests/assets/hello.pool.devnet.zip"),
+        "1234".into(),
+    )
+    .unwrap();
+
+    assert_eq!(keys.validator_key, NearKeyFile {
+        account_id: String::from("hello.pool.devnet"),
+        public_key: String::from("ed25519:4TfQz1x8LVn332JokpkDU5sUroSFwqhpP9ezVyXqPGst"),
+        secret_key: String::from("ed25519:5A8GbPvqKbU5iSszR8Q6oZnXa9WuNz6futH3ZJ5WMHnV8nyssieo9NpdubPtmC1ftgM9a9q7RLMwD3wjktvWihaa"),
+    });
+
+    assert_eq!(keys.validator_node_key, NearKeyFile {
+        account_id: String::from("node"),
+        public_key: String::from("ed25519:8Qn4z2ir1akQuS1nZB5RjyLt4fiw7rH626pk5Qv3pvtv"),
+        secret_key: String::from("ed25519:4UzKpf3gP8FtvpED8BE3YWUhc5JVNnwptdBZHCe5ZKLm9jXtec2JQ3TNzFFPLUFshcr8yyDBTPN2tej3CgjNctEi"),
+    });
 }
