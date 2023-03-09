@@ -29,6 +29,7 @@ jobs:
         with:
           commit-message: Upgrade near-cli
           branch: near-cli
+          base: dev
           delete-branch: true
           title: Upgrade near-cli
           body: |
