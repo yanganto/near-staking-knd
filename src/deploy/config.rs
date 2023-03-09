@@ -493,7 +493,7 @@ fn ask_password_for(file: &Path) -> Result<String> {
         .unwrap_or_default()
         .to_str()
         .unwrap_or_default();
-    println!("Please give your password for {file_name}");
+    println!("Please enter the password for {file_name}");
 
     let disable_terminal_echo = DisableTerminalEcho::new();
 
