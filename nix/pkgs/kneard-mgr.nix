@@ -13,7 +13,7 @@
 }:
 # FIXME: refactor this repository to have multiple workspaces
 rustPlatform.buildRustPackage {
-  name = "kneard-deploy";
+  name = "kneard-mgr";
   # avoid trigger rebuilds if unrelated files are changed
   src = runCommand "src" { } ''
     install -D ${../../Cargo.toml} $out/Cargo.toml
@@ -26,14 +26,14 @@ rustPlatform.buildRustPackage {
   '';
   inherit cargoLock;
 
-  cargoBuildFlags = [ "--bin" "kneard-deploy" ];
+  cargoBuildFlags = [ "--bin" "kneard-mgr" ];
   checkFlagsArray = [ "deploy::test_" ];
 
   nativeBuildInputs = [ makeWrapper ];
 
   # neard is for generating the key
   postInstall = ''
-    wrapProgram $out/bin/kneard-deploy --prefix PATH : ${lib.makeBinPath [ nixos-anywhere nixos-rebuild nix git openssh rsync neard ]}
+    wrapProgram $out/bin/kneard-mgr --prefix PATH : ${lib.makeBinPath [ nixos-anywhere nixos-rebuild nix git openssh rsync neard ]}
   '';
 
   checkInputs = [ nix ];

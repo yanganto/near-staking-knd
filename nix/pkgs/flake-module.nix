@@ -37,7 +37,7 @@
         kuutamod-unstable = pkgs.callPackage ./kuutamod/unstable.nix {
           inherit cargoLock;
         };
-        kneard-deploy = pkgs.callPackage ./kneard-deploy.nix {
+        kneard-mgr = pkgs.callPackage ./kneard-mgr.nix {
           inherit cargoLock;
           inherit (inputs'.nixos-anywhere.packages) nixos-anywhere;
           inherit (config.packages) neard;
@@ -51,7 +51,7 @@
         # passthru as convenience for the CI.
         inherit (pkgs) nix-update;
 
-        default = self'.packages.kneard-deploy;
+        default = self'.packages.kneard-mgr;
       }
       // (pkgs.lib.optionalAttrs (pkgs.system == "x86_64-linux") {
         near-bin = pkgs.callPackage ./neard/bin.nix { };
