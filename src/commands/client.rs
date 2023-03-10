@@ -5,7 +5,7 @@ use hyper::{Body, Client, Method, Request, Response};
 use hyperlocal::{UnixClientExt, Uri};
 use serde::de::DeserializeOwned;
 
-use super::{active_validator::Validator, ApiResponse, MaintenanceShutdown};
+use super::{active_validator::Validator, ApiResponse, MaintenanceOperation};
 
 async fn parse_response<T: DeserializeOwned>(req: Response<Body>) -> Result<T> {
     let body_bytes = hyper::body::to_bytes(req.into_body()).await?;
@@ -56,16 +56,21 @@ impl CommandClient {
         ))
     }
 
-    /// Initiatiate or cancel maintenance shutdown
-    pub async fn maintenance_shutdown(
+    /// Initiatiate or cancel maintenance shutdown or restart
+    pub async fn maintenance_operation(
         &self,
         minimum_length: Option<u64>,
         shutdown_at: Option<u64>,
         cancel: bool,
+        restart: bool,
     ) -> Result<()> {
-        let url = hyperlocal::Uri::new(&self.socket_path, "/maintenance_shutdown");
+        let url = if restart {
+            hyperlocal::Uri::new(&self.socket_path, "/maintenance_restart")
+        } else {
+            hyperlocal::Uri::new(&self.socket_path, "/maintenance_shutdown")
+        };
 
-        let body = serde_json::to_string(&MaintenanceShutdown {
+        let body = serde_json::to_string(&MaintenanceOperation {
             minimum_length,
             shutdown_at,
             cancel,
@@ -98,5 +103,28 @@ impl CommandClient {
             )
         }
         Ok(())
+    }
+
+    /// Get maintenance status
+    pub async fn maintenance_status(&self) -> Result<String> {
+        let url = Uri::new(&self.socket_path, "/maintenance_status").into();
+        let res = Client::unix().get(url).await.with_context(|| {
+            format!(
+                "failed to connect to kuutamod via {}",
+                self.socket_path.display()
+            )
+        })?;
+        let code = res.status();
+        let resp: ApiResponse = parse_response(res)
+            .await
+            .context("failed to parse response")?;
+        if !code.is_success() {
+            bail!(
+                "Request to get active validator failed: {} (status: {})",
+                resp.message,
+                resp.status
+            )
+        };
+        Ok(resp.message)
     }
 }

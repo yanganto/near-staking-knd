@@ -24,7 +24,10 @@ use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::ops::Add;
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 use std::{fmt, fs};
 use tokio::signal::unix::{signal, Signal, SignalKind};
 use tokio::sync::mpsc::Receiver;
@@ -52,6 +55,8 @@ const CONSUL_ACQUIRE_LEADER_FREQUENCY: Duration = Duration::from_secs(1);
 const CONSUL_LEADER_TIMEOUT: Duration = Duration::from_secs(25);
 /// How often we query neard's `/status` endpoint
 const NEARD_STATUS_FREQUENCY: Duration = Duration::from_secs(1);
+/// Shutdown kuutamod if neard shutdown as expected
+pub static SHUTDOWN_WITH_NEARD: AtomicBool = AtomicBool::new(false);
 
 // When adding states also update `initialize_state_gauge`
 #[derive(PartialEq, Debug, Clone, Copy)]
@@ -283,7 +288,7 @@ async fn schedule_maintenance_shutdown(
             bail!("We can not guarantee minimum maintenance window for a specified shutdown block height");
         }
         (None, Some(w)) => Some(w),
-        (Some(minimum_length), None) => match neard_client
+        (Some(minimum_length), None) if minimum_length > 0 => match neard_client
             .maintenance_windows(account_id)
             .await?
             .0
@@ -298,8 +303,8 @@ async fn schedule_maintenance_shutdown(
                 );
             }
         },
-        // No requirement specified, we will try to use the largest window in current epoch
-        (None, None) => {
+        // If minimum_length is 0 or no requirement specified, we will try to use the largest window in current epoch
+        (Some(_), None) | (None, None) => {
             let mut windows_size = 0;
             let mut windows_start = 0;
             for (start, end) in neard_client
@@ -350,12 +355,18 @@ async fn handle_request(
         Some(req) => req,
     };
     match req {
-        ipc::Request::MaintenanceShutdown(window_length, shutdown_at, cancel, resp_chan) => {
+        ipc::Request::MaintenanceOperation(
+            window_length,
+            shutdown_at,
+            cancel,
+            shutdown_with,
+            resp_chan,
+        ) => {
             if cancel {
                 if let Some(pid) = validator_pid {
                     let res = cancel_maintenance_shutdown(near_rpc_port, pid, near_home);
                     if let Err(e) = resp_chan
-                        .send(ipc::MaintenanceShutdownResponse {
+                        .send(ipc::MaintenanceOperationResponse {
                             shutdown_at_blockheight: res.await,
                         })
                         .await
@@ -366,6 +377,7 @@ async fn handle_request(
                         );
                     };
                 }
+                SHUTDOWN_WITH_NEARD.store(false, Ordering::Release);
                 None
             } else if let Some(pid) = validator_pid {
                 let res = schedule_maintenance_shutdown(
@@ -377,26 +389,34 @@ async fn handle_request(
                     shutdown_at,
                 );
                 if let Err(e) = resp_chan
-                    .send(ipc::MaintenanceShutdownResponse {
+                    .send(ipc::MaintenanceOperationResponse {
                         shutdown_at_blockheight: res.await,
                     })
                     .await
                 {
                     warn!("Failed to respond to ipc request for setting up maintenance shutdown on active node: {}", e);
                 };
+                if shutdown_with {
+                    SHUTDOWN_WITH_NEARD.store(true, Ordering::Release);
+                }
                 None
             } else {
                 if let Err(e) = resp_chan
-                    .send(ipc::MaintenanceShutdownResponse {
+                    .send(ipc::MaintenanceOperationResponse {
                         shutdown_at_blockheight: Ok(None),
                     })
                     .await
                 {
                     warn!("Failed to respond to ipc request for setting up maintenance shutdown on passive node: {}", e);
                 };
-                // If we are already in startup phase, this would not actually trigger a
-                // restart... which should be fine.
-                Some(StateType::Startup)
+
+                if shutdown_with {
+                    Some(StateType::Shutdown)
+                } else {
+                    // If we are already in startup phase, this would not actually trigger a
+                    // restart... which should be fine.
+                    Some(StateType::Startup)
+                }
             }
         }
     }
@@ -623,7 +643,8 @@ impl StateMachine {
             tokio::select! {
                 res = validator.process().wait() => {
                     match res {
-                        Ok(res) => info!("Neard shutdown with {}", res),  // maintenance shutdown
+                        Ok(_) if SHUTDOWN_WITH_NEARD.load(Ordering::Acquire) => return Ok(StateType::Shutdown),  // maintenance shutdown
+                        Ok(res) => info!("Neard shutdown with {}", res),  // maintenance restart
                         Err(err) => warn!("Cannot get status of neard process {}", err),
                     }
                     drop(validator);

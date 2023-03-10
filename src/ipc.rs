@@ -5,7 +5,7 @@ use near_primitives::types::BlockHeight;
 use tokio::sync::mpsc;
 
 /// Response from the supervisor
-pub struct MaintenanceShutdownResponse {
+pub struct MaintenanceOperationResponse {
     /// When to shutdown.
     /// Error if shutdown could not be scheduled.
     /// None if neard process is not a validator and an intermediate shutdown was requested
@@ -14,13 +14,17 @@ pub struct MaintenanceShutdownResponse {
 
 /// Request to send to the supervisor
 pub enum Request {
-    /// Schedule maintenance shutdown for a maintainace window of given size, book a block
-    /// height to shutdown at or cancel previous shutdon setting
-    /// + Channel where the supervisor will respond to once the request is finished
-    MaintenanceShutdown(
+    /// Schedule maintenance shutdown for
+    ///     * a maintainace window of given size,
+    ///     * book a block height to shutdown at,
+    ///     * cancel previous shutdon setting
+    ///     * shutdown kuutamod after neard shutdown
+    ///     + Channel where the supervisor will respond to once the request is finished
+    MaintenanceOperation(
         Option<u64>,
         Option<u64>,
         bool,
-        mpsc::Sender<MaintenanceShutdownResponse>,
+        bool,
+        mpsc::Sender<MaintenanceOperationResponse>,
     ),
 }

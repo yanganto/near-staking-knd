@@ -51,6 +51,16 @@ struct UpdateArgs {
     /// Comma-separated lists of hosts to perform the update
     #[clap(long, default_value = "")]
     hosts: String,
+
+    /// Immediately update without finding maintenance windows
+    #[clap(long)]
+    immediately: bool,
+
+    /// If not immediately, please specify time in blocks to copy the binary files for updating.
+    /// It takes 1~2 seconds for a near block.
+    /// If 0 or not provided, kuutamo will try to update in the longest maintenance window in the current epoch,
+    /// but it can not guarantee the  maintenance window is enough.
+    required_time_in_blocks: Option<u64>,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -58,6 +68,16 @@ struct RollbackArgs {
     /// Comma-separated lists of hosts to perform the rollback
     #[clap(long, default_value = "")]
     hosts: String,
+
+    /// Immediately update without finding maintenance windows
+    #[clap(long)]
+    immediately: bool,
+
+    /// If not immediately, please specify time in blocks to copy the binary files for rolling back.
+    /// It takes 1~2 seconds for a near block.
+    /// If 0 or not provided, kuutamo will try to rollback in the longest maintenance window in the current epoch,
+    /// but it can not guarantee the  maintenance window is enough.
+    required_time_in_blocks: Option<u64>,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -89,7 +109,9 @@ enum Command {
     Proxy(ProxyArgs),
     /// Ask Kuutamod to schedule a shutdown in maintenance windows, then it will be restart
     /// due to supervision by kuutamod
-    MaintenanceRestart(control_commands::MaintenanceShutdownArgs),
+    MaintenanceRestart(control_commands::MaintenanceOperationArgs),
+    /// Ask Kuutamod to schedule a shutdown in maintenance windows
+    MaintenanceShutdown(control_commands::MaintenanceOperationArgs),
 }
 
 #[derive(Parser)]
@@ -176,24 +198,36 @@ fn dry_update(
     deploy::dry_update(&hosts, flake)
 }
 
-fn update(
+async fn update(
     _args: &Args,
     update_args: &UpdateArgs,
     config: &Config,
     flake: &NixosFlake,
 ) -> Result<()> {
     let hosts = filter_hosts(&update_args.hosts, &config.hosts)?;
-    deploy::update(&hosts, flake)
+    deploy::update(
+        &hosts,
+        flake,
+        update_args.immediately,
+        update_args.required_time_in_blocks,
+    )
+    .await
 }
 
-fn rollback(
+async fn rollback(
     _args: &Args,
     rollback_args: &RollbackArgs,
     config: &Config,
     flake: &NixosFlake,
 ) -> Result<()> {
     let hosts = filter_hosts(&rollback_args.hosts, &config.hosts)?;
-    deploy::rollback(&hosts, flake)
+    deploy::rollback(
+        &hosts,
+        flake,
+        rollback_args.immediately,
+        rollback_args.required_time_in_blocks,
+    )
+    .await
 }
 
 fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
@@ -201,32 +235,32 @@ fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
     proxy::rpc(&hosts[0], proxy_args.local_port)
 }
 
-fn maintenance_shutdown(
-    args: &control_commands::MaintenanceShutdownArgs,
+fn maintenance_operation(
+    args: &control_commands::MaintenanceOperationArgs,
+    restart: bool,
     config: &Config,
 ) -> Result<()> {
     let hosts = filter_hosts(&args.host, &config.hosts)?;
+    let action = if restart {
+        "maintenance-restart"
+    } else {
+        "maintenance-shutdown"
+    };
     let output = match (args.minimum_length, args.shutdown_at) {
         (Some(_), Some(_)) => bail!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
         ),
         (Some(minimum_length), None) => deploy::utils::timeout_ssh(
             &hosts[0],
-            &[
-                "kuutamoctl",
-                "maintenance-shutdown",
-                &minimum_length.to_string(),
-            ],
+            &["kuutamoctl", action, &minimum_length.to_string()],
             true,
         )?,
-        (None, None) => {
-            deploy::utils::timeout_ssh(&hosts[0], &["kuutamoctl", "maintenance-shutdown"], true)?
-        }
+        (None, None) => deploy::utils::timeout_ssh(&hosts[0], &["kuutamoctl", action], true)?,
         (None, Some(shutdown_at)) => deploy::utils::timeout_ssh(
             &hosts[0],
             &[
                 "kuutamoctl",
-                "maintenance-shutdown",
+                action,
                 "--shutdown-at",
                 &shutdown_at.to_string(),
             ],
@@ -248,7 +282,8 @@ fn maintenance_shutdown(
 }
 
 /// The kuutamo program entry point
-pub fn main() -> Result<()> {
+#[tokio::main]
+pub async fn main() -> Result<()> {
     let args = Args::parse();
     let config = deploy::load_configuration(&args.config).with_context(|| {
         format!(
@@ -266,10 +301,13 @@ pub fn main() -> Result<()> {
         Command::DryUpdate(ref dry_update_args) => {
             dry_update(&args, dry_update_args, &config, &flake)
         }
-        Command::Update(ref update_args) => update(&args, update_args, &config, &flake),
-        Command::Rollback(ref rollback_args) => rollback(&args, rollback_args, &config, &flake),
+        Command::Update(ref update_args) => update(&args, update_args, &config, &flake).await,
+        Command::Rollback(ref rollback_args) => {
+            rollback(&args, rollback_args, &config, &flake).await
+        }
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
-        Command::MaintenanceRestart(ref args) => maintenance_shutdown(args, &config),
+        Command::MaintenanceRestart(ref args) => maintenance_operation(args, true, &config),
+        Command::MaintenanceShutdown(ref args) => maintenance_operation(args, false, &config),
     } {
         bail!("kuutamo failed doing {:?}: {e}", args.action);
     }
