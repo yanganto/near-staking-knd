@@ -131,9 +131,9 @@ makeTest' {
       # redeploying uploads the key
       new_machine.succeed("test -f /var/lib/secrets/validator_key.json")
 
-      installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes update >&2")
-      installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes update >&2")
+      installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes update --immediately >&2")
+      installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes update --immediately >&2")
       # XXX find out how we can make persist more than one profile in our test
-      #installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes rollback >&2")
+      #installer.succeed("${lib.getExe kuutamo} --config ${tomlConfig} --yes rollback --immediately >&2")
     '';
 }

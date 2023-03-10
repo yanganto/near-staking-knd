@@ -86,6 +86,11 @@ in
       };
     };
 
+    # We observed once that in early start of the executable a SIGHUP signal
+    # stopped consul presumably because the signal handler was not yet
+    # installed. This is a workaround for that rare case.
+    systemd.services.consul.serviceConfig.Restart = lib.mkForce "always";
+
     # kuutamo.neard and kuutamod cannot be used at the same time
     kuutamo.neard.enable = false;
 

@@ -7,19 +7,30 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
 
-/// The result for maintenacne windows rpc
+/// The result for maintenance windows rpc
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct MaintenanceWindowRPCResult(pub Vec<(BlockHeight, BlockHeight)>);
 
-/// The rpc result for maintenacne windows rpc
+/// The rpc result for maintenance windows rpc
 #[derive(Deserialize)]
-pub struct JsonRpcStatusResponse {
+pub struct MaintenanceWindowJsonRpcStatusResponse {
     /// RPC version
     pub jsonrpc: String,
     /// id, may take care in future
     pub id: String,
     /// the result we care
     pub result: MaintenanceWindowRPCResult,
+}
+
+/// The rpc result for maintenance windows rpc
+#[derive(Deserialize)]
+pub struct BlockDetailJsonRpcStatusResponse {
+    /// RPC version
+    pub jsonrpc: String,
+    /// id, may take care in future
+    pub id: String,
+    /// the result we care
+    pub result: BlockHeight,
 }
 
 /// A client implementing the neard status api
@@ -68,6 +79,22 @@ impl NeardClient {
         })
     }
 
+    /// Request final block details
+    pub async fn final_block(&self) -> Result<BlockHeight> {
+        let mut params = HashMap::<String, serde_json::Value>::new();
+        params.insert("finality".into(), "final".into());
+        let res = self
+            .client
+            .post(self.url.clone())
+            .json(&Self::rpc_request("block", params))
+            .send()
+            .await
+            .context("Failed to get block details")?;
+
+        let r: BlockDetailJsonRpcStatusResponse = res.json().await?;
+        Ok(r.result)
+    }
+
     /// Request maintenance windows
     pub async fn maintenance_windows(
         &self,
@@ -86,7 +113,7 @@ impl NeardClient {
             .await
             .context("Failed to get maintenance windows")?;
 
-        let r: JsonRpcStatusResponse = res.json().await?;
+        let r: MaintenanceWindowJsonRpcStatusResponse = res.json().await?;
         Ok(r.result)
     }
 

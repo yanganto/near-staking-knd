@@ -31,7 +31,10 @@
         };
         inherit (pkgs.callPackages ./near-cli/overrides.nix { }) near-cli;
 
-        kuutamod = pkgs.callPackage ./kuutamod.nix {
+        kuutamod = pkgs.callPackage ./kuutamod/stable.nix {
+          inherit cargoLock;
+        };
+        kuutamod-unstable = pkgs.callPackage ./kuutamod/unstable.nix {
           inherit cargoLock;
         };
         kuutamo = pkgs.callPackage ./kuutamo.nix {

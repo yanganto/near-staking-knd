@@ -1,7 +1,13 @@
-use std::{fmt::Display, fs, path::PathBuf, sync::Arc};
+use std::{
+    fmt::Display,
+    fs,
+    path::PathBuf,
+    sync::{atomic::Ordering, Arc},
+};
 
 use anyhow::{Context, Result};
 use hyper::{
+    header::{HeaderValue, CONTENT_TYPE},
     service::{make_service_fn, service_fn},
     Body, Method, Request, Response, Server, StatusCode,
 };
@@ -11,9 +17,9 @@ use serde::{de::DeserializeOwned, Serialize};
 use serde_json::json;
 use tokio::sync::mpsc::{self, Sender};
 
-use crate::{ipc, settings::Settings};
+use crate::{ipc, near_client::NeardClient, settings::Settings, supervisor::SHUTDOWN_WITH_NEARD};
 
-use super::{active_validator::active_validator, MaintenanceShutdown};
+use super::{active_validator::active_validator, MaintenanceOperation};
 
 fn server_error<T: Display>(msg: T) -> Response<Body>
 where
@@ -21,8 +27,9 @@ where
 {
     warn!("server error '{}'", msg);
     let res = serde_json::to_vec(&json!({"status": 500, "message": format!("{msg}")}));
-    // FIXME: Set header: Content-Type: application/json
     let mut resp: Response<Body> = Response::default();
+    resp.headers_mut()
+        .insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
     // The builder interface requires unwrap, which I don't like
     *resp.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
@@ -32,6 +39,31 @@ where
             Body::from(r#"{"status": 500, "message": "Cannot serialize json"}"#)
         }
         Ok(body) => Body::from(body),
+    };
+    *resp.body_mut() = body;
+    resp
+}
+
+fn gateway_timeout<T: Display>(msg: T) -> Response<Body>
+where
+    T: Display,
+{
+    warn!("gateway timeout '{}'", msg);
+    let res = serde_json::to_vec(&json!({"status": 504, "message": format!("{msg}")}));
+    let mut resp: Response<Body> = Response::default();
+    resp.headers_mut()
+        .insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+
+    let body = match res {
+        Err(e) => {
+            warn!("Failed to serialize json: {e}");
+            *resp.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+            Body::from(r#"{"status": 500, "message": "Cannot serialize json"}"#)
+        }
+        Ok(body) => {
+            *resp.status_mut() = StatusCode::GATEWAY_TIMEOUT;
+            Body::from(body)
+        }
     };
     *resp.body_mut() = body;
     resp
@@ -66,6 +98,7 @@ struct CommandServer {
     consul_token_path: Option<PathBuf>,
     control_socket: PathBuf,
     supervisor_request_chan: Sender<ipc::Request>,
+    near_client: NeardClient,
 }
 
 fn json_response<T: Serialize>(obj: T) -> Response<Body> {
@@ -86,14 +119,18 @@ async fn json_request<T: DeserializeOwned>(mut req: Request<Body>) -> Result<T> 
 
 impl CommandServer {
     /// Creates a new instance
-    pub fn new(settings: &Settings, supervisor_request_chan: Sender<ipc::Request>) -> Self {
-        CommandServer {
+    pub fn new(settings: &Settings, supervisor_request_chan: Sender<ipc::Request>) -> Result<Self> {
+        Ok(CommandServer {
             account_id: settings.account_id.to_string(),
             consul_url: settings.consul_url.to_string(),
             consul_token_path: settings.consul_token_file.to_owned(),
             control_socket: settings.control_socket.to_owned(),
             supervisor_request_chan,
-        }
+            near_client: NeardClient::new(&format!(
+                "http://localhost:{}",
+                settings.near_rpc_addr.port()
+            ))?,
+        })
     }
 
     async fn handle_requests(&self, req: Request<Body>) -> hyper::Result<Response<Body>> {
@@ -102,21 +139,29 @@ impl CommandServer {
                 r#"{"status": 200, "message": "OK"}"#,
             ))),
             (&Method::GET, "/active_validator") => self.handle_active_validator().await,
-            (&Method::POST, "/maintenance_shutdown") => self.handle_maintenance_shutdown(req).await,
+            (&Method::POST, "/maintenance_restart") => {
+                self.handle_maintenance_operation(req, false).await
+            }
+            (&Method::POST, "/maintenance_shutdown") => {
+                self.handle_maintenance_operation(req, true).await
+            }
+            (&Method::GET, "/maintenance_status") => self.handle_maintenance_status().await,
             _ => Ok(not_found()),
         }
     }
 
-    async fn handle_maintenance_shutdown(
+    async fn handle_maintenance_operation(
         &self,
         req: Request<Body>,
+        shutdown_with_neard: bool,
     ) -> hyper::Result<Response<Body>> {
         let (tx, mut rx) = mpsc::channel(1);
-        let args: MaintenanceShutdown = ok_or_500!(json_request(req).await);
-        let req = ipc::Request::MaintenanceShutdown(
+        let args: MaintenanceOperation = ok_or_500!(json_request(req).await);
+        let req = ipc::Request::MaintenanceOperation(
             args.minimum_length,
             args.shutdown_at,
             args.cancel,
+            shutdown_with_neard,
             tx,
         );
 
@@ -141,6 +186,39 @@ impl CommandServer {
             None => Ok(server_error("channel to supervisor was closed")),
         }
     }
+
+    async fn handle_maintenance_status(&self) -> hyper::Result<Response<Body>> {
+        let (metrics, final_block) =
+            tokio::join!(self.near_client.metrics(), self.near_client.final_block());
+
+        let resp = match (
+            metrics.ok().and_then(|m| {
+                m.get("near_block_expected_shutdown")
+                    .and_then(|s| s.parse::<u64>().ok())
+            }),
+            final_block,
+            SHUTDOWN_WITH_NEARD.load(Ordering::Acquire),
+        ) {
+            (Some(expect), Ok(current), true) if expect > 0 => Response::new(Body::from(format!(
+                "{{\"status\": 200, \"message\": \"maintenance shutdown in {} blocks, current: {current:}, shutdown at: {expect}\"}}",
+                expect - current
+            ))),
+            (Some(expect), Ok(current), false) if expect > 0 => Response::new(Body::from(format!(
+                "{{\"status\": 200, \"message\": \"maintenance restart in {} blocks,  current: {current:}, restart at: {expect}\"}}",
+                expect - current
+            ))),
+            (Some(expect), Err(_), true) if expect > 0 => Response::new(Body::from(format!("{{\"status\": 200, \"message\": \"maintenance shutdown will be at {expect}\"}}"))),
+            (Some(expect), Err(_), false) if expect > 0 => Response::new(Body::from(format!("{{\"status\": 200, \"message\": \"maintenance restart will be at {expect}\"}}"))),
+            (_, Ok(current), true) => Response::new(Body::from(format!(
+                "{{\"status\": 200, \"message\": \"maintenance shutdown set, current: {current:}\"}}",
+            ))),
+            (_, _, false) => Response::new(Body::from("{\"status\": 200, \"message\": \"no maintenance setting now\"}")),
+            (_, Err(_), _) => gateway_timeout("fail to fetch current block from neard"),
+        };
+
+        Ok(resp)
+    }
+
     async fn handle_active_validator(&self) -> hyper::Result<Response<Body>> {
         let validator =
             active_validator(&self.account_id, &self.consul_url, &self.consul_token_path).await;
@@ -150,7 +228,7 @@ impl CommandServer {
 
 /// Starts an control socket server
 pub async fn spawn_control_server(settings: &Settings, tx: Sender<ipc::Request>) -> Result<()> {
-    let server = Arc::new(CommandServer::new(settings, tx));
+    let server = Arc::new(CommandServer::new(settings, tx)?);
     let server = &server;
 
     if server.control_socket.exists() {

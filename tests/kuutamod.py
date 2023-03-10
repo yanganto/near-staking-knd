@@ -169,7 +169,7 @@ class Kuutamod:
         self.proc.wait()
 
     def network_produces_blocks(self) -> bool:
-        """check Kuutamo node keep updating the block height"""
+        """Check Kuutamo node keep updating the block height"""
 
         initial_height = int(self.neard_metrics()["near_block_height_head"])
         for _ in range(600):
@@ -198,3 +198,7 @@ class Kuutamod:
         with open(self.neard_home / "log_config.json", "w") as f:
             f.write('{"verbose_module": ""}')
         os.kill(pid, SIGHUP)
+
+    def __bool__(self) -> bool:
+        """Check kuutamod live or not"""
+        return self.proc.returncode is not None

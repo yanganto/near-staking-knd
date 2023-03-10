@@ -12,9 +12,15 @@ use nix::unistd::Pid;
 use std::fs::remove_file;
 use std::io::ErrorKind;
 use std::os::unix::fs::symlink;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+#[cfg(not(feature = "unstable"))]
+use std::path::PathBuf;
 use std::process::ExitStatus;
+#[cfg(not(feature = "unstable"))]
 use tokio::fs::File;
+#[cfg(feature = "unstable")]
+use tokio::fs::{read_to_string, write};
+#[cfg(not(feature = "unstable"))]
 use tokio::io::AsyncWriteExt;
 use tokio::process::Child;
 use tokio::time::{sleep, sleep_until, Duration, Instant};
@@ -116,10 +122,17 @@ async fn get_neard_config_changes(client: &NeardClient) -> Result<u64> {
     let metrics = client.metrics().await?;
 
     // NOTE if the dynamic config was not applied, the field in metric will absent and deem to 0
-    Ok(metrics
+    #[cfg(not(feature = "unstable"))]
+    return Ok(metrics
         .get("near_dynamic_config_changes")
         .map(|s| s.parse::<u64>().unwrap_or(0))
-        .unwrap_or(0))
+        .unwrap_or(0));
+
+    #[cfg(feature = "unstable")]
+    return Ok(metrics
+        .get("near_config_reloads_total")
+        .map(|s| s.parse::<u64>().unwrap_or(0))
+        .unwrap_or(0));
 }
 
 /// Trigger neard to load the dynamic config
@@ -148,6 +161,7 @@ async fn wait_until_config_applied(client: &NeardClient, initial_change_value: u
 /// Apply dynamic config
 /// NOTE: currently only expected shutdown in the config, so input parameter is only
 /// expected_shutdown
+#[cfg(not(feature = "unstable"))]
 pub async fn apply_dynamic_config(
     client: &NeardClient,
     pid: Pid,
@@ -176,6 +190,49 @@ pub async fn apply_dynamic_config(
         _ = sleep_until(apply_timeout) => {},
     }
     anyhow::bail!("dynamic config change was not applied within 5s")
+}
+
+/// Apply dynamic part, which is a part of `config.json`
+#[cfg(feature = "unstable")]
+pub async fn apply_dynamic_config(
+    client: &NeardClient,
+    pid: Pid,
+    neard_home: &Path,
+    expected_shutdown: Option<BlockHeight>,
+) -> Result<()> {
+    let changes = get_neard_config_changes(client).await?;
+
+    let config_path = neard_home.join("config.json");
+    let config_content = read_to_string(&config_path).await?;
+    if let Some(part) = config_content.strip_suffix("\n}") {
+        if let Some(expected_shutdown) = expected_shutdown {
+            let new_config = format!("{part:},\n  \"expected_shutdown\": {expected_shutdown}\n}}");
+            write(&config_path, &new_config)
+                .await
+                .with_context(|| "Can not write new config with expect_shutdown")?;
+            println!("new config({}):\n{}", config_path.display(), new_config);
+        };
+        reload_neard(pid)?;
+    } else {
+        anyhow::bail!("config.json is not end with `}}` as expected json object")
+    }
+
+    let apply_timeout = Instant::now() + Duration::from_secs(5);
+    tokio::select! {
+        res = wait_until_config_applied(client, changes) => {
+            if write(&config_path, config_content).await.is_err() {
+                error!("Can not write back the original config after expect_shutdown applied");
+            }
+            res
+        },
+        // startup timeout
+        _ = sleep_until(apply_timeout) => {
+            if write(&config_path, config_content).await.is_err() {
+                error!("Can not write back the original config after expect_shutdown applied");
+            }
+            anyhow::bail!("dynamic config change was not applied within 5s")
+        },
+    }
 }
 
 impl NeardProcess {
@@ -228,10 +285,12 @@ impl Drop for NeardProcess {
 }
 
 /// Safety operation to apply dyanic config
+#[cfg(not(feature = "unstable"))]
 struct DynConfig {
     dyn_config_path: PathBuf,
 }
 
+#[cfg(not(feature = "unstable"))]
 impl DynConfig {
     pub async fn new(neard_home: &Path, expected_shutdown: Option<BlockHeight>) -> Result<Self> {
         let dyn_config_path = neard_home.join("dyn_config.json");
@@ -246,6 +305,7 @@ impl DynConfig {
     }
 }
 
+#[cfg(not(feature = "unstable"))]
 impl Drop for DynConfig {
     /// Make sure the config file be deleted to avoid neard reload it when restarting,
     /// because neard process will load any existing dyn_config.json when it start.

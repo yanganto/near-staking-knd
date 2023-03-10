@@ -3,20 +3,35 @@ use log::info;
 
 use crate::deploy::nixos_rebuild;
 
-use super::{Host, NixosFlake};
+use super::{
+    utils::{handle_maintenance_shutdown, timeout_ssh},
+    Host, NixosFlake,
+};
 
 /// Rollback a nixos machine
-pub fn rollback(hosts: &[Host], flake: &NixosFlake) -> Result<()> {
+pub async fn rollback(
+    hosts: &[Host],
+    flake: &NixosFlake,
+    immediately: bool,
+    required_time_in_blocks: Option<u64>,
+) -> Result<()> {
     flake.show()?;
-    hosts
-        .iter()
-        .map(|host| {
-            info!("Rollback {}", host.name);
+    for host in hosts.iter() {
+        info!("Rollback {}", host.name);
 
+        if immediately {
             nixos_rebuild("rollback", host, flake, false)?;
-
-            Ok(())
-        })
-        .collect::<Result<Vec<_>>>()?;
+        } else {
+            nixos_rebuild("build", host, flake, true)?;
+            let r = match timeout_ssh(host, &["systemctl", "disable", "kuutamod"], true) {
+                Ok(_) => handle_maintenance_shutdown(host, required_time_in_blocks)
+                    .await
+                    .and_then(|_| nixos_rebuild("rollback", host, flake, true)),
+                Err(e) => Err(e),
+            };
+            let _ = timeout_ssh(host, &["systemctl", "enable", "kuutamod"], true)?;
+            r?
+        }
+    }
     Ok(())
 }
