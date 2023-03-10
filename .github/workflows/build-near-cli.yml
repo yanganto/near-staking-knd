@@ -5,6 +5,7 @@ on:
      - main
      - staging
      - trying
+     - dev
   pull_request:
 jobs:
   build:
