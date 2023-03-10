@@ -36,3 +36,7 @@ path = "src/bin/kuutamod.rs"
 [[bin]]
 name = "kuutamoctl"
 path = "src/bin/kuutamoctl.rs"
+
+[features]
+# set this for neard-unstable
+unstable = []

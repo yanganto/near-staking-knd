@@ -1,0 +1,26 @@
+diff --git a/nearcore/src/dyn_config.rs b/nearcore/src/dyn_config.rs
+index c4016db71..2758dd7a5 100644
+--- a/nearcore/src/dyn_config.rs
++++ b/nearcore/src/dyn_config.rs
+@@ -45,6 +45,7 @@ pub fn read_updateable_configs(
+ pub fn get_updateable_client_config(config: Config) -> UpdateableClientConfig {
+     // All fields that can be updated while the node is running should be explicitly set here.
+     // Keep this list in-sync with `core/dyn-configs/README.md`.
++    crate::metrics::EXPECTED_SHUTDOWN_BLOCK.set(config.expected_shutdown.unwrap_or_default() as i64);
+     UpdateableClientConfig { expected_shutdown: config.expected_shutdown }
+ }
+ 
+diff --git a/nearcore/src/metrics.rs b/nearcore/src/metrics.rs
+index 105397d11..8bd68d09a 100644
+--- a/nearcore/src/metrics.rs
++++ b/nearcore/src/metrics.rs
+@@ -44,3 +44,9 @@ pub(crate) static COLD_STORE_COPY_RESULT: Lazy<IntCounterVec> = Lazy::new(|| {
+     )
+     .unwrap()
+ });
++
++/// An indicate for expected shutdown
++pub(crate) static EXPECTED_SHUTDOWN_BLOCK: Lazy<IntGauge> = Lazy::new(|| {
++    try_create_int_gauge("near_block_expected_shutdown", "The block height expected shutdown")
++    .unwrap()
++});

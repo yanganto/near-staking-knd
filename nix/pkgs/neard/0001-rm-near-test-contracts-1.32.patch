@@ -1,0 +1,199 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index abc009a88..fb47470c8 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -2131,7 +2131,6 @@ dependencies = [
+  "near-crypto",
+  "near-primitives",
+  "near-store",
+- "near-test-contracts",
+  "nearcore",
+  "tempfile",
+ ]
+@@ -2526,7 +2525,6 @@ dependencies = [
+  "near-stdx 0.16.0",
+  "near-store",
+  "near-telemetry",
+- "near-test-contracts",
+  "near-vm-errors",
+  "near-vm-runner",
+  "nearcore",
+@@ -3071,7 +3069,6 @@ dependencies = [
+  "near-primitives",
+  "near-primitives-core",
+  "near-store",
+- "near-test-contracts",
+  "nearcore",
+  "node-runtime",
+  "num-rational",
+@@ -3948,7 +3945,6 @@ dependencies = [
+  "near-cache",
+  "near-primitives",
+  "near-stable-hasher",
+- "near-test-contracts",
+  "near-vm-errors",
+  "near-vm-logic",
+  "once_cell",
+@@ -4133,7 +4129,6 @@ dependencies = [
+  "near-o11y",
+  "near-primitives",
+  "near-store",
+- "near-test-contracts",
+  "near-vm-errors",
+  "near-vm-logic",
+  "near-vm-runner",
+@@ -5270,7 +5265,6 @@ dependencies = [
+  "near-o11y",
+  "near-primitives",
+  "near-store",
+- "near-test-contracts",
+  "near-vm-logic",
+  "near-vm-runner",
+  "nearcore",
+@@ -5302,7 +5296,6 @@ dependencies = [
+  "near-o11y",
+  "near-primitives",
+  "near-store",
+- "near-test-contracts",
+  "nearcore",
+  "serde",
+  "serde_json",
+@@ -5913,7 +5906,6 @@ dependencies = [
+  "near-primitives",
+  "near-primitives-core",
+  "near-store",
+- "near-test-contracts",
+  "nearcore",
+  "node-runtime",
+  "once_cell",
+@@ -6112,7 +6104,6 @@ dependencies = [
+  "near-chain-configs",
+  "near-crypto",
+  "near-primitives",
+- "near-test-contracts",
+  "node-runtime",
+  "once_cell",
+ ]
+diff --git a/genesis-tools/genesis-populate/Cargo.toml b/genesis-tools/genesis-populate/Cargo.toml
+index c25d8076b..197958994 100644
+--- a/genesis-tools/genesis-populate/Cargo.toml
++++ b/genesis-tools/genesis-populate/Cargo.toml
+@@ -17,7 +17,7 @@ near-crypto = { path = "../../core/crypto" }
+ near-primitives = { path = "../../core/primitives" }
+ near-store = { path = "../../core/store" }
+ near-chain = { path = "../../chain/chain" }
+-near-test-contracts = { path = "../../runtime/near-test-contracts" }
++# near-test-contracts = { path = "../../runtime/near-test-contracts" }
+ 
+ [features]
+ protocol_feature_flat_state = [
+diff --git a/integration-tests/Cargo.toml b/integration-tests/Cargo.toml
+index eab6572b3..6dd44cba6 100644
+--- a/integration-tests/Cargo.toml
++++ b/integration-tests/Cargo.toml
+@@ -46,7 +46,7 @@ near-primitives-core = { path = "../core/primitives-core" }
+ near-store = { path = "../core/store" }
+ near-o11y = { path = "../core/o11y" }
+ near-telemetry = { path = "../chain/telemetry" }
+-near-test-contracts = { path = "../runtime/near-test-contracts" }
++# near-test-contracts = { path = "../runtime/near-test-contracts" }
+ near-performance-metrics = { path = "../utils/near-performance-metrics" }
+ near-vm-errors = { path = "../runtime/near-vm-errors" }
+ near-vm-runner = { path = "../runtime/near-vm-runner" }
+diff --git a/runtime/near-vm-runner/Cargo.toml b/runtime/near-vm-runner/Cargo.toml
+index 55183844c..6bf35dd12 100644
+--- a/runtime/near-vm-runner/Cargo.toml
++++ b/runtime/near-vm-runner/Cargo.toml
+@@ -62,7 +62,7 @@ wasm-smith.workspace = true
+ wasmprinter.workspace = true
+ wat.workspace = true
+ 
+-near-test-contracts = { path = "../near-test-contracts" }
++# near-test-contracts = { path = "../near-test-contracts" }
+ 
+ [features]
+ # all vms enabled for now
+diff --git a/runtime/runtime-params-estimator/Cargo.toml b/runtime/runtime-params-estimator/Cargo.toml
+index 5a02a916f..8aeb3ac3c 100644
+--- a/runtime/runtime-params-estimator/Cargo.toml
++++ b/runtime/runtime-params-estimator/Cargo.toml
+@@ -39,7 +39,7 @@ near-crypto = { path = "../../core/crypto" }
+ near-o11y = { path = "../../core/o11y" }
+ near-primitives = { path = "../../core/primitives" }
+ near-store = { path = "../../core/store" }
+-near-test-contracts = { path = "../near-test-contracts" }
++# near-test-contracts = { path = "../near-test-contracts" }
+ near-vm-logic = {path = "../../runtime/near-vm-logic"  }
+ near-vm-runner = {path = "../../runtime/near-vm-runner" }
+ nearcore = { path = "../../nearcore" }
+@@ -68,7 +68,7 @@ nightly = [
+ ]
+ nightly_protocol = [
+   "near-primitives/nightly_protocol",
+-  "near-test-contracts/nightly",
++  # "near-test-contracts/nightly",
+ ]
+ protocol_feature_flat_state = [
+   "nearcore/protocol_feature_flat_state",
+diff --git a/runtime/runtime/Cargo.toml b/runtime/runtime/Cargo.toml
+index 39a55e42f..f59a80fbc 100644
+--- a/runtime/runtime/Cargo.toml
++++ b/runtime/runtime/Cargo.toml
+@@ -54,5 +54,5 @@ tempfile.workspace = true
+ 
+ near-chain-configs = { path = "../../core/chain-configs" }
+ near-store = { path = "../../core/store", features = ["test_features"] }
+-near-test-contracts = { path = "../../runtime/near-test-contracts" }
++# near-test-contracts = { path = "../../runtime/near-test-contracts" }
+ testlib = { path = "../../test-utils/testlib" }
+diff --git a/test-utils/runtime-tester/Cargo.toml b/test-utils/runtime-tester/Cargo.toml
+index adfc2df91..60b845a61 100644
+--- a/test-utils/runtime-tester/Cargo.toml
++++ b/test-utils/runtime-tester/Cargo.toml
+@@ -22,7 +22,7 @@ nearcore = { path = "../../nearcore" }
+ near-primitives = { path = "../../core/primitives" }
+ near-store = { path = "../../core/store" }
+ near-o11y = { path = "../../core/o11y" }
+-near-test-contracts = { path = "../../runtime/near-test-contracts" }
++# near-test-contracts = { path = "../../runtime/near-test-contracts" }
+ 
+ [dev-dependencies]
+ testlib = { path = "../testlib" }
+diff --git a/test-utils/testlib/Cargo.toml b/test-utils/testlib/Cargo.toml
+index d9208dbe4..b5895bfdf 100644
+--- a/test-utils/testlib/Cargo.toml
++++ b/test-utils/testlib/Cargo.toml
+@@ -12,7 +12,7 @@ near-chain-configs = { path = "../../core/chain-configs" }
+ near-chain = { path = "../../chain/chain" }
+ near-crypto = { path = "../../core/crypto" }
+ near-primitives = { path = "../../core/primitives" }
+-near-test-contracts = { path = "../../runtime/near-test-contracts" }
++# near-test-contracts = { path = "../../runtime/near-test-contracts" }
+ node-runtime = { path = "../../runtime/runtime" }
+ 
+ [features]
+diff --git a/tools/amend-genesis/Cargo.toml b/tools/amend-genesis/Cargo.toml
+index 539b9d792..5741b8f85 100644
+--- a/tools/amend-genesis/Cargo.toml
++++ b/tools/amend-genesis/Cargo.toml
+@@ -23,6 +23,6 @@ near-network = { path = "../../chain/network" }
+ near-primitives = { path = "../../core/primitives" }
+ near-primitives-core = { path = "../../core/primitives-core" }
+ near-store = { path = "../../core/store" }
+-near-test-contracts = { path = "../../runtime/near-test-contracts" }
++# near-test-contracts = { path = "../../runtime/near-test-contracts" }
+ nearcore = { path = "../../nearcore" }
+ node-runtime = { path = "../../runtime/runtime" }
+diff --git a/tools/state-viewer/Cargo.toml b/tools/state-viewer/Cargo.toml
+index 677dd3503..02992ccd3 100644
+--- a/tools/state-viewer/Cargo.toml
++++ b/tools/state-viewer/Cargo.toml
+@@ -30,7 +30,7 @@ near-network = { path = "../../chain/network" }
+ near-primitives = { path = "../../core/primitives" }
+ near-primitives-core = { path = "../../core/primitives-core" }
+ near-store = { path = "../../core/store" }
+-near-test-contracts = { path = "../../runtime/near-test-contracts" }
++# near-test-contracts = { path = "../../runtime/near-test-contracts" }
+ nearcore = { path = "../../nearcore" }
+ node-runtime = { path = "../../runtime/runtime" }
+ 
