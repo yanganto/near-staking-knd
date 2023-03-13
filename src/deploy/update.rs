@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use log::info;
 
 use crate::deploy::nixos_rebuild;
@@ -21,7 +21,7 @@ pub async fn update(
 
         if immediately {
             nixos_rebuild("switch", host, flake, true)?;
-        } else {
+        } else if let Some(required_time_in_blocks) = required_time_in_blocks {
             nixos_rebuild("build", host, flake, true)?;
             let r = match timeout_ssh(host, &["systemctl", "disable", "kuutamod"], true) {
                 Ok(_) => handle_maintenance_shutdown(host, required_time_in_blocks)
@@ -31,6 +31,8 @@ pub async fn update(
             };
             let _ = timeout_ssh(host, &["systemctl", "enable", "kuutamod"], true)?;
             r?
+        } else {
+            bail!("please specify [REQUIRED_TIME_IN_BLOCKS] or pass `--immediately`, or `--help` to learn more.")
         }
     }
     Ok(())
