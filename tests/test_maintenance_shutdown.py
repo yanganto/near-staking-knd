@@ -121,12 +121,8 @@ def test_maintenance_shutdown_metrics(
 
         proc = leader.execute_command(
             "maintenance-shutdown",
+            "--wait",
             "1",  # Use one block window for maintenance shutdown in test
         )
         assert proc.returncode == 0
-        for i in range(100):
-            if not leader:
-                break
-            time.sleep(0.1)
-        else:
-            assert not leader
+        assert not leader
