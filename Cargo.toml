@@ -30,8 +30,8 @@ zip = { version = "0.6.4", default-features = false, features = ["aes-crypto", "
 format_serde_error = { version = "0.3.0", features = [ "colored", "serde_json" ], default-features = false, git = "https://github.com/AlexanderThaller/format_serde_error" }
 
 [[bin]]
-name = "kuutamod"
-path = "src/bin/kuutamod.rs"
+name = "kneard-deploy"
+path = "src/bin/kneard-deploy.rs"
 
 [[bin]]
 name = "kuutamoctl"
