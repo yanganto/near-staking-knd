@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use log::info;
 
 use crate::deploy::nixos_rebuild;
@@ -13,7 +13,7 @@ pub async fn rollback(
     hosts: &[Host],
     flake: &NixosFlake,
     immediately: bool,
-    required_time_in_blocks: Option<u64>,
+    required_time_in_blocks: u64,
 ) -> Result<()> {
     flake.show()?;
     for host in hosts.iter() {
@@ -21,7 +21,7 @@ pub async fn rollback(
 
         if immediately {
             nixos_rebuild("rollback", host, flake, false)?;
-        } else if let Some(required_time_in_blocks) = required_time_in_blocks {
+        } else {
             nixos_rebuild("build", host, flake, true)?;
             let r = match timeout_ssh(host, &["systemctl", "disable", "kuutamod"], true) {
                 Ok(_) => handle_maintenance_shutdown(host, required_time_in_blocks)
@@ -31,8 +31,6 @@ pub async fn rollback(
             };
             let _ = timeout_ssh(host, &["systemctl", "enable", "kuutamod"], true)?;
             r?
-        } else {
-            bail!("please specify [REQUIRED_TIME_IN_BLOCKS] or pass `--immediately`, or `--help` to learn more.")
         }
     }
     Ok(())
