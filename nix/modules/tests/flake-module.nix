@@ -7,7 +7,7 @@
         cp -r ${./test-config.toml} test-config.toml
         cp -r ${./validator_key.json} validator_key.json
         cp -r ${./node_key.json} node_key.json
-        ${lib.getExe self'.packages.kneard-deploy} --config test-config.toml generate-config "$out"
+        ${lib.getExe self'.packages.kneard-mgr} --config test-config.toml generate-config "$out"
       '';
     in
     {
@@ -18,7 +18,7 @@
         neard = import ./neard.nix {
           inherit self pkgs;
         };
-        kneard-deploy = pkgs.callPackage ./kneard-deploy.nix {
+        kneard-mgr = pkgs.callPackage ./kneard-mgr.nix {
           inherit self pkgs;
         };
 
