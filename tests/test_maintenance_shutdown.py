@@ -125,4 +125,5 @@ def test_maintenance_shutdown_metrics(
             "1",  # Use one block window for maintenance shutdown in test
         )
         assert proc.returncode == 0
+        assert "shutdown at block height:" in proc.stdout
         assert not leader
