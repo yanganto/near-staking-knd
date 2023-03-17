@@ -297,7 +297,7 @@ pub async fn main() -> Result<()> {
     })?;
     let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
 
-    if let Err(e) = match args.action {
+    let res = match args.action {
         Command::GenerateConfig(ref config_args) => {
             generate_config(&args, config_args, &config, &flake)
         }
@@ -312,8 +312,6 @@ pub async fn main() -> Result<()> {
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
         Command::MaintenanceRestart(ref args) => maintenance_operation(args, true, &config),
         Command::MaintenanceShutdown(ref args) => maintenance_operation(args, false, &config),
-    } {
-        bail!("kuutamo failed doing {:?}: {e}", args.action);
-    }
-    Ok(())
+    };
+    res.with_context(|| format!("kuutamo failed doing {:?}", args.action))
 }
