@@ -33,7 +33,6 @@ def test_maintenance_restart(
     near_network: NearNetwork,
     ports: Ports,
 ) -> None:
-
     kuutamods = []
     for idx in range(2):
         kuutamods.append(
@@ -144,7 +143,6 @@ def test_maintenance_restart(
         assert "no maintenance setting now" in proc.stdout
 
     with Section("test maintenance restart on leader"):
-
         proc = leader.execute_command(
             "maintenance-restart",
             "1",  # Use one block window for maintenance restart in test

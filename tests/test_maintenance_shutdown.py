@@ -75,7 +75,6 @@ def test_maintenance_shutdown_metrics(
             )
 
     with Section("test maintenance status for shutdown"):
-
         proc = leader.execute_command("maintenance-status")
         log_note(proc.stdout)
         assert "shutdown" in proc.stdout
