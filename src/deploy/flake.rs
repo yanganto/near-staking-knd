@@ -25,6 +25,7 @@ impl NixosFlake {
         let args = vec![
             "flake",
             "show",
+            "--refresh",
             "--extra-experimental-features",
             "flakes nix-command",
             self.path()
