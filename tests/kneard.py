@@ -60,7 +60,7 @@ class Kuutamod:
     control_socket: Path
     neard_home: Path
     command: Command
-    kuutamoctl: Path
+    kneard_ctl: Path
 
     @classmethod
     def run(
@@ -71,7 +71,7 @@ class Kuutamod:
         command: Command,
         ports: Ports,
         near_network: NearNetwork,
-        kuutamoctl: Path,
+        kneard_ctl: Path,
         debug: bool,
     ) -> Kuutamod:
         exporter_port = ports.allocate(3)
@@ -117,7 +117,7 @@ class Kuutamod:
             neard_home=neard_home,
             command=command,
             rpc_port=int(config["rpc"]["addr"].split(":")[-1]),
-            kuutamoctl=kuutamoctl,
+            kneard_ctl=kneard_ctl,
         )
         if debug:
             instance.enable_neard_debug()
@@ -186,7 +186,7 @@ class Kuutamod:
         """Send command to Kuutamod"""
 
         return subprocess.run(
-            [str(self.kuutamoctl), "--control-socket", str(self.control_socket), *args],
+            [str(self.kneard_ctl), "--control-socket", str(self.control_socket), *args],
             stdout=subprocess.PIPE,
             text=True,
             check=check,

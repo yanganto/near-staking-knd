@@ -1,4 +1,4 @@
-//! kuutamoctl - a cli for kneard
+//! kneard-ctl - a cli for kneard
 
 #![deny(missing_docs)]
 
@@ -256,14 +256,14 @@ fn maintenance_operation(
         ),
         (Some(minimum_length), None) => deploy::utils::timeout_ssh(
             &hosts[0],
-            &["kuutamoctl", action, &minimum_length.to_string()],
+            &["kneard-ctl", action, &minimum_length.to_string()],
             true,
         )?,
-        (None, None) => deploy::utils::timeout_ssh(&hosts[0], &["kuutamoctl", action], true)?,
+        (None, None) => deploy::utils::timeout_ssh(&hosts[0], &["kneard-ctl", action], true)?,
         (None, Some(shutdown_at)) => deploy::utils::timeout_ssh(
             &hosts[0],
             &[
-                "kuutamoctl",
+                "kneard-ctl",
                 action,
                 "--shutdown-at",
                 &shutdown_at.to_string(),

@@ -15,7 +15,7 @@ from setup_localnet import NearNetwork
 
 def test_multiple_nodes(
     kneard: Path,
-    kuutamoctl: Path,
+    kneard_ctl: Path,
     command: Command,
     consul: Consul,
     near_network: NearNetwork,
@@ -35,7 +35,7 @@ def test_multiple_nodes(
                 near_network=near_network,
                 command=command,
                 consul=consul,
-                kuutamoctl=kuutamoctl,
+                kneard_ctl=kneard_ctl,
                 debug=True,
             )
         )

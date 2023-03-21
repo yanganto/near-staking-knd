@@ -172,9 +172,9 @@ kneard_state{type="Voting"} 0
 kneard_uptime 3447978
 ```
 
-Once neard is synced with the network, you should see a kneard listed as an active validator using `kuutamoctl`:
+Once neard is synced with the network, you should see a kneard listed as an active validator using `kneard-ctl`:
 ```console
-$ kuutamoctl active-validator
+$ kneard-ctl active-validator
 Name: river
 ```
 where `Name` is the kuutamo node id.

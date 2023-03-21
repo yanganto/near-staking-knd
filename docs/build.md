@@ -1,6 +1,6 @@
 # Build
 
-Kuutamod comes as a single binary and with the optional programme `kuutamoctl`
+Kuutamod comes as a single binary and with the optional programme `kneard-ctl`
 to check the status of Kuutamod at runtime.
 
 ## Build with nix

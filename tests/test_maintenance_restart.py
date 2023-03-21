@@ -27,7 +27,7 @@ def work_with_neard_versions(
 
 def test_maintenance_restart(
     kneard: Path,
-    kuutamoctl: Path,
+    kneard_ctl: Path,
     command: Command,
     consul: Consul,
     near_network: NearNetwork,
@@ -42,7 +42,7 @@ def test_maintenance_restart(
                 ports=ports,
                 near_network=near_network,
                 command=command,
-                kuutamoctl=kuutamoctl,
+                kneard_ctl=kneard_ctl,
                 consul=consul,
                 debug=False,
             )

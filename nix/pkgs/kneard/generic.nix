@@ -21,7 +21,7 @@ rustPlatform.buildRustPackage ({
   buildInputs = [ openssl ];
   nativeBuildInputs = [ pkg-config python3.pkgs.pytest ] ++ lib.optionals enableLint [ clippy mypy ];
 
-  cargoBuildFlags = [ "--bin" "kuutamoctl" "--bin" "kneard" ] ++ additionalBuildFlags;
+  cargoBuildFlags = [ "--bin" "kneard-ctl" "--bin" "kneard" ] ++ additionalBuildFlags;
 
   doCheck = false;
 

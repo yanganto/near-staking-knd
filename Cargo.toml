@@ -34,8 +34,8 @@ name = "kneard-mgr"
 path = "src/bin/kneard-mgr.rs"
 
 [[bin]]
-name = "kuutamoctl"
-path = "src/bin/kuutamoctl.rs"
+name = "kneard-ctl"
+path = "src/bin/kneard-ctl.rs"
 
 [features]
 # set this for neard-unstable

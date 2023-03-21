@@ -95,7 +95,7 @@ in
     kuutamo.neard.enable = false;
 
     environment.systemPackages = [
-      # for kuutamoctl
+      # for kneard-ctl
       cfg.package
     ];
 
@@ -168,7 +168,7 @@ in
               touch /run/kneard/restart
 
               ${lib.optionalString (cfg.consulTokenFile != null) ''
-                # We need those keys for kuutamoctl as root
+                # We need those keys for kneard-ctl as root
                 # We copy the token from the service here to make things like systemd's LoadCredential and secrets from vault work.
                 install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kneard/consul-token
               ''}

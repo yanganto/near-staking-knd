@@ -177,10 +177,10 @@ kneard_state{type="Voting"} 0
 kneard_uptime 1273658
 ```
 
-Once neard is synced with the network, you should see a kneard listed as an active validator using `kuutamoctl`:
+Once neard is synced with the network, you should see a kneard listed as an active validator using `kneard-ctl`:
 
 ```
-$ kuutamoctl active-validator
+$ kneard-ctl active-validator
 Name: river
 ```
 
@@ -257,7 +257,7 @@ curl http://localhost:8500/v1/status/leader
 ```
 
 Just like in the `localnet` example, you can query
-`http://localhost:2233/metrics` on each host or use `kuutamoctl` to see which
+`http://localhost:2233/metrics` on each host or use `kneard-ctl` to see which
 host is currently the designated validator.
 
 # Further reading

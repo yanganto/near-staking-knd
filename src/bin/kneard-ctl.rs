@@ -1,4 +1,4 @@
-//! kuutamoctl - a cli for kneard
+//! kneard-ctl - a cli for kneard
 
 #![deny(missing_docs)]
 
@@ -49,7 +49,7 @@ async fn show_maintenance_status(kuutamo_client: &CommandClient) -> Result<()> {
     Ok(println!("{}", &kuutamo_client.maintenance_status().await?))
 }
 
-/// The kuutamoctl program entry point
+/// The kneard-ctl program entry point
 #[tokio::main]
 pub async fn main() {
     let args = Args::parse();
