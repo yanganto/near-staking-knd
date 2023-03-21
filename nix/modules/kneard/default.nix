@@ -4,10 +4,10 @@
 , ...
 }:
 let
-  cfg = config.kuutamo.kuutamod;
+  cfg = config.kuutamo.kneard;
 in
 {
-  options.kuutamo.kuutamod = {
+  options.kuutamo.kneard = {
     validatorKeyFile = lib.mkOption {
       type = lib.types.either lib.types.path lib.types.str;
       description = ''
@@ -91,7 +91,7 @@ in
     # installed. This is a workaround for that rare case.
     systemd.services.consul.serviceConfig.Restart = lib.mkForce "always";
 
-    # kuutamo.neard and kuutamod cannot be used at the same time
+    # kuutamo.neard and kneard cannot be used at the same time
     kuutamo.neard.enable = false;
 
     environment.systemPackages = [
@@ -99,18 +99,18 @@ in
       cfg.package
     ];
 
-    # this is useful for kuutamodctl
+    # this is useful for kneardctl
     environment.variables =
       {
         "KUUTAMO_ACCOUNT_ID" = cfg.accountId;
       }
       // lib.optionalAttrs (cfg.consulTokenFile != null) {
-        "KUUTAMO_CONSUL_TOKEN_FILE" = "/run/kuutamod/consul-token";
+        "KUUTAMO_CONSUL_TOKEN_FILE" = "/run/kneard/consul-token";
       };
 
-    # If failover / kuutamod fails for what ever reason, this service allows to
+    # If failover / kneard fails for what ever reason, this service allows to
     # start neard manually.
-    # Do NOT start this service if any kuutamod for this validator key is
+    # Do NOT start this service if any kneard for this validator key is
     # signing or else it will result in double-signing
     # This service assumes that configuration is already mostly inplace i.e. a
     # neard backup and neard's config.json
@@ -133,7 +133,7 @@ in
         };
     };
 
-    systemd.services.kuutamod = {
+    systemd.services.kneard = {
       wantedBy = [ "multi-user.target" ];
       # we want to restart the service ourself manually
       reloadIfChanged = true;
@@ -160,17 +160,17 @@ in
             ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}"
             ++ lib.optional (cfg.publicAddress != null) "KUUTAMO_PUBLIC_ADDRESS=${cfg.publicAddress}";
 
-          RuntimeDirectory = "kuutamod";
+          RuntimeDirectory = "kneard";
 
           ExecReload = [
-            "+${pkgs.writeShellScript "kuutamod-schedule-reload" ''
+            "+${pkgs.writeShellScript "kneard-schedule-reload" ''
               set -x
-              touch /run/kuutamod/restart
+              touch /run/kneard/restart
 
               ${lib.optionalString (cfg.consulTokenFile != null) ''
                 # We need those keys for kuutamoctl as root
                 # We copy the token from the service here to make things like systemd's LoadCredential and secrets from vault work.
-                install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kuutamod/consul-token
+                install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kneard/consul-token
               ''}
 
               # reload consul token file
@@ -178,7 +178,7 @@ in
             ''}"
           ];
 
-          # If neard goes out-of-memory, we want to keep kuutamod running.
+          # If neard goes out-of-memory, we want to keep kneard running.
           OOMPolicy = "continue";
 
           # in addition to ipv4/ipv6 we also need unix sockets
@@ -186,13 +186,13 @@ in
 
           # this script is run as root
           ExecStartPre =
-            lib.optional (cfg.consulTokenFile != null) "+${pkgs.writeShellScript "kuutamod-consul-token" ''
+            lib.optional (cfg.consulTokenFile != null) "+${pkgs.writeShellScript "kneard-consul-token" ''
               set -eux -o pipefail
-              install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kuutamod/consul-token
+              install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kneard/consul-token
             ''}"
             ++ config.systemd.services.neard.serviceConfig.ExecStartPre
             ++ [
-              "+${pkgs.writeShellScript "kuutamod-setup" ''
+              "+${pkgs.writeShellScript "kneard-setup" ''
                 set -eux -o pipefail
                 # Generate voter node key
                 if [[ ! -f /var/lib/neard/voter_node_key.json ]]; then
@@ -201,7 +201,7 @@ in
               ''}"
               # we need to execute this as the neard user so we get access to private tmp
             ];
-          ExecStart = "${cfg.package}/bin/kuutamod";
+          ExecStart = "${cfg.package}/bin/kneard";
         };
     };
 

@@ -20,7 +20,7 @@ in
     # FIXME: this should be provided by kuutamoctl
     users.extraUsers.root.openssh.authorizedKeys.keys = cfg.public_ssh_keys;
 
-    kuutamo.kuutamod.publicAddress = cfg.ipv6_address or cfg.ipv4_address;
+    kuutamo.kneard.publicAddress = cfg.ipv6_address or cfg.ipv4_address;
 
     kuutamo.network.macAddress = cfg.mac_address or null;
 

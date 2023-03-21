@@ -3,22 +3,22 @@ _:
   perSystem = { self', pkgs, ... }:
     {
       checks = {
-        kuutamod-unit-tests = pkgs.callPackage ./kuutamod-unit-tests.nix {
+        kneard-unit-tests = pkgs.callPackage ./kneard-unit-tests.nix {
           inherit (self'.packages) neard;
-          inherit (self'.packages) kuutamod;
+          inherit (self'.packages) kneard;
         };
-        kuutamod-unit-tests-unstable = self'.checks.kuutamod-unit-tests.override {
+        kneard-unit-tests-unstable = self'.checks.kneard-unit-tests.override {
           neard = self'.packages.neard-unstable;
-          kuutamod = self'.packages.kuutamod-unstable;
+          kneard = self'.packages.kneard-unstable;
         };
         # for testing with binary releases
-        #kuutamod-tests-bin = self'.checks.kuutamod-tests.override {
+        #kneard-tests-bin = self'.checks.kneard-tests.override {
         #  neard = self'.packages.neard-bin;
         #};
-        kuutamod-lint = self'.packages.kuutamod.override {
+        kneard-lint = self'.packages.kneard.override {
           enableLint = true;
         };
-        kuutamod-unstable-lint = self'.packages.kuutamod.override {
+        kneard-unstable-lint = self'.packages.kneard.override {
           enableLint = true;
         };
       };

@@ -19,8 +19,8 @@
             ];
           };
           validator = {
-            kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
-            kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
+            kuutamo.kneard.validatorKeyFile = "/var/lib/secrets/validator_key.json";
+            kuutamo.kneard.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
           };
         in
         {

@@ -1,11 +1,11 @@
 # Primary-Secondary failover design
 
-This page describes the internal kuutamod state machine used
+This page describes the internal kneard state machine used
 to manage neard and failover to instances in case a failure happens.
 
 ## States
 
-When starting up, kuutamod will go through the series of states before it's
+When starting up, kneard will go through the series of states before it's
 promoted as a validator. Here is an overview of all states:
 
 1. Startup:
@@ -36,18 +36,18 @@ promoted as a validator. Here is an overview of all states:
 Kuutamod also exports the state it's currently in through its prometheus API:
 
 ```console
-$ curl --silent http://localhost:2233/metrics | grep -E 'kuutamod_state'
-# HELP kuutamod_state In what state our supervisor statemachine is
-# TYPE kuutamod_state gauge
-kuutamod_state{type="Registering"} 0
-kuutamod_state{type="Shutdown"} 0
-kuutamod_state{type="Startup"} 0
-kuutamod_state{type="Syncing"} 0
-kuutamod_state{type="Validating"} 1
-kuutamod_state{type="Voting"} 0
+$ curl --silent http://localhost:2233/metrics | grep -E 'kneard_state'
+# HELP kneard_state In what state our supervisor statemachine is
+# TYPE kneard_state gauge
+kneard_state{type="Registering"} 0
+kneard_state{type="Shutdown"} 0
+kneard_state{type="Startup"} 0
+kneard_state{type="Syncing"} 0
+kneard_state{type="Validating"} 1
+kneard_state{type="Voting"} 0
 ```
 
-In this case `kuutamod` is in `Validating` state.
+In this case `kneard` is in `Validating` state.
 
 ## State transitions
 
@@ -69,7 +69,7 @@ sequenceDiagram
     Registering->>Startup: '/status' HTTP endpoint not available for 3 uninterrupted calls (one call per second).
     Registering->>Syncing: '/status' HTTP endpoint indicates that neard is syncing
     Registering->>Voting: Consul session successfully created
-    Voting->>Validating: Kuutamod acquired session lock for '/kuutamod-leader/<account_name>' in consul
+    Voting->>Validating: Kuutamod acquired session lock for '/kneard-leader/<account_name>' in consul
     Validating->>Registering: Consul session has expired
     Validating->>Startup: Neard stops
     Validating->>Voting: Session cannot be renewed for 20 seconds

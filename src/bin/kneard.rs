@@ -1,24 +1,24 @@
 //! Consul client implementation
 
 #![deny(missing_docs)]
-//! kuutamod executable
+//! kneard executable
 
 use anyhow::bail;
 use anyhow::Result;
-use kuutamod::commands::spawn_control_server;
-use kuutamod::prometheus::spawn_prometheus_exporter;
-use kuutamod::settings::parse_settings;
-use kuutamod::supervisor::run_supervisor;
+use kneard::commands::spawn_control_server;
+use kneard::prometheus::spawn_prometheus_exporter;
+use kneard::settings::parse_settings;
+use kneard::supervisor::run_supervisor;
 use log::warn;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 
-/// The kuutamod program entry point
+/// The kneard program entry point
 #[tokio::main]
 pub async fn main() -> Result<()> {
     let settings = Arc::new(parse_settings()?);
 
-    if let Err(e) = kuutamod::log_fmt::init(&settings.node_id) {
+    if let Err(e) = kneard::log_fmt::init(&settings.node_id) {
         bail!("Failed to setup logger: {:?}", e);
     };
 

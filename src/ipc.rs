@@ -18,7 +18,7 @@ pub enum Request {
     ///     * a maintainace window of given size,
     ///     * book a block height to shutdown at,
     ///     * cancel previous shutdon setting
-    ///     * shutdown kuutamod after neard shutdown
+    ///     * shutdown kneard after neard shutdown
     ///     + Channel where the supervisor will respond to once the request is finished
     MaintenanceOperation(
         Option<u64>,

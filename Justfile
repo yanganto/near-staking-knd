@@ -34,7 +34,7 @@ lint:
 watch:
   cargo watch
 
-# Run kuutamod integration tests
+# Run kneard integration tests
 test:
   pytest -s tests
 

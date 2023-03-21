@@ -3,7 +3,7 @@
 ## Run a single test
 
 ``` console
-$ just run-test kuutamod
+$ just run-test kneard
 ```
 
 
@@ -12,7 +12,7 @@ $ just run-test kuutamod
 This will open up a repl for interactive debugging
 
 ``` console
-$ just debug-test kuutamod
+$ just debug-test kneard
 # Inside the repl:
 # starts all virtual machines
 >>> start_all()

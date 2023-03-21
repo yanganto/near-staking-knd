@@ -263,7 +263,7 @@ impl NeardProcess {
         None
     }
 
-    /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kuutamod
+    /// Restart by sending terminate signal without update `self.sent_kill` such that it will restart by kneard
     pub async fn restart(pid: Pid) -> Result<()> {
         let mut result = signal::kill(pid, Signal::SIGTERM);
         if result.is_err() {

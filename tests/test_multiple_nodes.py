@@ -8,13 +8,13 @@ from signal import SIGKILL
 
 from command import Command
 from consul import Consul
-from kuutamod import Kuutamod
+from kneard import Kuutamod
 from ports import Ports
 from setup_localnet import NearNetwork
 
 
 def test_multiple_nodes(
-    kuutamod: Path,
+    kneard: Path,
     kuutamoctl: Path,
     command: Command,
     consul: Consul,
@@ -25,12 +25,12 @@ def test_multiple_nodes(
     # near_network.set_artifact_path("/tmp/test.tgz")
 
     # FIXME Just now we use the validator key of genesis node3 for our setup
-    kuutamods = []
+    kneards = []
     for idx in range(2):
-        kuutamods.append(
+        kneards.append(
             Kuutamod.run(
-                neard_home=near_network.home / f"kuutamod{idx}",
-                kuutamod=kuutamod,
+                neard_home=near_network.home / f"kneard{idx}",
+                kneard=kneard,
                 ports=ports,
                 near_network=near_network,
                 command=command,
@@ -43,13 +43,13 @@ def test_multiple_nodes(
     follower = None
     # wait for leader election to take place
     while leader is None:
-        for idx, k in enumerate(kuutamods):
+        for idx, k in enumerate(kneards):
             res = k.metrics()
             print(idx, res)
-            if res.get('kuutamod_state{type="Validating"}') == "1":
-                leader = kuutamods[idx]
-                del kuutamods[idx]
-                follower = kuutamods.pop()
+            if res.get('kneard_state{type="Validating"}') == "1":
+                leader = kneards[idx]
+                del kneards[idx]
+                follower = kneards.pop()
                 break
             time.sleep(0.1)
     proc = leader.execute_command("--json", "active-validator")
@@ -63,9 +63,9 @@ def test_multiple_nodes(
     leader.wait_validator_port()
     follower.wait_voter_port()
 
-    assert len(kuutamods) == 0 and follower is not None
+    assert len(kneards) == 0 and follower is not None
     follower_res = follower.metrics()
-    assert follower_res['kuutamod_state{type="Validating"}'] == "0"
+    assert follower_res['kneard_state{type="Validating"}'] == "0"
 
     assert leader.network_produces_blocks()
     assert follower.network_produces_blocks()
@@ -77,7 +77,7 @@ def test_multiple_nodes(
     start = time.perf_counter()
     while True:
         res = follower.metrics()
-        if res.get('kuutamod_state{type="Validating"}') == "1":
+        if res.get('kneard_state{type="Validating"}') == "1":
             break
         print(res)
         time.sleep(0.1)
@@ -89,7 +89,7 @@ def test_multiple_nodes(
 
     while True:
         res = follower.metrics()
-        if res.get('kuutamod_state{type="Voting"}') == "1":
+        if res.get('kneard_state{type="Voting"}') == "1":
             break
         print(res)
         time.sleep(0.1)
@@ -100,7 +100,7 @@ def test_multiple_nodes(
     start = time.perf_counter()
     while True:
         res = follower.metrics()
-        if res.get('kuutamod_state{type="Validating"}') == "1":
+        if res.get('kneard_state{type="Validating"}') == "1":
             break
         print(res)
         time.sleep(0.1)

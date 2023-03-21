@@ -1,8 +1,8 @@
 import ./lib.nix ({ self, ... }: {
-  name = "single-node-kuutamod";
+  name = "single-node-kneard";
   nodes.server = { ... }: {
     imports = [
-      self.nixosModules.kuutamod
+      self.nixosModules.kneard
       self.nixosModules.neard-mainnet
     ];
 
@@ -18,21 +18,21 @@ import ./lib.nix ({ self, ... }: {
     };
     services.consul.extraConfig.bootstrap_expect = 1;
 
-    kuutamo.kuutamod.validatorKeyFile = ./validator_key.json;
+    kuutamo.kneard.validatorKeyFile = ./validator_key.json;
 
     virtualisation.memorySize = 1024;
-    kuutamo.kuutamod.validatorNodeKeyFile = ./node_key.json;
+    kuutamo.kneard.validatorNodeKeyFile = ./node_key.json;
   };
 
   testScript = ''
     start_all()
-    server.wait_for_unit("kuutamod.service")
+    server.wait_for_unit("kneard.service")
     server.wait_for_unit("consul.service")
     # wait until consul is up
     server.wait_until_succeeds("curl --silent 127.0.0.1:8500/v1/status/leader")
 
-    # kuutamod prometheus endpoint
-    server.wait_until_succeeds("curl --silent http://127.0.0.1:2233/metrics | grep -q 'kuutamod_state{type=\"Syncing\"} 1'")
+    # kneard prometheus endpoint
+    server.wait_until_succeeds("curl --silent http://127.0.0.1:2233/metrics | grep -q 'kneard_state{type=\"Syncing\"} 1'")
     # neard prometheus endpoint
     server.succeed("curl --silent http://127.0.0.1:3030/metrics")
 
@@ -40,7 +40,7 @@ import ./lib.nix ({ self, ... }: {
     server.succeed("[[ ! -f /var/lib/neard/validator_key.json ]]")
     server.succeed("[[ -f /var/lib/neard/node_key.json ]]")
 
-    server.succeed("systemctl stop kuutamod")
+    server.succeed("systemctl stop kneard")
     server.fail("curl --silent http://127.0.0.1:3030/metrics")
     server.succeed("! systemctl is-active neard-manual")
     server.succeed("systemctl start neard-manual")

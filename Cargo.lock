@@ -841,7 +841,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "kuutamod"
+name = "kneard"
 version = "0.1.0"
 dependencies = [
  "anyhow",

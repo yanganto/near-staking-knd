@@ -1,11 +1,11 @@
-//! kuutamoctl - a cli for kuutamod
+//! kuutamoctl - a cli for kneard
 
 #![deny(missing_docs)]
 
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
-use kuutamod::commands::control_commands::{Command, MaintenanceOperationArgs};
-use kuutamod::commands::CommandClient;
+use kneard::commands::control_commands::{Command, MaintenanceOperationArgs};
+use kneard::commands::CommandClient;
 use std::path::PathBuf;
 use std::time::Duration;
 use tokio::net::UnixStream;
@@ -21,7 +21,7 @@ struct Args {
     #[clap(
         long,
         env = "KUUTAMO_CONTROL_SOCKET",
-        default_value = "/var/lib/neard/kuutamod.sock"
+        default_value = "/var/lib/neard/kneard.sock"
     )]
     pub control_socket: PathBuf,
 
@@ -70,7 +70,7 @@ pub async fn main() {
                     .maintenance_operation(minimum_length, shutdown_at, cancel, false)
                     .await;
                 if r.is_ok() && wait {
-                    // Wait for kuutamod to terminate
+                    // Wait for kneard to terminate
                     while UnixStream::connect(&args.control_socket).await.is_ok() {
                         sleep(Duration::from_millis(100)).await
                     }

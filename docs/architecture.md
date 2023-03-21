@@ -1,9 +1,9 @@
 # Architecture
 
-This page describes the minimal needed reference architecture for kuutamod to provide failover.
+This page describes the minimal needed reference architecture for kneard to provide failover.
 In later sections of this document we also describe variants and their tradeoffs.
 
-From a 10,000 foot altitude the architecture of kuutamod looks like this:
+From a 10,000 foot altitude the architecture of kneard looks like this:
 
 ![Reference architecture](reference-architecture.png)
 
@@ -11,7 +11,7 @@ Let's break this down. Kuutamod requires consul to elect the active validator by
 acquiring a [session
 lock](https://www.consul.io/docs/dynamic-app-config/sessions). The active
 validator will receive the validator key of the pool. All other nodes running
-kuutamod + neard become passive validator as depicted without validator key and
+kneard + neard become passive validator as depicted without validator key and
 are kept in sync with the network for faster failover.
 
 In case the active validator crashes or it becomes unavailable the session lock
@@ -23,8 +23,8 @@ case it detect failures.
 
 ## Required number of nodes
 
-TL;DR You will need at least two nodes that run kuutamod + neard and three nodes
-that run consul (consul can be colocated on the nodes that run kuutamod).
+TL;DR You will need at least two nodes that run kneard + neard and three nodes
+that run consul (consul can be colocated on the nodes that run kneard).
 The nodes should be set up in a way that makes it unlikely for them to fail at
 the same time (i.e. same power source, same network switch)
 
@@ -42,7 +42,7 @@ their stake in the future.
 
 To counteract this, we recommend running at least three nodes for consul. Note
 that the third instance can be run as an arbitor node, only with consul and
-without kuutamod+neard. In this case, the hardware requirements for this node
+without kneard+neard. In this case, the hardware requirements for this node
 could be reduced, with the disadvantage that one less possible failover instance
 is available:
 

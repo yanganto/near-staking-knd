@@ -2,15 +2,15 @@
 
 If you are using our NixOS module, you can find all available options at the
 time in the
-[kuutamod](https://github.com/kuutamoaps/kuutamod/blob/main/nix/modules/kuutamod/default.nix)
+[kneard](https://github.com/kuutamoaps/kneard/blob/main/nix/modules/kneard/default.nix)
 module as well as the
-[neard](https://github.com/kuutamoaps/kuutamod/blob/main/nix/modules/neard/default.nix)
-module. If you plan to use kuutamod in other Linux distributions, we also list
+[neard](https://github.com/kuutamoaps/kneard/blob/main/nix/modules/neard/default.nix)
+module. If you plan to use kneard in other Linux distributions, we also list
 here the underlying configuration options here.
 
-kuutamod accepts all options to be either passed via commandline arguments or
+kneard accepts all options to be either passed via commandline arguments or
 via environment variables. Here is a list of all environment variables (you can
-this information also by typing `kuutamod --help`):
+this information also by typing `kneard --help`):
 
 - `KUUTAMO_NODE_ID` (default: node), unique identifier for the current node (used in logging)
 - `KUUTAMO_ACCOUNT_ID` (default: default), NEAR Account id of the validator.
@@ -32,7 +32,7 @@ this information also by typing `kuutamod --help`):
   key should be the same on every host. The voter node key will be used by
   neard while the instance is not the validator.
 
-- `KUUTAMO_NEARD_HOME` (default: `.`): where neard data is located, kuutamod expects neard configuration
+- `KUUTAMO_NEARD_HOME` (default: `.`): where neard data is located, kneard expects neard configuration
   to be set up prior to start.
 - `KUUTAMO_NEARD_BOOTNODES`: (default: None, optional) if provided, neard will
   use these nodes for bootstrapping connection to the network.

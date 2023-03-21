@@ -23,13 +23,13 @@ pub async fn update(
             nixos_rebuild("switch", host, flake, true)?;
         } else {
             nixos_rebuild("build", host, flake, true)?;
-            let r = match timeout_ssh(host, &["systemctl", "disable", "kuutamod"], true) {
+            let r = match timeout_ssh(host, &["systemctl", "disable", "kneard"], true) {
                 Ok(_) => handle_maintenance_shutdown(host, required_time_in_blocks)
                     .await
                     .and_then(|_| nixos_rebuild("switch", host, flake, true)),
                 Err(e) => Err(e),
             };
-            let _ = timeout_ssh(host, &["systemctl", "enable", "kuutamod"], true)?;
+            let _ = timeout_ssh(host, &["systemctl", "enable", "kneard"], true)?;
             r?
         }
     }

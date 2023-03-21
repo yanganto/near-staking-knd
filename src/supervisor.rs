@@ -35,7 +35,7 @@ use tokio::time::{self, Duration, Instant};
 
 lazy_static! {
     static ref STATE: IntGaugeVec = register_int_gauge_vec!(
-        "kuutamod_state",
+        "kneard_state",
         "In what state our supervisor statemachine is",
         &["type"],
     )
@@ -55,7 +55,7 @@ const CONSUL_ACQUIRE_LEADER_FREQUENCY: Duration = Duration::from_secs(1);
 const CONSUL_LEADER_TIMEOUT: Duration = Duration::from_secs(25);
 /// How often we query neard's `/status` endpoint
 const NEARD_STATUS_FREQUENCY: Duration = Duration::from_secs(1);
-/// Shutdown kuutamod if neard shutdown as expected
+/// Shutdown kneard if neard shutdown as expected
 pub static SHUTDOWN_WITH_NEARD: AtomicBool = AtomicBool::new(false);
 
 // When adding states also update `initialize_state_gauge`
