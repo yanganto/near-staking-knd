@@ -256,14 +256,20 @@ fn maintenance_operation(
         ),
         (Some(minimum_length), None) => deploy::utils::timeout_ssh(
             &hosts[0],
-            &["kneard-ctl", action, &minimum_length.to_string()],
+            // TODO:
+            // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
+            &["kuutamoctl", action, &minimum_length.to_string()],
             true,
         )?,
-        (None, None) => deploy::utils::timeout_ssh(&hosts[0], &["kneard-ctl", action], true)?,
+        // TODO:
+        // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
+        (None, None) => deploy::utils::timeout_ssh(&hosts[0], &["kuutamoctl", action], true)?,
         (None, Some(shutdown_at)) => deploy::utils::timeout_ssh(
             &hosts[0],
             &[
-                "kneard-ctl",
+                // TODO:
+                // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
+                "kuutamoctl",
                 action,
                 "--shutdown-at",
                 &shutdown_at.to_string(),

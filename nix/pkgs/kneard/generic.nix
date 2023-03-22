@@ -23,6 +23,11 @@ rustPlatform.buildRustPackage ({
 
   cargoBuildFlags = [ "--bin" "kneard-ctl" "--bin" "kneard" ] ++ additionalBuildFlags;
 
+  # allow rollback from v0.2.* to v0.1.0
+  postInstall = ''
+    ln -s $out/bin/kneard-ctl $out/bin/kuutamoctl
+  '';
+
   doCheck = false;
 
   meta = with lib; {

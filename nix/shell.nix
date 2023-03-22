@@ -57,8 +57,6 @@
             (pkgs.writeShellScriptBin "local-near" ''
               export NEAR_ENV=local
               export NEAR_CLI_LOCALNET_RPC_SERVER_URL=http://localhost:33300
-              # direnv sets PROJ_ROOT
-              exec "${pkgs.nodePackages.near-cli}/bin/near" --keyPath $PROJ_ROOT/src/kneard/.data/near/localnet/owner/validator_key.json "$@"
             '')
           ]
           ++ self'.packages.kneard.buildInputs;
