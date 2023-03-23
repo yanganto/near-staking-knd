@@ -10,8 +10,8 @@ let
   };
 in
 generic {
-  ver = "1.32.0";
-  sha256 = "sha256-FBpHxb92cM59fRBxPpzOCaZ308yMnFES0mB/fgrkgWc=";
-  cargoSha256 = "sha256-tKt98TpuibJsABr4r0Xi4SiCRlu7xj+XbkZHvMq0Zio=";
+  ver = "1.32.1";
+  sha256 = "sha256-TlgEjTQmG8qst+xy0ES1dGXyJNIytFq/f2S6c8eM63U=";
+  cargoSha256 = "sha256-m9kvFsQeSJaHHQ074kszDhp8M9DaqUKDk3oV6STpcnE=";
   inherit toolchainFile toolchainChecksum toolchain neardPatches revisionNumber;
 }
