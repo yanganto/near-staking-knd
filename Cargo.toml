@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 tempfile = "3"
 reqwest = { version = "0.11.14", features = ["json"], default-features = false }
-anyhow = "1.0.69"
+anyhow = "1.0.70"
 tokio = { version = "1.26.0", features = ["full"] }
 hyperlocal = "0.8"
 futures-util = "0.3.27"
@@ -16,13 +16,13 @@ hyper = { version = "0.14.25", features = [ "server" ] }
 prometheus = "0.13.3"
 lazy_static = "1.4.0"
 nix = "0.26.2"
-serde = { version = "1.0.155", features = ["derive"] }
+serde = { version = "1.0.157", features = ["derive"] }
 serde_derive = "1.0.151"
-toml = "0.7.2"
+toml = "0.7.3"
 serde_json = "1.0.94"
 near-primitives = "0.15.0"
 log = { version = "0.4.17", features = ["std"] }
-clap = { version = "4.1.8", features = ["derive", "env"] }
+clap = { version = "4.1.11", features = ["derive", "env"] }
 regex = "1"
 ctrlc = { version = "3.2", features = ["termination"] }
 zip = { version = "0.6.4", default-features = false, features = ["aes-crypto", "deflate"] }
@@ -30,8 +30,8 @@ zip = { version = "0.6.4", default-features = false, features = ["aes-crypto", "
 format_serde_error = { version = "0.3.0", features = [ "colored", "serde_json" ], default-features = false, git = "https://github.com/AlexanderThaller/format_serde_error" }
 
 [[bin]]
-name = "kuutamod"
-path = "src/bin/kuutamod.rs"
+name = "kneard-mgr"
+path = "src/bin/kneard-mgr.rs"
 
 [[bin]]
 name = "kuutamoctl"

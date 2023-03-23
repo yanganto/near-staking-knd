@@ -1,12 +1,8 @@
-{ makeTest'
-, nixosModules
-}:
-makeTest'
-{
+(import ./lib.nix) ({ self, ... }: {
   name = "neard";
   nodes.server = { ... }: {
     imports = [
-      nixosModules.neard-mainnet
+      self.nixosModules.neard-mainnet
     ];
   };
 
@@ -19,4 +15,4 @@ makeTest'
     server.succeed("[[ -f /var/lib/neard/validator_key.json ]]")
     server.succeed("[[ -f /var/lib/neard/node_key.json ]]")
   '';
-}
+})

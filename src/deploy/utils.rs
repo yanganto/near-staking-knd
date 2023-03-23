@@ -3,7 +3,6 @@ use anyhow::{Context, Result};
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
-use tokio::io::stdout;
 use tokio::io::AsyncWriteExt;
 use tokio::time::sleep;
 
@@ -59,40 +58,37 @@ async fn watch_maintenance_status(host: &Host, flag: &AtomicBool) {
     while flag.load(Ordering::Relaxed) {
         sleep(Duration::from_secs(1)).await;
         if let Ok(output) = timeout_ssh(host, &["kuutamoctl", "maintenance-status"], true) {
-            let _ = stdout().write_all(&output.stdout).await;
+            let _ = tokio::io::stdout().write_all(&output.stdout).await;
         }
     }
 }
 
 /// Keep printing maintenance status before maintenance shutdown
-pub async fn handle_maintenance_shutdown(
-    host: &Host,
-    required_time_in_blocks: Option<u64>,
-) -> Result<()> {
+pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u64) -> Result<()> {
     let flag = AtomicBool::new(true);
-    let shutdown_cmd = if let Some(blocks) = required_time_in_blocks {
-        async_timeout_ssh(
+
+    tokio::select! {
+        _ = watch_maintenance_status(host, &flag) => (),
+        r = async_timeout_ssh(
             host,
             vec![
                 "kuutamoctl".into(),
                 "maintenance-shutdown".into(),
-                blocks.to_string(),
+                "--wait".to_string(),
+                required_time_in_blocks.to_string(),
             ],
             true,
-        )
-    } else {
-        async_timeout_ssh(
-            host,
-            vec!["kuutamoctl".into(), "maintenance-shutdown".into()],
-            true,
-        )
-    };
-
-    tokio::select! {
-        _ = watch_maintenance_status(host, &flag) => (),
-        r = shutdown_cmd => {
+        ) => {
             flag.store(false, Ordering::Relaxed);
-            let _ = stdout().write_all(&r?.stdout).await;
+            let Output{stdout, stderr, status} = r?;
+            let _ = tokio::io::stdout().write_all(&stdout).await;
+            if status.success() {
+                println!("maintenance shutdown complete");
+            }
+            else {
+                let _ = tokio::io::stderr().write_all(&stderr).await;
+                anyhow::bail!("could not execute maintenance shutdown")
+            }
         }
     }
     Ok(())

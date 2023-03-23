@@ -13,7 +13,7 @@ pub async fn update(
     hosts: &[Host],
     flake: &NixosFlake,
     immediately: bool,
-    required_time_in_blocks: Option<u64>,
+    required_time_in_blocks: u64,
 ) -> Result<()> {
     flake.show()?;
     for host in hosts.iter() {

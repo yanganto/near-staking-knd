@@ -11,8 +11,8 @@ let
   };
 in
 generic {
-  ver = "1.32.0-rc.1";
-  sha256 = "sha256-wFNrDlBC8C3FSjTTXKCAIha+Y0Y0tB7FN/gDMI8LRsU=";
-  cargoSha256 = "sha256-HSJ4LPYzOesj3K2OXoABD1zAFafu39XJjtBMcPB6a94=";
+  ver = "1.32.0-rc.2";
+  sha256 = "sha256-n88pQCjyqscVTSLfr46w7gRT6uqb9iv2ln0h8NBuASc=";
+  cargoSha256 = "sha256-r+3yncOjA3eYEqbxMrX7ykWZijsnBHSUNJSNvbrQ6FI=";
   inherit toolchainFile toolchainChecksum toolchain;
 }

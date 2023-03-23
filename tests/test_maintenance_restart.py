@@ -33,7 +33,6 @@ def test_maintenance_restart(
     near_network: NearNetwork,
     ports: Ports,
 ) -> None:
-
     kuutamods = []
     for idx in range(2):
         kuutamods.append(
@@ -126,8 +125,8 @@ def test_maintenance_restart(
                 if (
                     res.get("near_block_expected_shutdown")
                     == "0"  # no block height for shutdown
-                    and res.get("near_dynamic_config_changes")
-                    == "2"  # the second time dynamic config change
+                    and res.get("near_config_reloads_total")
+                    == "3"  # the second time dynamic config change
                 ):
                     break
             except (ConnectionRefusedError, ConnectionResetError):
@@ -136,7 +135,7 @@ def test_maintenance_restart(
         else:
             assert (
                 res.get("near_block_expected_shutdown") == "0"
-                or res.get("near_dynamic_config_changes") == "2"
+                and res.get("near_config_reloads_total") == "3"
             )
 
         proc = leader.execute_command("maintenance-status")
@@ -144,7 +143,6 @@ def test_maintenance_restart(
         assert "no maintenance setting now" in proc.stdout
 
     with Section("test maintenance restart on leader"):
-
         proc = leader.execute_command(
             "maintenance-restart",
             "1",  # Use one block window for maintenance restart in test

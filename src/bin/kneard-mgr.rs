@@ -56,11 +56,13 @@ struct UpdateArgs {
     #[clap(long)]
     immediately: bool,
 
-    /// If not immediately, please specify time in blocks to copy the binary files for updating.
-    /// It takes 1~2 seconds for a near block.
+    /// If not immediately, please specify time in blocks to update, it takes 1~2 seconds for a near block.
+    /// For active-passive pairs, the time needs to cover switching nodes.
+    /// For single nodes, the time need to cover copy binaries.
     /// If 0 or not provided, kuutamo will try to update in the longest maintenance window in the current epoch,
     /// but it can not guarantee the  maintenance window is enough.
-    required_time_in_blocks: Option<u64>,
+    #[clap(default_value = "0")]
+    required_time_in_blocks: u64,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -73,11 +75,13 @@ struct RollbackArgs {
     #[clap(long)]
     immediately: bool,
 
-    /// If not immediately, please specify time in blocks to copy the binary files for rolling back.
-    /// It takes 1~2 seconds for a near block.
+    /// If not immediately, please specify time in blocks to rollback, it takes 1~2 seconds for a near block.
+    /// For active-passive pairs, the time needs to cover switching nodes.
+    /// For single nodes, the time need to cover copy binaries.
     /// If 0 or not provided, kuutamo will try to rollback in the longest maintenance window in the current epoch,
     /// but it can not guarantee the  maintenance window is enough.
-    required_time_in_blocks: Option<u64>,
+    #[clap(default_value = "0")]
+    required_time_in_blocks: u64,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -293,7 +297,7 @@ pub async fn main() -> Result<()> {
     })?;
     let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
 
-    if let Err(e) = match args.action {
+    let res = match args.action {
         Command::GenerateConfig(ref config_args) => {
             generate_config(&args, config_args, &config, &flake)
         }
@@ -308,8 +312,6 @@ pub async fn main() -> Result<()> {
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
         Command::MaintenanceRestart(ref args) => maintenance_operation(args, true, &config),
         Command::MaintenanceShutdown(ref args) => maintenance_operation(args, false, &config),
-    } {
-        bail!("kuutamo failed doing {:?}: {e}", args.action);
-    }
-    Ok(())
+    };
+    res.with_context(|| format!("kuutamo failed doing {:?}", args.action))
 }

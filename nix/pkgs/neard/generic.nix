@@ -1,6 +1,5 @@
 { fetchFromGitHub
 , fetchurl
-, fetchpatch
 , zlib
 , openssl
 , pkg-config
@@ -44,34 +43,9 @@ rustPlatform.buildRustPackage rec {
   cargoPatches = [
     # Remove test dependency on contract
     # Since we are not building tests, we can skip those.
-    (
-      lib.optional (lib.versionOlder version "1.32.0") (
-        ./0001-rm-near-test-contracts.patch
-      )
-    )
-    (
-      lib.optional (lib.versionAtLeast version "1.32.0") (
-        ./0001-rm-near-test-contracts-1.32.patch
-      )
-    )
-
+    ./0001-rm-near-test-contracts-1.32.patch
     ./0002-rocksdb-max-open.patch
-
-    (
-      lib.optional (lib.versionOlder version "1.32.0") (
-        fetchpatch
-          {
-            name = "maintenance_patch-1.31.0-rc.5";
-            url = "https://github.com/kuutamolabs/nearcore/commit/e045bee17716140e53dcb53bcae43bc4f3c4d8d7.patch";
-            sha256 = "sha256-fKX+LvASNa0FR97qquUxIDXv91KKYKMaKRTNPuQF41w=";
-          }
-      )
-    )
-    (
-      lib.optional (lib.versionAtLeast version "1.32.0") (
-        ./0003-expected-shutdown-metrix.patch
-      )
-    )
+    ./0003-expected-shutdown-metrix.patch
   ];
 
   passthru = {

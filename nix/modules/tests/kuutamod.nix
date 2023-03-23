@@ -1,10 +1,9 @@
-{ makeTest', nixosModules }:
-makeTest' {
+import ./lib.nix ({ self, ... }: {
   name = "single-node-kuutamod";
   nodes.server = { ... }: {
     imports = [
-      nixosModules.kuutamod
-      nixosModules.neard-mainnet
+      self.nixosModules.kuutamod
+      self.nixosModules.neard-mainnet
     ];
 
     services.consul.interface.bind = "eth0";
@@ -50,4 +49,4 @@ makeTest' {
     server.succeed("[[ -f /var/lib/neard/validator_key.json ]]")
     server.succeed("[[ -f /var/lib/neard/node_key.json ]]")
   '';
-}
+})

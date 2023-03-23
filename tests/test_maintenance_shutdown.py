@@ -60,22 +60,21 @@ def test_maintenance_shutdown_metrics(
         for i in range(150):
             try:
                 res = leader.neard_metrics()
-                if res.get("near_block_expected_shutdown") == "1000" and (
-                    res.get("near_dynamic_config_changes") == "1"
-                    or res.get("near_config_reloads_total") == "2"
-                ):  # the first time dynamic config change
+                if (
+                    res.get("near_block_expected_shutdown") == "1000"
+                    and res.get("near_config_reloads_total") == "2"
+                ):
                     break
             except (ConnectionRefusedError, ConnectionResetError):
                 pass
             time.sleep(0.1)
         else:
-            assert res.get("near_block_expected_shutdown") == "1000" and (
-                res.get("near_dynamic_config_changes") == "1"
-                or res.get("near_config_reloads_total") == "2"
+            assert (
+                res.get("near_block_expected_shutdown") == "1000"
+                and res.get("near_config_reloads_total") == "2"
             )
 
     with Section("test maintenance status for shutdown"):
-
         proc = leader.execute_command("maintenance-status")
         log_note(proc.stdout)
         assert "shutdown" in proc.stdout
@@ -95,20 +94,20 @@ def test_maintenance_shutdown_metrics(
         for i in range(150):
             try:
                 res = leader.neard_metrics()
-                if res.get(
-                    "near_block_expected_shutdown"
-                ) == "0" and (  # no block height for shutdown
-                    res.get("near_dynamic_config_changes") == "2"
-                    or res.get("near_config_reloads_total") == "3"
-                ):  # the second time dynamic config change
+                # no block height for shutdown; and
+                # the second time dynamic config change
+                if (
+                    res.get("near_block_expected_shutdown") == "0"
+                    and res.get("near_config_reloads_total") == "3"
+                ):
                     break
             except (ConnectionRefusedError, ConnectionResetError):
                 pass
             time.sleep(0.1)
         else:
-            assert res.get("near_block_expected_shutdown") == "0" and (
-                res.get("near_dynamic_config_changes") == "2"
-                or res.get("near_config_reloads_total") == "3"
+            assert (
+                res.get("near_block_expected_shutdown") == "0"
+                and res.get("near_config_reloads_total") == "3"
             )
 
         proc = leader.execute_command("maintenance-status")
@@ -121,12 +120,9 @@ def test_maintenance_shutdown_metrics(
 
         proc = leader.execute_command(
             "maintenance-shutdown",
+            "--wait",
             "1",  # Use one block window for maintenance shutdown in test
         )
         assert proc.returncode == 0
-        for i in range(100):
-            if not leader:
-                break
-            time.sleep(0.1)
-        else:
-            assert not leader
+        assert "shutdown at block height:" in proc.stdout
+        assert not leader
