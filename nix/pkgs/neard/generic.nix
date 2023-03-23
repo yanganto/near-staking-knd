@@ -91,6 +91,9 @@ rustPlatform.buildRustPackage rec {
     toolchain
   ];
 
+  # FIXME: Drop after normal update.
+  rebuildTrigger = 1;
+
   LIBCLANG_PATH = "${llvmPackages.libclang.lib}/lib";
   BINDGEN_EXTRA_CLANG_ARGS = "-isystem ${llvmPackages.libclang.lib}/lib/clang/${lib.getVersion llvmPackages.clang}/include";
 
