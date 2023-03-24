@@ -23,6 +23,7 @@ in
     kuutamo.kuutamod.publicAddress = cfg.ipv6_address or cfg.ipv4_address;
 
     kuutamo.network.macAddress = cfg.mac_address or null;
+    kuutamo.network.interface = cfg.interface;
 
     kuutamo.network.ipv4.address = cfg.ipv4_address;
     kuutamo.network.ipv4.gateway = cfg.ipv4_gateway;
