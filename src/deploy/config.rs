@@ -129,6 +129,8 @@ struct HostConfig {
     #[serde(default)]
     pub mac_address: Option<String>,
     #[serde(default)]
+    pub interface: Option<String>,
+    #[serde(default)]
     ipv6_address: Option<IpV6String>,
     #[serde(default)]
     ipv6_gateway: Option<IpAddr>,
@@ -185,6 +187,8 @@ pub struct Host {
 
     /// Mac address of the public interface to use
     pub mac_address: Option<String>,
+    /// interface to use
+    pub interface: Option<String>,
 
     /// Public ipv4 address of the host
     pub ipv4_address: IpAddr,
@@ -286,6 +290,19 @@ fn validate_host(
         let mac_address_regex = Regex::new(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$").unwrap();
         if !mac_address_regex.is_match(a) {
             bail!("mac address does match a valid format: {} (valid example value: 02:42:34:d1:18:7a)", a);
+        }
+        Some(a.clone())
+    } else {
+        None
+    };
+
+    let interface = if let Some(ref a) = &host.interface {
+        let interface_regex = Regex::new(r"^[0-9a-z]*$").unwrap();
+        if !interface_regex.is_match(a) {
+            bail!(
+                "interface match a valid format: {} (valid example value: enp1s0f0)",
+                a
+            );
         }
         Some(a.clone())
     } else {
@@ -475,6 +492,7 @@ fn validate_host(
         install_ssh_user,
         ssh_hostname,
         mac_address,
+        interface,
         ipv4_address,
         ipv4_cidr,
         ipv4_gateway,
@@ -774,6 +792,7 @@ fn test_validate_host() {
             nixos_module: "single-node-validator-mainnet".to_string(),
             extra_nixos_modules: Vec::new(),
             mac_address: None,
+            interface: None,
             ipv4_address: "192.168.0.1".parse::<IpAddr>().unwrap(),
             ipv4_cidr: 0,
             ipv4_gateway: "192.168.255.255".parse::<IpAddr>().unwrap(),
