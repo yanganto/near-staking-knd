@@ -129,6 +129,8 @@ struct HostConfig {
     #[serde(default)]
     pub mac_address: Option<String>,
     #[serde(default)]
+    pub interface: Option<String>,
+    #[serde(default)]
     ipv6_address: Option<IpV6String>,
     #[serde(default)]
     ipv6_gateway: Option<IpAddr>,
@@ -185,6 +187,8 @@ pub struct Host {
 
     /// Mac address of the public interface to use
     pub mac_address: Option<String>,
+    /// interface to use
+    pub interface: String,
 
     /// Public ipv4 address of the host
     pub ipv4_address: IpAddr,
@@ -291,6 +295,24 @@ fn validate_host(
     } else {
         None
     };
+
+    let maybe_interface = host.interface.as_deref().or(default.interface.as_deref());
+    if mac_address.is_some() && maybe_interface.is_some() {
+        bail!(
+            "Either mac_address or interface (not both) must be provided for host.{}",
+            name
+        );
+    }
+    let default_interface = "eth0";
+
+    let interface = maybe_interface.unwrap_or(default_interface).to_string();
+    let interface_regex = Regex::new(r"^[0-9a-z]*$").unwrap();
+    if !interface_regex.is_match(&interface) {
+        bail!(
+            "interface match a valid format: {} (valid example value: enp1s0f0)",
+            &interface
+        );
+    }
 
     let ipv4_address = host
         .ipv4_address
@@ -475,6 +497,7 @@ fn validate_host(
         install_ssh_user,
         ssh_hostname,
         mac_address,
+        interface,
         ipv4_address,
         ipv4_cidr,
         ipv4_gateway,
@@ -774,6 +797,7 @@ fn test_validate_host() {
             nixos_module: "single-node-validator-mainnet".to_string(),
             extra_nixos_modules: Vec::new(),
             mac_address: None,
+            interface: "eth0".to_string(),
             ipv4_address: "192.168.0.1".parse::<IpAddr>().unwrap(),
             ipv4_cidr: 0,
             ipv4_gateway: "192.168.255.255".parse::<IpAddr>().unwrap(),
