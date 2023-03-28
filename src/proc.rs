@@ -25,7 +25,7 @@ const NEARD_STOP_TIMEOUT: Duration = Duration::from_secs(60);
 
 lazy_static! {
     static ref NEARD_RESTARTS: IntCounter = register_int_counter!(
-        "kneard_neard_restarts",
+        "kuutamod_neard_restarts",
         "How often neard has been restarted"
     )
     .unwrap();

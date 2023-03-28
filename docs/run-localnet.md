@@ -85,25 +85,25 @@ You can check if it becomes a validator by running the command `curl`.
 
 ```console
 $ curl http://localhost:2233/metrics
-# HELP kneard_neard_restarts How often neard has been restarted
-# TYPE kneard_neard_restarts counter
-kneard_neard_restarts 1
-# HELP kneard_state In what state our supervisor statemachine is
-# TYPE kneard_state gauge
-kneard_state{type="Registering"} 0
-kneard_state{type="Shutdown"} 0
-kneard_state{type="Startup"} 0
-kneard_state{type="Syncing"} 0
-kneard_state{type="Validating"} 1
-kneard_state{type="Voting"} 0
-# HELP kneard_uptime Time in milliseconds how long daemon is running
-# TYPE kneard_uptime gauge
-kneard_uptime 81917
+# HELP kuutamod_neard_restarts How often neard has been restarted
+# TYPE kuutamod_neard_restarts counter
+kuutamod_neard_restarts 1
+# HELP kuutamod_state In what state our supervisor statemachine is
+# TYPE kuutamod_state gauge
+kuutamod_state{type="Registering"} 0
+kuutamod_state{type="Shutdown"} 0
+kuutamod_state{type="Startup"} 0
+kuutamod_state{type="Syncing"} 0
+kuutamod_state{type="Validating"} 1
+kuutamod_state{type="Voting"} 0
+# HELP kuutamod_uptime Time in milliseconds how long daemon is running
+# TYPE kuutamod_uptime gauge
+kuutamod_uptime 81917
 ```
 
 This retrieves data from the [prometheus](https://prometheus.io/) monitoring endpoint of kneard.
 
-The line `kneard_state{type="Validating"} 1` indicates that `kneard` has set
+The line `kuutamod_state{type="Validating"} 1` indicates that `kneard` has set
 up neard as a validator, as you can also see from the neard home directory:
 
 ```console
@@ -142,17 +142,17 @@ already another kneard instance registered:
 
 ```
 $ curl http://localhost:2234/metrics
-# HELP kneard_state In what state our supervisor statemachine is
-# TYPE kneard_state gauge
-kneard_state{type="Registering"} 0
-kneard_state{type="Shutdown"} 0
-kneard_state{type="Startup"} 0
-kneard_state{type="Syncing"} 0
-kneard_state{type="Validating"} 0
-kneard_state{type="Voting"} 1
-# HELP kneard_uptime Time in milliseconds how long daemon is running
-# TYPE kneard_uptime gauge
-kneard_uptime 10412
+# HELP kuutamod_state In what state our supervisor statemachine is
+# TYPE kuutamod_state gauge
+kuutamod_state{type="Registering"} 0
+kuutamod_state{type="Shutdown"} 0
+kuutamod_state{type="Startup"} 0
+kuutamod_state{type="Syncing"} 0
+kuutamod_state{type="Validating"} 0
+kuutamod_state{type="Voting"} 1
+# HELP kuutamod_uptime Time in milliseconds how long daemon is running
+# TYPE kuutamod_uptime gauge
+kuutamod_uptime 10412
 ```
 
 If we look at its neard home directory we can also see that no validator key is
@@ -201,20 +201,20 @@ This currently requires a restart of `neard` so that it loads the `validator nod
 
 ```
 $ curl http://localhost:2234/metrics
-# HELP kneard_neard_restarts How often neard has been restarted
-# TYPE kneard_neard_restarts counter
-kneard_neard_restarts 1
-# HELP kneard_state In what state our supervisor statemachine is
-# TYPE kneard_state gauge
-kneard_state{type="Registering"} 0
-kneard_state{type="Shutdown"} 0
-kneard_state{type="Startup"} 0
-kneard_state{type="Syncing"} 0
-kneard_state{type="Validating"} 1
-kneard_state{type="Voting"} 0
-# HELP kneard_uptime Time in milliseconds how long daemon is running
-# TYPE kneard_uptime gauge
-kneard_uptime 43610
+# HELP kuutamod_neard_restarts How often neard has been restarted
+# TYPE kuutamod_neard_restarts counter
+kuutamod_neard_restarts 1
+# HELP kuutamod_state In what state our supervisor statemachine is
+# TYPE kuutamod_state gauge
+kuutamod_state{type="Registering"} 0
+kuutamod_state{type="Shutdown"} 0
+kuutamod_state{type="Startup"} 0
+kuutamod_state{type="Syncing"} 0
+kuutamod_state{type="Validating"} 1
+kuutamod_state{type="Voting"} 0
+# HELP kuutamod_uptime Time in milliseconds how long daemon is running
+# TYPE kuutamod_uptime gauge
+kuutamod_uptime 43610
 ```
 
 ```

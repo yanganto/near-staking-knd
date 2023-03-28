@@ -159,17 +159,17 @@ went well, you should be able to reach kneard's prometheus exporter url:
 
 ```console
 $ curl http://localhost:2233/metrics
-# HELP kneard_state In what state our supervisor statemachine is
-# TYPE kneard_state gauge
-kneard_state{type="Registering"} 0
-kneard_state{type="Shutdown"} 0
-kneard_state{type="Startup"} 0
-kneard_state{type="Syncing"} 1
-kneard_state{type="Validating"} 0
-kneard_state{type="Voting"} 0
-# HELP kneard_uptime Time in milliseconds how long daemon is running
-# TYPE kneard_uptime gauge
-kneard_uptime 3447978
+# HELP kuutamod_state In what state our supervisor statemachine is
+# TYPE kuutamod_state gauge
+kuutamod_state{type="Registering"} 0
+kuutamod_state{type="Shutdown"} 0
+kuutamod_state{type="Startup"} 0
+kuutamod_state{type="Syncing"} 1
+kuutamod_state{type="Validating"} 0
+kuutamod_state{type="Voting"} 0
+# HELP kuutamod_uptime Time in milliseconds how long daemon is running
+# TYPE kuutamod_uptime gauge
+kuutamod_uptime 3447978
 ```
 
 Once neard is synced with the network, you should see a kneard listed as an active validator using `kneard-ctl`:

@@ -71,7 +71,7 @@ def test_single_node(
         wait_for_port("127.0.0.1", voter_port, proc=proc)
         while True:
             res = query_prometheus_endpoint("127.0.0.1", exporter_port)
-            if res.get('kneard_state{type="Validating"}') == "1":
+            if res.get('kuutamod_state{type="Validating"}') == "1":
                 break
             time.sleep(0.1)
 
@@ -82,14 +82,14 @@ def test_single_node(
         time.sleep(5)  # it should stay master at this point
         res = query_prometheus_endpoint("127.0.0.1", exporter_port)
         # only one needed restart to get into validator state
-        assert res.get("kneard_neard_restarts") == "1"
-        assert int(res.get("kneard_uptime", "0")) > 0
-        assert res.get('kneard_state{type="Validating"}') == "1"
-        assert res.get('kneard_state{type="Registering"}') == "0"
-        assert res.get('kneard_state{type="Shutdown"}') == "0"
-        assert res.get('kneard_state{type="Startup"}') == "0"
-        assert res.get('kneard_state{type="Syncing"}') == "0"
-        assert res.get('kneard_state{type="Voting"}') == "0"
+        assert res.get("kuutamod_neard_restarts") == "1"
+        assert int(res.get("kuutamod_uptime", "0")) > 0
+        assert res.get('kuutamod_state{type="Validating"}') == "1"
+        assert res.get('kuutamod_state{type="Registering"}') == "0"
+        assert res.get('kuutamod_state{type="Shutdown"}') == "0"
+        assert res.get('kuutamod_state{type="Startup"}') == "0"
+        assert res.get('kuutamod_state{type="Syncing"}') == "0"
+        assert res.get('kuutamod_state{type="Voting"}') == "0"
     finally:
         # terminate kneard -> neard properly so we can cleanup the temporary directory
         proc.send_signal(signal.SIGTERM)

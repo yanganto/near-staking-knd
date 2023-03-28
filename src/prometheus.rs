@@ -14,7 +14,7 @@ use crate::proc::get_neard_pid;
 lazy_static! {
     static ref START: Instant = Instant::now();
     static ref UPTIME: Gauge = register_gauge!(
-        "kneard_uptime",
+        "kuutamod_uptime",
         "Time in milliseconds how long daemon is running"
     )
     .unwrap();

@@ -32,7 +32,7 @@ import ./lib.nix ({ self, ... }: {
     server.wait_until_succeeds("curl --silent 127.0.0.1:8500/v1/status/leader")
 
     # kneard prometheus endpoint
-    server.wait_until_succeeds("curl --silent http://127.0.0.1:2233/metrics | grep -q 'kneard_state{type=\"Syncing\"} 1'")
+    server.wait_until_succeeds("curl --silent http://127.0.0.1:2233/metrics | grep -q 'kuutamod_state{type=\"Syncing\"} 1'")
     # neard prometheus endpoint
     server.succeed("curl --silent http://127.0.0.1:3030/metrics")
 

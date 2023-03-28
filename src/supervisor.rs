@@ -35,7 +35,7 @@ use tokio::time::{self, Duration, Instant};
 
 lazy_static! {
     static ref STATE: IntGaugeVec = register_int_gauge_vec!(
-        "kneard_state",
+        "kuutamod_state",
         "In what state our supervisor statemachine is",
         &["type"],
     )

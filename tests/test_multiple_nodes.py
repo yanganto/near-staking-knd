@@ -46,7 +46,7 @@ def test_multiple_nodes(
         for idx, k in enumerate(kneards):
             res = k.metrics()
             print(idx, res)
-            if res.get('kneard_state{type="Validating"}') == "1":
+            if res.get('kuutamod_state{type="Validating"}') == "1":
                 leader = kneards[idx]
                 del kneards[idx]
                 follower = kneards.pop()
@@ -65,7 +65,7 @@ def test_multiple_nodes(
 
     assert len(kneards) == 0 and follower is not None
     follower_res = follower.metrics()
-    assert follower_res['kneard_state{type="Validating"}'] == "0"
+    assert follower_res['kuutamod_state{type="Validating"}'] == "0"
 
     assert leader.network_produces_blocks()
     assert follower.network_produces_blocks()
@@ -77,7 +77,7 @@ def test_multiple_nodes(
     start = time.perf_counter()
     while True:
         res = follower.metrics()
-        if res.get('kneard_state{type="Validating"}') == "1":
+        if res.get('kuutamod_state{type="Validating"}') == "1":
             break
         print(res)
         time.sleep(0.1)
@@ -89,7 +89,7 @@ def test_multiple_nodes(
 
     while True:
         res = follower.metrics()
-        if res.get('kneard_state{type="Voting"}') == "1":
+        if res.get('kuutamod_state{type="Voting"}') == "1":
             break
         print(res)
         time.sleep(0.1)
@@ -100,7 +100,7 @@ def test_multiple_nodes(
     start = time.perf_counter()
     while True:
         res = follower.metrics()
-        if res.get('kneard_state{type="Validating"}') == "1":
+        if res.get('kuutamod_state{type="Validating"}') == "1":
             break
         print(res)
         time.sleep(0.1)

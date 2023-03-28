@@ -36,15 +36,15 @@ promoted as a validator. Here is an overview of all states:
 Kuutamod also exports the state it's currently in through its prometheus API:
 
 ```console
-$ curl --silent http://localhost:2233/metrics | grep -E 'kneard_state'
-# HELP kneard_state In what state our supervisor statemachine is
-# TYPE kneard_state gauge
-kneard_state{type="Registering"} 0
-kneard_state{type="Shutdown"} 0
-kneard_state{type="Startup"} 0
-kneard_state{type="Syncing"} 0
-kneard_state{type="Validating"} 1
-kneard_state{type="Voting"} 0
+$ curl --silent http://localhost:2233/metrics | grep -E 'kuutamod_state'
+# HELP kuutamod_state In what state our supervisor statemachine is
+# TYPE kuutamod_state gauge
+kuutamod_state{type="Registering"} 0
+kuutamod_state{type="Shutdown"} 0
+kuutamod_state{type="Startup"} 0
+kuutamod_state{type="Syncing"} 0
+kuutamod_state{type="Validating"} 1
+kuutamod_state{type="Voting"} 0
 ```
 
 In this case `kneard` is in `Validating` state.

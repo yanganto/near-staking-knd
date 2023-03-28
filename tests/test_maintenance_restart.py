@@ -54,7 +54,7 @@ def test_maintenance_restart(
         while leader is None:
             for idx, k in enumerate(kneards):
                 res = k.metrics()
-                if res.get('kneard_state{type="Validating"}') == "1":
+                if res.get('kuutamod_state{type="Validating"}') == "1":
                     log_note(f"leader is kuutamo{idx}")
                     leader = kneards[idx]
                     del kneards[idx]
@@ -75,7 +75,7 @@ def test_maintenance_restart(
 
         assert len(kneards) == 0 and follower is not None
         follower_res = follower.metrics()
-        assert follower_res['kneard_state{type="Validating"}'] == "0"
+        assert follower_res['kuutamod_state{type="Validating"}'] == "0"
 
     with Section("test maintenance restart on follower"):
         follower.wait_rpc_port()

@@ -36,7 +36,7 @@ def test_maintenance_shutdown_metrics(
         while True:
             try:
                 res = leader.metrics()
-                if res.get('kneard_state{type="Validating"}') == "1":
+                if res.get('kuutamod_state{type="Validating"}') == "1":
                     break
             except (ConnectionRefusedError, ConnectionResetError):
                 pass
