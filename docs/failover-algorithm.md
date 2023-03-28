@@ -69,7 +69,7 @@ sequenceDiagram
     Registering->>Startup: '/status' HTTP endpoint not available for 3 uninterrupted calls (one call per second).
     Registering->>Syncing: '/status' HTTP endpoint indicates that neard is syncing
     Registering->>Voting: Consul session successfully created
-    Voting->>Validating: Kuutamod acquired session lock for '/kneard-leader/<account_name>' in consul
+    Voting->>Validating: Kuutamod acquired session lock for '/kuutamod-leader/<account_name>' in consul
     Validating->>Registering: Consul session has expired
     Validating->>Startup: Neard stops
     Validating->>Voting: Session cannot be renewed for 20 seconds

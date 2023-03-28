@@ -4,5 +4,5 @@
 
 /// Consul key used for leadership election
 pub fn consul_leader_key(account_name: &str) -> String {
-    format!("kneard-leader/{account_name}")
+    format!("kuutamod-leader/{account_name}")
 }

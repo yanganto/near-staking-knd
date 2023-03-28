@@ -87,7 +87,7 @@ impl fmt::Display for ConsulError {
 /// [
 ///   {
 ///     "LockIndex": 1,
-///     "Key": "kneard-leader",
+///     "Key": "kuutamod-leader",
 ///     "Flags": 0,
 ///     "Value": "eyJIb3N0bmFtZSI6ImV2ZSIsIk5vZGVQdWJsaWNLZXkiOiJlZDI1NTE5OjdxZ1JhTlI5Z2ZXcVpTejVIc1NHOFhMRlR2ZFcxTHRaRmZqMnJ5RVlFRk5XIiwiTm9kZUlkIjoia3V1dGFtb2QwIn0=",
 ///     "Session": "bb8c1bc7-cc43-d20a-db4b-b1ecdc7f5572",
@@ -98,7 +98,7 @@ impl fmt::Display for ConsulError {
 /// This is an expired session:
 /// [{
 ///    "LockIndex": 1,
-///    "Key": "kneard-leader",
+///    "Key": "kuutamod-leader",
 ///    "Flags": 0,
 ///    "Value": "eyJIb3N0bmFtZSI6ImV2ZSIsIk5vZGVQdWJsaWNLZXkiOiJlZDI1NTE5OjdxZ1JhTlI5Z2ZXcVpTejVIc1NHOFhMRlR2ZFcxTHRaRmZqMnJ5RVlFRk5XIiwiTm9kZUlkIjoia3V1dGFtb2QwIn0=",
 ///    "CreateIndex": 8,
