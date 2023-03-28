@@ -159,7 +159,7 @@ $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet>/
 $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet>/node_key.json /var/lib/secrets/node_key.json
 ```
 
-You will now need to run `systemctl restart kneard` so that it picks up the keys. If everything
+You will now need to run `systemctl restart kuutamod` so that it picks up the keys. If everything
 went well, you should be able to reach kneard's prometheus exporter url:
 
 ```

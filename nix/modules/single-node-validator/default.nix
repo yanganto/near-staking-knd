@@ -6,8 +6,8 @@
     ../toml-mapping.nix
   ];
 
-  # we want `kuutamo update` to also restart `kneard.service`
-  systemd.services.kneard.reloadIfChanged = lib.mkForce false;
+  # we want `kuutamo update` to also restart `kuutamod.service`(for kneard)
+  systemd.services.kuutamod.reloadIfChanged = lib.mkForce false;
   system.stateVersion = "22.05";
 
   kuutamo.kneard.validatorKeyFile = "/var/lib/secrets/validator_key.json";

@@ -133,7 +133,8 @@ in
         };
     };
 
-    systemd.services.kneard = {
+    # We still use kuutamod here for backward compatible
+    systemd.services.kuutamod = {
       wantedBy = [ "multi-user.target" ];
       # we want to restart the service ourself manually
       reloadIfChanged = true;

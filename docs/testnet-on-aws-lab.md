@@ -154,7 +154,7 @@ $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/kuutamo-te
 $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/node_key.json /var/lib/secrets/node_key.json
 ```
 
-You will then need restart kneard with `systemctl restart kneard` so that it picks up the key. If everything
+You will then need restart kneard with `systemctl restart kuutamod` so that it picks up the key. If everything
 went well, you should be able to reach kneard's prometheus exporter url:
 
 ```console
@@ -181,7 +181,7 @@ where `Name` is the kuutamo node id.
 
 You can view logs in the systemd journal
 ```console
-$ journalctl -u kneard.service -f
+$ journalctl -u kuutamod.service -f
 Jul 17 21:43:50 river kneard[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: # 1102053 7zgkxdDiKBoqud9DuSC47cwZ94e63BwGj1NNKs93JcLs Validator | 100 validators 29 peers ⬇ 345 kB/s ⬆ 485 kB/s 0.80 bps 0 gas/s CPU: 0%, Mem: 1.77 GB
 ```
 

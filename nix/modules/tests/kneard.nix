@@ -26,7 +26,7 @@ import ./lib.nix ({ self, ... }: {
 
   testScript = ''
     start_all()
-    server.wait_for_unit("kneard.service")
+    server.wait_for_unit("kuutamod.service")
     server.wait_for_unit("consul.service")
     # wait until consul is up
     server.wait_until_succeeds("curl --silent 127.0.0.1:8500/v1/status/leader")
@@ -40,7 +40,7 @@ import ./lib.nix ({ self, ... }: {
     server.succeed("[[ ! -f /var/lib/neard/validator_key.json ]]")
     server.succeed("[[ -f /var/lib/neard/node_key.json ]]")
 
-    server.succeed("systemctl stop kneard")
+    server.succeed("systemctl stop kuutamod")
     server.fail("curl --silent http://127.0.0.1:3030/metrics")
     server.succeed("! systemctl is-active neard-manual")
     server.succeed("systemctl start neard-manual")
