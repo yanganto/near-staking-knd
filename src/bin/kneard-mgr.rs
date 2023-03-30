@@ -95,6 +95,16 @@ struct ProxyArgs {
     local_port: u16,
 }
 
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+struct SshArgs {
+    /// Host to ssh into
+    #[clap(long, default_value = "")]
+    hosts: String,
+
+    /// Additional arguments to pass to ssh
+    command: Option<Vec<String>>,
+}
+
 /// Subcommand to run
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(clap::Subcommand, PartialEq, Debug, Clone)]
@@ -116,6 +126,8 @@ enum Command {
     MaintenanceRestart(control_commands::MaintenanceOperationArgs),
     /// Ask Kuutamod to schedule a shutdown in maintenance windows
     MaintenanceShutdown(control_commands::MaintenanceOperationArgs),
+    /// SSH into a host
+    Ssh(SshArgs),
 }
 
 #[derive(Parser)]
@@ -285,6 +297,16 @@ fn maintenance_operation(
     }
 }
 
+fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
+    let hosts = filter_hosts(&ssh_args.hosts, &config.hosts)?;
+    let command = ssh_args
+        .command
+        .as_ref()
+        .map_or_else(|| [].as_slice(), |v| v.as_slice());
+    let command = command.iter().map(|s| s.as_str()).collect::<Vec<_>>();
+    kuutamod::ssh::ssh(&hosts, command.as_slice())
+}
+
 /// The kuutamo program entry point
 #[tokio::main]
 pub async fn main() -> Result<()> {
@@ -312,6 +334,7 @@ pub async fn main() -> Result<()> {
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
         Command::MaintenanceRestart(ref args) => maintenance_operation(args, true, &config),
         Command::MaintenanceShutdown(ref args) => maintenance_operation(args, false, &config),
+        Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
     };
     res.with_context(|| format!("kuutamo failed doing {:?}", args.action))
 }

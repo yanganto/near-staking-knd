@@ -9,7 +9,7 @@ pub use nixos_rebuild::nixos_rebuild;
 pub use rollback::rollback;
 pub use update::update;
 
-mod command;
+pub(crate) mod command;
 mod config;
 mod dry_update;
 mod flake;
