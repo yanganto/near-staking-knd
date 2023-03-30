@@ -161,7 +161,7 @@ in
             ++ lib.optional (cfg.consulTokenFile != null) "KUUTAMO_CONSUL_TOKEN_FILE=${cfg.consulTokenFile}"
             ++ lib.optional (cfg.publicAddress != null) "KUUTAMO_PUBLIC_ADDRESS=${cfg.publicAddress}";
 
-          RuntimeDirectory = "kneard";
+          RuntimeDirectory = "kuutamod";
 
           ExecReload = [
             "+${pkgs.writeShellScript "kneard-schedule-reload" ''
@@ -171,7 +171,7 @@ in
               ${lib.optionalString (cfg.consulTokenFile != null) ''
                 # We need those keys for kneard-ctl as root
                 # We copy the token from the service here to make things like systemd's LoadCredential and secrets from vault work.
-                install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kneard/consul-token
+                install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kuutamod/consul-token
               ''}
 
               # reload consul token file
@@ -189,7 +189,7 @@ in
           ExecStartPre =
             lib.optional (cfg.consulTokenFile != null) "+${pkgs.writeShellScript "kneard-consul-token" ''
               set -eux -o pipefail
-              install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kneard/consul-token
+              install -m400 "$KUUTAMO_CONSUL_TOKEN_FILE" /run/kuutamod/consul-token
             ''}"
             ++ config.systemd.services.neard.serviceConfig.ExecStartPre
             ++ [
