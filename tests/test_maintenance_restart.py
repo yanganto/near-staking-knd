@@ -125,8 +125,8 @@ def test_maintenance_restart(
                 if (
                     res.get("near_block_expected_shutdown")
                     == "0"  # no block height for shutdown
-                    and res.get("near_dynamic_config_changes")
-                    == "2"  # the second time dynamic config change
+                    and res.get("near_config_reloads_total")
+                    == "3"  # the second time dynamic config change
                 ):
                     break
             except (ConnectionRefusedError, ConnectionResetError):
@@ -135,7 +135,7 @@ def test_maintenance_restart(
         else:
             assert (
                 res.get("near_block_expected_shutdown") == "0"
-                or res.get("near_dynamic_config_changes") == "2"
+                and res.get("near_config_reloads_total") == "3"
             )
 
         proc = leader.execute_command("maintenance-status")

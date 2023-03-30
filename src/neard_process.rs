@@ -13,15 +13,8 @@ use std::fs::remove_file;
 use std::io::ErrorKind;
 use std::os::unix::fs::symlink;
 use std::path::Path;
-#[cfg(not(feature = "unstable"))]
-use std::path::PathBuf;
 use std::process::ExitStatus;
-#[cfg(not(feature = "unstable"))]
-use tokio::fs::File;
-#[cfg(feature = "unstable")]
 use tokio::fs::{read_to_string, write};
-#[cfg(not(feature = "unstable"))]
-use tokio::io::AsyncWriteExt;
 use tokio::process::Child;
 use tokio::time::{sleep, sleep_until, Duration, Instant};
 
@@ -120,15 +113,6 @@ pub fn setup_voter(settings: &Settings) -> Result<NeardProcess> {
 
 async fn get_neard_config_changes(client: &NeardClient) -> Result<u64> {
     let metrics = client.metrics().await?;
-
-    // NOTE if the dynamic config was not applied, the field in metric will absent and deem to 0
-    #[cfg(not(feature = "unstable"))]
-    return Ok(metrics
-        .get("near_dynamic_config_changes")
-        .map(|s| s.parse::<u64>().unwrap_or(0))
-        .unwrap_or(0));
-
-    #[cfg(feature = "unstable")]
     return Ok(metrics
         .get("near_config_reloads_total")
         .map(|s| s.parse::<u64>().unwrap_or(0))
@@ -158,42 +142,7 @@ async fn wait_until_config_applied(client: &NeardClient, initial_change_value: u
     }
 }
 
-/// Apply dynamic config
-/// NOTE: currently only expected shutdown in the config, so input parameter is only
-/// expected_shutdown
-#[cfg(not(feature = "unstable"))]
-pub async fn apply_dynamic_config(
-    client: &NeardClient,
-    pid: Pid,
-    neard_home: &Path,
-    expected_shutdown: Option<BlockHeight>,
-) -> Result<()> {
-    // We need neard metric to make sure the dyn config is correctly applied.
-    // If we can not get the neard metric at this moment, we will not try to apply the dynamic
-    // config and abort early.
-    let changes = get_neard_config_changes(client).await?;
-
-    let dyn_config = DynConfig::new(neard_home, expected_shutdown).await?;
-    reload_neard(pid)?;
-
-    // Check the dynamic config effect and show in metrics
-    // Actually, the dynamic config is applied when SIGHUP sent, and we can check it change on
-    // log in the same time, however, the metrics takes much more time to reflect these, so we
-    // wait 5 seconds to check on this.
-    let apply_timeout = Instant::now() + Duration::from_secs(5);
-    tokio::select! {
-        res = wait_until_config_applied(client, changes) => {
-            drop(dyn_config);
-            return res;
-        }
-        // startup timeout
-        _ = sleep_until(apply_timeout) => {},
-    }
-    anyhow::bail!("dynamic config change was not applied within 5s")
-}
-
 /// Apply dynamic part, which is a part of `config.json`
-#[cfg(feature = "unstable")]
 pub async fn apply_dynamic_config(
     client: &NeardClient,
     pid: Pid,
@@ -280,38 +229,6 @@ impl Drop for NeardProcess {
             if let Err(err) = graceful_stop_neard(&mut self.process) {
                 warn!("Failed to stop near process: {err:?}");
             }
-        }
-    }
-}
-
-/// Safety operation to apply dyanic config
-#[cfg(not(feature = "unstable"))]
-struct DynConfig {
-    dyn_config_path: PathBuf,
-}
-
-#[cfg(not(feature = "unstable"))]
-impl DynConfig {
-    pub async fn new(neard_home: &Path, expected_shutdown: Option<BlockHeight>) -> Result<Self> {
-        let dyn_config_path = neard_home.join("dyn_config.json");
-        let dynamic_config = serde_json::json!({ "expected_shutdown": expected_shutdown });
-
-        // The previous config file will be truncated if existing
-        let mut file = File::create(&dyn_config_path).await?;
-        file.write_all(dynamic_config.to_string().as_bytes())
-            .await?;
-
-        Ok(Self { dyn_config_path })
-    }
-}
-
-#[cfg(not(feature = "unstable"))]
-impl Drop for DynConfig {
-    /// Make sure the config file be deleted to avoid neard reload it when restarting,
-    /// because neard process will load any existing dyn_config.json when it start.
-    fn drop(&mut self) {
-        if let Err(e) = force_unlink(&self.dyn_config_path) {
-            error!("dyn_config.json can not force remove as expected: {e:?}");
         }
     }
 }
