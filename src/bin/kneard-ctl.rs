@@ -21,7 +21,7 @@ struct Args {
     #[clap(
         long,
         env = "KUUTAMO_CONTROL_SOCKET",
-        default_value = "/var/lib/neard/kneard.sock"
+        default_value = "/var/lib/neard/kuutamod.sock"
     )]
     pub control_socket: PathBuf,
 

@@ -93,7 +93,7 @@ pub struct Settings {
     /// Unix socket path where kneard will listen for remote control commands
     #[clap(
         long,
-        default_value = "/var/lib/neard/kneard.sock",
+        default_value = "/var/lib/neard/kuutamod.sock",
         env = "KUUTAMO_CONTROL_SOCKET"
     )]
     pub control_socket: PathBuf,
@@ -155,7 +155,7 @@ pub fn parse_settings() -> Result<Settings> {
     let config_path = &settings.neard_home.join("config.json");
     let config = read_near_config(config_path).context("failed to parse near config")?;
     settings.near_rpc_addr = config.rpc_addr;
-    settings.control_socket = settings.neard_home.join("kneard.sock");
+    settings.control_socket = settings.neard_home.join("kuutamod.sock");
 
     Ok(settings)
 }

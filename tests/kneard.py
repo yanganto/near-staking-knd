@@ -81,7 +81,7 @@ class Kuutamod:
         validator_node_key = near_network.home / "node3" / "node_key.json"
         voter_node_key = neard_home / "voter_node_key.json"
         node_id = str(neard_home.name)
-        control_socket = neard_home / "kneard.sock"
+        control_socket = neard_home / "kuutamod.sock"
         env = dict(
             KUUTAMO_CONSUL_URL=f"http://127.0.0.1:{consul.http_port}",
             KUUTAMO_NODE_ID=str(neard_home.name),
