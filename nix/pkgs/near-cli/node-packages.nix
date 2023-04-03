@@ -4,13 +4,13 @@
 
 let
   sources = {
-    "@babel/code-frame-7.18.6" = {
+    "@babel/code-frame-7.21.4" = {
       name = "_at_babel_slash_code-frame";
       packageName = "@babel/code-frame";
-      version = "7.18.6";
+      version = "7.21.4";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.18.6.tgz";
-        sha512 = "TDCmlK5eOvH+eH7cdAFlNXeVJqWIQ7gW9tY1GJIpUtFb6CmjVyq2VM3u71bOyR8CRihcCgMUYoDNyLXao3+70Q==";
+        url = "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.21.4.tgz";
+        sha512 = "LYvhNKfwWSPpocw8GI7gpK2nq3HSDuEPC/uSYaALSJu9xjsalaaYFOq0Pwt5KmVqwEbZlDu81aLXwBOmD/Fv9g==";
       };
     };
     "@babel/helper-validator-identifier-7.19.1" = {
@@ -2482,7 +2482,7 @@ in
       sha512 = "0EaNAw5SKSIIJrJajG32CNMGfBtZTgIrOVKSXBTWpvo+F0OozsbvuO4UG3ZSRNThXHijxybp58SqPiU3JuzXGA==";
     };
     dependencies = [
-      sources."@babel/code-frame-7.18.6"
+      sources."@babel/code-frame-7.21.4"
       sources."@babel/helper-validator-identifier-7.19.1"
       (sources."@babel/highlight-7.18.6" // {
         dependencies = [
