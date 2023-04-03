@@ -36,7 +36,8 @@
       "secs": 10800,
       "nanos": 0
     },
-    "blacklist": []
+    "blacklist": [],
+    "tier1_enable_outbound": true
   },
   "consensus": {
     "min_num_peers": 3,
