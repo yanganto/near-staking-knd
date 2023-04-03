@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: 'dev'
       - name: Upgrade neard-configuration
         run: |
           bash -x ./.github/workflows/update-neard-configuration.sh ${{matrix.network}}
@@ -24,7 +26,6 @@ jobs:
         with:
           commit-message: Upgrade near configuration for ${{matrix.network}}
           branch: near-config-${{matrix.network}}
-          base: dev
           delete-branch: true
           title: Upgrade near configuration for ${{matrix.network}}
           body: |
@@ -50,7 +51,6 @@ jobs:
         with:
           commit-message: Upgrade near configuration for ${{matrix.network}}
           branch: near-genesis-${{matrix.network}}
-          base: dev
           delete-branch: true
           title: Upgrade genesis.json for ${{matrix.network}}
           body: |
