@@ -15,6 +15,9 @@ pub enum Command {
 
     /// Show the current voted validator
     ActiveValidator,
+
+    /// Check the status of rpc service
+    CheckRpc(CheckRpcArgs),
 }
 
 /// Arguments for maintenance shutdonw command
@@ -40,4 +43,12 @@ pub struct MaintenanceOperationArgs {
     /// Cli will wait for shutdown/restart
     #[clap(long)]
     pub wait: bool,
+}
+
+/// Arguments for check rpc command
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+pub struct CheckRpcArgs {
+    /// Cli will keep blocking when rpc service up
+    #[clap(long)]
+    pub watch: bool,
 }

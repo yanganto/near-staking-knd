@@ -116,7 +116,30 @@ impl CommandClient {
             .context("failed to parse response")?;
         if !code.is_success() {
             bail!(
-                "Request to get active validator failed: {} (status: {})",
+                "Request to get maintenance status failed: {} (status: {})",
+                resp.message,
+                resp.status
+            )
+        };
+        Ok(resp.message)
+    }
+
+    /// Get rpc status
+    pub async fn rpc_status(&self) -> Result<String> {
+        let url = Uri::new(&self.socket_path, "/rpc_status").into();
+        let res = Client::unix().get(url).await.with_context(|| {
+            format!(
+                "failed to connect to kuutamod via {}",
+                self.socket_path.display()
+            )
+        })?;
+        let code = res.status();
+        let resp: ApiResponse = parse_response(res)
+            .await
+            .context("failed to parse response")?;
+        if !code.is_success() {
+            bail!(
+                "Request to get rpc status failed: {} (status: {})",
                 resp.message,
                 resp.status
             )

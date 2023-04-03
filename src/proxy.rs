@@ -29,7 +29,7 @@ async fn proxy(host: &Host, local_port: u16) -> Result<()> {
 /// Proxy RPC service
 pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
     tokio::select! {
-        _ = async_timeout_ssh(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--wait".into()], true) => println!("Could not proxy, because neard does not provide rpc service now."),
+        _ = async_timeout_ssh(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--watch".into()], true) => println!("Could not proxy, because neard does not provide rpc service now."),
         _ = proxy(host, local_port) => (),
     }
     Ok(())
