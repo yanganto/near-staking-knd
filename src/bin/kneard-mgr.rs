@@ -7,6 +7,7 @@ use clap::Parser;
 use kneard::commands::control_commands;
 use kneard::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
 use kneard::proxy;
+use kneard::utils;
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
@@ -248,9 +249,9 @@ async fn rollback(
     .await
 }
 
-fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
+async fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
     let hosts = filter_hosts(&proxy_args.host, &config.hosts)?;
-    proxy::rpc(&hosts[0], proxy_args.local_port)
+    proxy::rpc(&hosts[0], proxy_args.local_port).await
 }
 
 fn maintenance_operation(
@@ -268,7 +269,7 @@ fn maintenance_operation(
         (Some(_), Some(_)) => bail!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
         ),
-        (Some(minimum_length), None) => deploy::utils::timeout_ssh(
+        (Some(minimum_length), None) => utils::ssh::timeout_ssh(
             &hosts[0],
             // TODO:
             // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
@@ -277,8 +278,8 @@ fn maintenance_operation(
         )?,
         // TODO:
         // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
-        (None, None) => deploy::utils::timeout_ssh(&hosts[0], &["kuutamoctl", action], true)?,
-        (None, Some(shutdown_at)) => deploy::utils::timeout_ssh(
+        (None, None) => utils::ssh::timeout_ssh(&hosts[0], &["kuutamoctl", action], true)?,
+        (None, Some(shutdown_at)) => utils::ssh::timeout_ssh(
             &hosts[0],
             &[
                 // TODO:
@@ -312,7 +313,7 @@ fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
         .as_ref()
         .map_or_else(|| [].as_slice(), |v| v.as_slice());
     let command = command.iter().map(|s| s.as_str()).collect::<Vec<_>>();
-    kneard::ssh::ssh(&hosts, command.as_slice())
+    kneard::utils::ssh::local_ssh(&hosts, command.as_slice())
 }
 
 /// The kuutamo program entry point

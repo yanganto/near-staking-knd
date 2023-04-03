@@ -9,7 +9,8 @@ use std::{
     time::Duration,
 };
 
-use crate::deploy::{command::status_to_pretty_err, utils::timeout_ssh};
+use crate::deploy::command::status_to_pretty_err;
+use crate::utils::ssh::timeout_ssh;
 
 use super::{Host, NixosFlake};
 

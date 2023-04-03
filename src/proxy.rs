@@ -2,11 +2,11 @@
 //!
 
 use crate::deploy::Host;
+use crate::utils::ssh::async_timeout_ssh;
 use anyhow::{Context, Result};
 use std::process::Command;
 
-/// Proxy RPC service
-pub fn rpc(host: &Host, local_port: u16) -> Result<()> {
+async fn proxy(host: &Host, local_port: u16) -> Result<()> {
     let address = host.ipv4_address;
     let user = &host.install_ssh_user;
     println!(
@@ -23,5 +23,14 @@ pub fn rpc(host: &Host, local_port: u16) -> Result<()> {
         ])
         .status()
         .context("Failed to setup ssh tunnel")?;
+    Ok(())
+}
+
+/// Proxy RPC service
+pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
+    tokio::select! {
+        _ = async_timeout_ssh(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--wait".into()], true) => println!("Could not proxy, because neard does not provide rpc service now."),
+        _ = proxy(host, local_port) => (),
+    }
     Ok(())
 }
