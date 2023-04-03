@@ -1,9 +1,13 @@
-{ near-staking-ui, stdenv, npmlock2nix, nodejs }:
+{ near-staking-ui, stdenv, npmlock2nix, nodejs, python3 }:
 stdenv.mkDerivation rec {
   name = "near-staking-analytics";
   src = near-staking-ui;
   node_modules = npmlock2nix.v2.node_modules {
     src = src + "/backend";
+    buildInputs = [ python3 ];
+    sourceOverrides = {
+      buildRequirePatchShebangs = true;
+    };
   };
   installPhase = ''
     cd backend
