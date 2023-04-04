@@ -105,7 +105,7 @@ in
         "KUUTAMO_ACCOUNT_ID" = cfg.accountId;
       }
       // lib.optionalAttrs (cfg.consulTokenFile != null) {
-        "KUUTAMO_CONSUL_TOKEN_FILE" = "/run/kneard/consul-token";
+        "KUUTAMO_CONSUL_TOKEN_FILE" = "/run/kuutamod/consul-token";
       };
 
     # If failover / kneard fails for what ever reason, this service allows to
@@ -166,7 +166,7 @@ in
           ExecReload = [
             "+${pkgs.writeShellScript "kneard-schedule-reload" ''
               set -x
-              touch /run/kneard/restart
+              touch /run/kuutamod/restart
 
               ${lib.optionalString (cfg.consulTokenFile != null) ''
                 # We need those keys for kneard-ctl as root
