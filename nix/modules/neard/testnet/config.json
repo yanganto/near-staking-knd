@@ -21,7 +21,9 @@
     "enable_debug_rpc": true
   },
   "telemetry": {
-    "endpoints": []
+    "endpoints": [
+      "https://explorer.testnet.near.org/api/nodes"
+    ]
   },
   "network": {
     "addr": "0.0.0.0:24567",
@@ -36,7 +38,8 @@
       "secs": 10800,
       "nanos": 0
     },
-    "blacklist": []
+    "blacklist": [],
+    "tier1_enable_outbound": true
   },
   "consensus": {
     "min_num_peers": 3,

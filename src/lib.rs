@@ -18,4 +18,6 @@ pub mod prometheus;
 pub mod proxy;
 pub mod scoped_consul_session;
 pub mod settings;
+/// ssh utils to host
+pub mod ssh;
 pub mod supervisor;

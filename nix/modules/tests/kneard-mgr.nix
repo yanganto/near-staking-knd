@@ -127,5 +127,8 @@ in
       installer.succeed("${lib.getExe kneard-mgr} --config ${tomlConfig} --yes update --immediately >&2")
       # XXX find out how we can make persist more than one profile in our test
       #installer.succeed("${lib.getExe kneard-mgr} --config ${tomlConfig} --yes rollback --immediately >&2")
+
+      hostname = installer.succeed("${lib.getExe kneard-mgr} --config ${tomlConfig} ssh hostname").strip()
+      assert "validator-00" == hostname, f"'validator-00' != '{hostname}'"
     '';
 })
