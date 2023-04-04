@@ -29,7 +29,7 @@ pub struct MaintenanceOperationArgs {
     #[arg(long)]
     pub shutdown_at: Option<u64>,
 
-    /// Cancel the maintenance shutdwon setting
+    /// Cancel the maintenance shutdown setting
     #[arg(long)]
     pub cancel: bool,
 
