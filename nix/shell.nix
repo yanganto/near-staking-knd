@@ -54,10 +54,6 @@
             self'.packages.neard
             pkgs.consul
             pkgs.hivemind
-            (pkgs.writeShellScriptBin "local-near" ''
-              export NEAR_ENV=local
-              export NEAR_CLI_LOCALNET_RPC_SERVER_URL=http://localhost:33300
-            '')
           ]
           ++ self'.packages.kneard.buildInputs;
         CORE_CONTRACTS = self.inputs.core-contracts;
