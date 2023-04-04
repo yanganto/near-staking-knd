@@ -24,7 +24,9 @@
     "enable_debug_rpc": true
   },
   "telemetry": {
-    "endpoints": []
+    "endpoints": [
+      "https://explorer.mainnet.near.org/api/nodes"
+    ]
   },
   "network": {
     "addr": "0.0.0.0:24567",
