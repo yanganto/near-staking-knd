@@ -9,17 +9,17 @@ use std::process::{Command, Output};
 
 async fn proxy(host: &Host, local_port: u16) -> Result<()> {
     let address = host.ipv4_address;
-    let user = &host.install_ssh_user;
     println!(
         "The Near RPC api of {:} is now reachable at http://localhost:{:}",
         host.name, local_port
     );
     println!("Press Ctrl-C to close it");
+    // always use root for proxy, because this is the only user in our image
     let _ = Command::new("ssh")
         .args([
             "-L",
             &format!("{local_port:}:localhost:3030"),
-            &format!("{user:}@{address:}"),
+            &format!("root@{address:}"),
             "-N",
         ])
         .status()
