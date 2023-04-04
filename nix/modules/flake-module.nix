@@ -25,11 +25,11 @@
         imports = [ ./neard/mainnet ];
       };
       kuutamo-binary-cache = ./binary-cache;
-      kuutamod = { pkgs, ... }: {
+      kneard = { pkgs, ... }: {
         imports = [
-          ./kuutamod
+          ./kneard
         ];
-        kuutamo.kuutamod.package = self.packages.${pkgs.stdenv.hostPlatform.system}.kuutamod;
+        kuutamo.kneard.package = self.packages.${pkgs.stdenv.hostPlatform.system}.kneard;
       };
 
       disko-partitioning-script = ./disko-partitioning-script.nix;
@@ -37,7 +37,7 @@
 
       single-node-validator = {
         imports = [
-          self.nixosModules.kuutamod
+          self.nixosModules.kneard
           self.nixosModules.disko-partitioning-script
           self.nixosModules.networkd
           self.nixosModules.kuutamo-binary-cache
@@ -91,7 +91,7 @@
         ];
       };
 
-      default = self.nixosModules.kuutamod;
+      default = self.nixosModules.kneard;
     };
   };
 }

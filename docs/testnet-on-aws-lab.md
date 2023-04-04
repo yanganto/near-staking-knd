@@ -12,7 +12,7 @@
 #### Edit `configuration.nix` so it is as below: `nano /etc/nixos/configuration.nix`
 ```nix
 { modulesPath, ... }: {
-  imports = [ "${modulesPath}/virtualisation/amazon-image.nix" ./kuutamod.nix];
+  imports = [ "${modulesPath}/virtualisation/amazon-image.nix" ./kneard.nix];
   ec2.hvm = true;
 
   nix.extraOptions = ''
@@ -40,13 +40,13 @@
       modules = [
         ./configuration.nix
         
-        # Optional: This adds a our binary cache so you don't have to compile neard/kuutamod yourself.
+        # Optional: This adds a our binary cache so you don't have to compile neard/kneard yourself.
         # The binary cache module, won't be effective on the first run of nixos-rebuild, but you can specify it also via command line like this:
         # $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
         near-staking-knd.nixosModules.kuutamo-binary-cache
 
         near-staking-knd.nixosModules.neard-testnet
-        near-staking-knd.nixosModules.kuutamod
+        near-staking-knd.nixosModules.kneard
       ];
     };
   };
@@ -73,10 +73,10 @@ In this case, the full s3 backup URL (to be used in the config below, as
 `s3://near-protocol-public/backups/testnet/rpc/2022-08-23T11:00:30Z`
 
 
-#### Add `kuutamod.nix` file as below: `nano /etc/nixos/kuutamod.nix`
+#### Add `kneard.nix` file as below: `nano /etc/nixos/kneard.nix`
 ```nix
 {
-  # consul is here because you can add more kuutamod nodes later and create an Active/Passive HA cluster.
+  # consul is here because you can add more kneard nodes later and create an Active/Passive HA cluster.
   # Consul wants to bind to a network interface. You can get your interface as follows:
   # $ ip route get 8.8.8.8
   # 8.8.8.8 via 131.159.102.254 dev enp24s0f0 src 131.159.102.16 uid 1000
@@ -88,8 +88,8 @@ In this case, the full s3 backup URL (to be used in the config below, as
   # This is the URL we calculated above:
   kuutamo.neard.s3.dataBackupDirectory = "s3://near-protocol-public/backups/testnet/rpc/2022-07-15T11:00:30Z";
 
-  kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
-  kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
+  kuutamo.kneard.validatorKeyFile = "/var/lib/secrets/validator_key.json";
+  kuutamo.kneard.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
 }
 ```
 
@@ -99,7 +99,7 @@ If you are wanting to use the binary cache:
 ```console
 $ nixos-rebuild boot --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" --flake /etc/nixos#validator
 ```
-If not, and you want compile neard and kuutamod on the machine (remember to comment out this line in `flake.nix`  `near-staking-knd.nixosModules.kuutamo-binary-cache`):
+If not, and you want compile neard and kneard on the machine (remember to comment out this line in `flake.nix`  `near-staking-knd.nixosModules.kuutamo-binary-cache`):
 
 ```console
 $ nixos-rebuild boot --flake /etc/nixos#validator
@@ -113,20 +113,20 @@ updating GRUB 2 menu...
 $ reboot
 ```
 
-SSH back into the machine. It can take a couple of minutes to be ready. Then run `journalctl -u kuutamod.service -n 10` 
-This will show you the 10 most recent kuutamod logs. If you logged straight back in after reboot you'll probably see something like this:
+SSH back into the machine. It can take a couple of minutes to be ready. Then run `journalctl -u kneard.service -n 10`
+This will show you the 10 most recent kneard logs. If you logged straight back in after reboot you'll probably see something like this:
 ![image](https://user-images.githubusercontent.com/38218340/186202697-8b83218a-188d-4610-8ecd-c6025ca9bf89.png)
 
 This is the S3 backup download, and at time of writing takes about an hour to download.
 
-You can continue the rest of this setup but note this needs to complete first, then the block/chunk validations, before you'll move on from the 'Syncing' kuutamod state.
+You can continue the rest of this setup but note this needs to complete first, then the block/chunk validations, before you'll move on from the 'Syncing' kneard state.
 
 #### Create keys
 
-Note that with kuutamod there will be one validator and node key for the active
+Note that with kneard there will be one validator and node key for the active
 validator, while each validator also has its own non-validator node key, which
 is used during passive mode. The passive keys are created automatically by
-kuutamod.
+kneard.
 
 The next step is to generate and install the active validator key and validator
 node key.
@@ -154,8 +154,8 @@ $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/kuutamo-te
 $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/testnet/node_key.json /var/lib/secrets/node_key.json
 ```
 
-You will then need restart kuutamod with `systemctl restart kuutamod` so that it picks up the key. If everything
-went well, you should be able to reach kuutamod's prometheus exporter url:
+You will then need restart kneard with `systemctl restart kuutamod` so that it picks up the key. If everything
+went well, you should be able to reach kneard's prometheus exporter url:
 
 ```console
 $ curl http://localhost:2233/metrics
@@ -172,9 +172,9 @@ kuutamod_state{type="Voting"} 0
 kuutamod_uptime 3447978
 ```
 
-Once neard is synced with the network, you should see a kuutamod listed as an active validator using `kuutamoctl`:
+Once neard is synced with the network, you should see a kneard listed as an active validator using `kneard-ctl`:
 ```console
-$ kuutamoctl active-validator
+$ kneard-ctl active-validator
 Name: river
 ```
 where `Name` is the kuutamo node id.
@@ -182,7 +182,7 @@ where `Name` is the kuutamo node id.
 You can view logs in the systemd journal
 ```console
 $ journalctl -u kuutamod.service -f
-Jul 17 21:43:50 river kuutamod[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: # 1102053 7zgkxdDiKBoqud9DuSC47cwZ94e63BwGj1NNKs93JcLs Validator | 100 validators 29 peers ⬇ 345 kB/s ⬆ 485 kB/s 0.80 bps 0 gas/s CPU: 0%, Mem: 1.77 GB
+Jul 17 21:43:50 river kneard[44389]: 2022-07-17T21:43:50.898176Z  INFO stats: # 1102053 7zgkxdDiKBoqud9DuSC47cwZ94e63BwGj1NNKs93JcLs Validator | 100 validators 29 peers ⬇ 345 kB/s ⬆ 485 kB/s 0.80 bps 0 gas/s CPU: 0%, Mem: 1.77 GB
 ```
 
 ---

@@ -60,18 +60,18 @@ class Kuutamod:
     control_socket: Path
     neard_home: Path
     command: Command
-    kuutamoctl: Path
+    kneard_ctl: Path
 
     @classmethod
     def run(
         cls,
         neard_home: Path,
         consul: Consul,
-        kuutamod: Path,
+        kneard: Path,
         command: Command,
         ports: Ports,
         near_network: NearNetwork,
-        kuutamoctl: Path,
+        kneard_ctl: Path,
         debug: bool,
     ) -> Kuutamod:
         exporter_port = ports.allocate(3)
@@ -99,12 +99,12 @@ class Kuutamod:
         config = json.load(open(neard_home / "config.json"))
         if debug:
             proc = command.run(
-                [str(kuutamod)],
+                [str(kneard)],
                 extra_env=env,
                 stderr=open(neard_home / f"{neard_home.name}-debug.txt", "w"),
             )
         else:
-            proc = command.run([str(kuutamod)], extra_env=env)
+            proc = command.run([str(kneard)], extra_env=env)
         wait_for_port("127.0.0.1", exporter_port)
 
         instance = cls(
@@ -117,7 +117,7 @@ class Kuutamod:
             neard_home=neard_home,
             command=command,
             rpc_port=int(config["rpc"]["addr"].split(":")[-1]),
-            kuutamoctl=kuutamoctl,
+            kneard_ctl=kneard_ctl,
         )
         if debug:
             instance.enable_neard_debug()
@@ -125,7 +125,7 @@ class Kuutamod:
 
     @retry(30, (ConnectionRefusedError, ConnectionResetError))
     def neard_pid(self) -> Optional[int]:
-        """Query pid for neard which managed by the kuutamod with 3 times retry"""
+        """Query pid for neard which managed by the kneard with 3 times retry"""
         conn = http.client.HTTPConnection("127.0.0.1", self.exporter_port)
         conn.request("GET", "/neard-pid")
         response = conn.getresponse()
@@ -136,12 +136,12 @@ class Kuutamod:
 
     @retry(300, (ConnectionRefusedError, ConnectionResetError))
     def metrics(self) -> dict:
-        """Query the prometheus metrics for kuutamod"""
+        """Query the prometheus metrics for kneard"""
         return query_prometheus_endpoint("127.0.0.1", self.exporter_port)
 
     @retry(300, (ConnectionRefusedError, ConnectionResetError))
     def neard_metrics(self) -> dict:
-        """Query the prometheus metrics for neard which managed by the kuutamod"""
+        """Query the prometheus metrics for neard which managed by the kneard"""
         return query_prometheus_endpoint("127.0.0.1", self.rpc_port)
 
     def wait_metrics_port(self) -> None:
@@ -161,11 +161,11 @@ class Kuutamod:
         wait_for_port("127.0.0.1", self.rpc_port)
 
     def terminate(self) -> None:
-        """Terminate kuutamod processes"""
+        """Terminate kneard processes"""
         self.proc.terminate()
 
     def wait(self) -> None:
-        """Wait kuutamod processes"""
+        """Wait kneard processes"""
         self.proc.wait()
 
     def network_produces_blocks(self) -> bool:
@@ -186,7 +186,7 @@ class Kuutamod:
         """Send command to Kuutamod"""
 
         return subprocess.run(
-            [str(self.kuutamoctl), "--control-socket", str(self.control_socket), *args],
+            [str(self.kneard_ctl), "--control-socket", str(self.control_socket), *args],
             stdout=subprocess.PIPE,
             text=True,
             check=check,
@@ -200,5 +200,5 @@ class Kuutamod:
         os.kill(pid, SIGHUP)
 
     def __bool__(self) -> bool:
-        """Check kuutamod live or not"""
+        """Check kneard live or not"""
         return self.proc.returncode is not None

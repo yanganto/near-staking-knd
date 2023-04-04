@@ -31,10 +31,10 @@
         };
         inherit (pkgs.callPackages ./near-cli/overrides.nix { }) near-cli;
 
-        kuutamod = pkgs.callPackage ./kuutamod/stable.nix {
+        kneard = pkgs.callPackage ./kneard/stable.nix {
           inherit cargoLock;
         };
-        kuutamod-unstable = pkgs.callPackage ./kuutamod/unstable.nix {
+        kneard-unstable = pkgs.callPackage ./kneard/unstable.nix {
           inherit cargoLock;
         };
         kneard-mgr = pkgs.callPackage ./kneard-mgr.nix {

@@ -1,6 +1,6 @@
 [package]
-name = "kuutamod"
-version = "0.1.0"
+name = "kneard"
+version = "0.2.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -34,8 +34,8 @@ name = "kneard-mgr"
 path = "src/bin/kneard-mgr.rs"
 
 [[bin]]
-name = "kuutamoctl"
-path = "src/bin/kuutamoctl.rs"
+name = "kneard-ctl"
+path = "src/bin/kneard-ctl.rs"
 
 [features]
 # set this for neard-unstable

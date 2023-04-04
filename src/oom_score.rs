@@ -6,7 +6,7 @@ use std::io::Write;
 
 /// The default score for processes on Linux
 pub const DEFAULT_OOM_SCORE: u32 = 200;
-/// The score that kuutamod uses
+/// The score that kneard uses
 pub const KUUTAMOD_OOM_SCORE: u32 = 100;
 
 /// Adjust the process specific oom score. The lower the oom score the less likely a process get killed.

@@ -729,7 +729,7 @@ ipv6_address = "2605:9880:400::3"
     );
     let k = hosts["validator-00"].validator_keys.as_ref().unwrap();
     assert_eq!(k.validator_key, NearKeyFile {
-        account_id: String::from("kuutamod0"),
+        account_id: String::from("kneard"),
         public_key: String::from("ed25519:3XGPceVrDHPaysJ2LV2iftYjnRVAJm31GkJCnG4cGLp1"),
         secret_key: String::from("ed25519:22eQKH8uYsesa8qy5g4yCwmpr6hmy2srmUnC155EbV6vxSAkeMioZucdcGxnDQ1HHPtTRGpFGexUtPdKGEMV5BE1"),
     });

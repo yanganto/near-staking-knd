@@ -1,4 +1,4 @@
-//! Read settings for kuutamod
+//! Read settings for kneard
 
 use crate::near_config::{read_near_config, NearKey};
 use anyhow::{bail, Context, Result};
@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 // set by systemd LoadCredential
 const CREDENTIALS_DIRECTORY: &str = "CREDENTIALS_DIRECTORY";
 
-/// Setting options for kuutamod
+/// Setting options for kneard
 #[derive(Parser, Debug, Clone)]
 #[clap(author, version, about, long_about = None)]
 pub struct Settings {
@@ -37,7 +37,7 @@ pub struct Settings {
     /// same validator key
     #[clap(long, default_value = "default", env = "KUUTAMO_ACCOUNT_ID")]
     pub account_id: AccountId,
-    /// The exporter address, that kuutamod will listen to: format: ip:host
+    /// The exporter address, that kneard will listen to: format: ip:host
     #[clap(
         long,
         default_value = "127.0.0.1:2233",
@@ -50,15 +50,15 @@ pub struct Settings {
     /// RPC address of the neard daemon
     #[clap(skip = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 80))]
     pub near_rpc_addr: SocketAddr,
-    /// The neard validator key that we will pass to neard, when kuutamod becomes validator
+    /// The neard validator key that we will pass to neard, when kneard becomes validator
     #[clap(long, default_value = ".", env = "KUUTAMO_VALIDATOR_KEY")]
     pub validator_key: PathBuf,
-    /// The neard node key that we will pass to neard, when kuutamod becomes validator
+    /// The neard node key that we will pass to neard, when kneard becomes validator
     #[clap(long, default_value = ".", env = "KUUTAMO_VALIDATOR_NODE_KEY")]
     pub validator_node_key: PathBuf,
 
     /// The public key of the node key that we will write in the public address
-    /// of our neard configuration when kuutamod becomes validator
+    /// of our neard configuration when kneard becomes validator
     #[clap(skip)]
     pub validator_node_public_key: String,
 
@@ -69,10 +69,10 @@ pub struct Settings {
         env = "KUUTAMO_VALIDATOR_NETWORK_ADDR"
     )]
     pub validator_network_addr: SocketAddr,
-    /// The neard node key that we will pass to neard, when kuutamod is not a validator
+    /// The neard node key that we will pass to neard, when kneard is not a validator
     #[clap(long, default_value = ".", env = "KUUTAMO_VOTER_NODE_KEY")]
     pub voter_node_key: PathBuf,
-    /// The address neard will listen, when kuutamod is not a validator. At least the port should be different from `validator_network_addr`
+    /// The address neard will listen, when kneard is not a validator. At least the port should be different from `validator_network_addr`
     #[clap(
         long,
         default_value = "0.0.0.0:24568",
@@ -90,7 +90,7 @@ pub struct Settings {
     #[clap(long, env = "KUUTAMO_NEARD_BOOTNODES")]
     pub near_boot_nodes: Option<String>,
 
-    /// Unix socket path where kuutamod will listen for remote control commands
+    /// Unix socket path where kneard will listen for remote control commands
     #[clap(
         long,
         default_value = "/var/lib/neard/kuutamod.sock",

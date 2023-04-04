@@ -10,7 +10,7 @@ from typing import Any, List
 import pytest
 from command import Command
 from consul import Consul
-from kuutamod import Kuutamod
+from kneard import Kuutamod
 from log_utils import Section, log_note
 from ports import Ports
 from setup_localnet import NearNetwork
@@ -26,23 +26,23 @@ def work_with_neard_versions(
 
 
 def test_maintenance_restart(
-    kuutamod: Path,
-    kuutamoctl: Path,
+    kneard: Path,
+    kneard_ctl: Path,
     command: Command,
     consul: Consul,
     near_network: NearNetwork,
     ports: Ports,
 ) -> None:
-    kuutamods = []
+    kneards = []
     for idx in range(2):
-        kuutamods.append(
+        kneards.append(
             Kuutamod.run(
-                neard_home=near_network.home / f"kuutamod{idx}",
-                kuutamod=kuutamod,
+                neard_home=near_network.home / f"kneard{idx}",
+                kneard=kneard,
                 ports=ports,
                 near_network=near_network,
                 command=command,
-                kuutamoctl=kuutamoctl,
+                kneard_ctl=kneard_ctl,
                 consul=consul,
                 debug=False,
             )
@@ -52,13 +52,13 @@ def test_maintenance_restart(
 
     with Section("leader election"):
         while leader is None:
-            for idx, k in enumerate(kuutamods):
+            for idx, k in enumerate(kneards):
                 res = k.metrics()
                 if res.get('kuutamod_state{type="Validating"}') == "1":
                     log_note(f"leader is kuutamo{idx}")
-                    leader = kuutamods[idx]
-                    del kuutamods[idx]
-                    follower = kuutamods.pop()
+                    leader = kneards[idx]
+                    del kneards[idx]
+                    follower = kneards.pop()
                     break
                 time.sleep(0.1)
 
@@ -73,7 +73,7 @@ def test_maintenance_restart(
         leader.wait_validator_port()
         follower.wait_voter_port()
 
-        assert len(kuutamods) == 0 and follower is not None
+        assert len(kneards) == 0 and follower is not None
         follower_res = follower.metrics()
         assert follower_res['kuutamod_state{type="Validating"}'] == "0"
 

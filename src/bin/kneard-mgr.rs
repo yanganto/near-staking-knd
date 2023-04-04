@@ -1,12 +1,12 @@
-//! kuutamoctl - a cli for kuutamod
+//! kneard-ctl - a cli for kneard
 
 #![deny(missing_docs)]
 
 use anyhow::{bail, Context, Result};
 use clap::Parser;
-use kuutamod::commands::control_commands;
-use kuutamod::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
-use kuutamod::proxy;
+use kneard::commands::control_commands;
+use kneard::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
+use kneard::proxy;
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
@@ -59,7 +59,7 @@ struct UpdateArgs {
     /// If not immediately, please specify time in blocks to update, it takes 1~2 seconds for a near block.
     /// For active-passive pairs, the time needs to cover switching nodes.
     /// For single nodes, the time need to cover copy binaries.
-    /// If 0 or not provided, kuutamo will try to update in the longest maintenance window in the current epoch,
+    /// If 0 or not provided, kneard will try to update in the longest maintenance window in the current epoch,
     /// but it can not guarantee the  maintenance window is enough.
     #[clap(default_value = "0")]
     required_time_in_blocks: u64,
@@ -78,7 +78,7 @@ struct RollbackArgs {
     /// If not immediately, please specify time in blocks to rollback, it takes 1~2 seconds for a near block.
     /// For active-passive pairs, the time needs to cover switching nodes.
     /// For single nodes, the time need to cover copy binaries.
-    /// If 0 or not provided, kuutamo will try to rollback in the longest maintenance window in the current epoch,
+    /// If 0 or not provided, kneard will try to rollback in the longest maintenance window in the current epoch,
     /// but it can not guarantee the  maintenance window is enough.
     #[clap(default_value = "0")]
     required_time_in_blocks: u64,
@@ -122,7 +122,7 @@ enum Command {
     /// Proxy remote rpc to local
     Proxy(ProxyArgs),
     /// Ask Kuutamod to schedule a shutdown in maintenance windows, then it will be restart
-    /// due to supervision by kuutamod
+    /// due to supervision by kneard
     MaintenanceRestart(control_commands::MaintenanceOperationArgs),
     /// Ask Kuutamod to schedule a shutdown in maintenance windows
     MaintenanceShutdown(control_commands::MaintenanceOperationArgs),
@@ -268,13 +268,19 @@ fn maintenance_operation(
         ),
         (Some(minimum_length), None) => deploy::utils::timeout_ssh(
             &hosts[0],
+            // TODO:
+            // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
             &["kuutamoctl", action, &minimum_length.to_string()],
             true,
         )?,
+        // TODO:
+        // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
         (None, None) => deploy::utils::timeout_ssh(&hosts[0], &["kuutamoctl", action], true)?,
         (None, Some(shutdown_at)) => deploy::utils::timeout_ssh(
             &hosts[0],
             &[
+                // TODO:
+                // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
                 "kuutamoctl",
                 action,
                 "--shutdown-at",
@@ -304,7 +310,7 @@ fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
         .as_ref()
         .map_or_else(|| [].as_slice(), |v| v.as_slice());
     let command = command.iter().map(|s| s.as_str()).collect::<Vec<_>>();
-    kuutamod::ssh::ssh(&hosts, command.as_slice())
+    kneard::ssh::ssh(&hosts, command.as_slice())
 }
 
 /// The kuutamo program entry point

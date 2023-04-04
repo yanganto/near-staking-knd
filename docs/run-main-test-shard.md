@@ -1,6 +1,6 @@
 # Running on `mainnet` or `testnet`
 
-## Single node kuutamod
+## Single node kneard
 
 This part of the tutorial assumes that you have installed a computer on which.
 [NixOS](https://nixos.org/manual/nixos/stable/#sec-installation).
@@ -19,7 +19,7 @@ To do this, add these lines to your `configuration.nix`...
 
 and create a `flake.nix` file in `/etc/nixos/` [More info on flakes](https://nixos.wiki/wiki/Flakes#Using_nix_flakes_with_NixOS).
 
-In your `flake.nix` you have to add the `kuutamod` flake as source and import
+In your `flake.nix` you have to add the `kneard` flake as source and import
 the nixos modules from it into your configuration.nix.
 
 ```nix
@@ -39,7 +39,7 @@ the nixos modules from it into your configuration.nix.
       modules = [
         ./configuration.nix
 
-        # Optional: This adds a our binary cache so you don't have to compile neard/kuutamod yourself.
+        # Optional: This adds a our binary cache so you don't have to compile neard/kneard yourself.
         # The binary cache module, won't be effective on the first run of nixos-rebuild, but you can specify it also via command line like this:
         # $ nixos-rebuild switch --option  extra-binary-caches "https://cache.garnix.io" --option extra-trusted-public-keys "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
         near-staking-knd.nixosModules.kuutamo-binary-cache
@@ -48,7 +48,7 @@ the nixos modules from it into your configuration.nix.
         near-staking-knd.nixosModules.neard-testnet
         # or if you want to join other networks, use one of these as needed.
         # near-staking-knd.nixosModules.neard-mainnet
-        near-staking-knd.nixosModules.kuutamod
+        near-staking-knd.nixosModules.kneard
       ];
     };
   };
@@ -79,10 +79,10 @@ For `mainnet` replace the word `testnet` in the urls above.
 
 ---
 
-Create a new file called `kuutamod.nix` next to your `configuration.nix` in `/etc/nixos/`.
-If your NixOS configuration is managed via a git repository, do not forget to run `git add kuutamod.nix`.
+Create a new file called `kneard.nix` next to your `configuration.nix` in `/etc/nixos/`.
+If your NixOS configuration is managed via a git repository, do not forget to run `git add kneard.nix`.
 
-Add the following configuration to the `/etc/nixos/kuutamod.nix` file:
+Add the following configuration to the `/etc/nixos/kneard.nix` file:
 
 ```nix
 {
@@ -101,8 +101,8 @@ Add the following configuration to the `/etc/nixos/kuutamod.nix` file:
   # We create these keys after the first 'nixos-rebuild switch'
   # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
   # to securely encrypt and manage these files. For both sops-nix and agenix, set the owner to 'neard' so that the service can read it.
-  kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
-  kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
+  kuutamo.kneard.validatorKeyFile = "/var/lib/secrets/validator_key.json";
+  kuutamo.kneard.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
 }
 ```
 
@@ -110,7 +110,7 @@ Import this file in your `configuration.nix`:
 
 ```nix
 {
-  imports = [ ./kuutamod.nix ];
+  imports = [ ./kneard.nix ];
 }
 ```
 
@@ -121,14 +121,14 @@ nixos-rebuild switch --flake /etc/nixos#my-validator
 ```
 
 The first switch will take longer since it blocks on downloading the s3 data backup (around 300GB).
-You can follow the progress by running: `sudo journalctl -u kuutamod -f`.
+You can follow the progress by running: `sudo journalctl -u kneard -f`.
 
 #### Node keys / generating the active validator key
 
-Note that with kuutamod there will be one validator and node key for the active
+Note that with kneard there will be one validator and node key for the active
 validator, while each validator also has its own non-validator node key, which
 is used during passive mode. The passive keys are created automatically by
-kuutamod.
+kneard.
 
 The next step is to generate and install the active validator key and validator
 node key.
@@ -160,7 +160,7 @@ $ sudo install -o neard -g neard -D -m400 ~/.near-credentials/<mainnet|testnet>/
 ```
 
 You will now need to run `systemctl restart kuutamod` so that it picks up the keys. If everything
-went well, you should be able to reach kuutamod's prometheus exporter url:
+went well, you should be able to reach kneard's prometheus exporter url:
 
 ```
 $ curl http://localhost:2233/metrics
@@ -177,10 +177,10 @@ kuutamod_state{type="Voting"} 0
 kuutamod_uptime 1273658
 ```
 
-Once neard is synced with the network, you should see a kuutamod listed as an active validator using `kuutamoctl`:
+Once neard is synced with the network, you should see a kneard listed as an active validator using `kneard-ctl`:
 
 ```
-$ kuutamoctl active-validator
+$ kneard-ctl active-validator
 Name: river
 ```
 
@@ -188,7 +188,7 @@ where `name` is the kuutamo node id.
 
 ## Multi-Node kuutamo cluster
 
-Once your single-node kuutamod setup works, you can scale out to multiple nodes by changing your `kuutamod.nix`
+Once your single-node kneard setup works, you can scale out to multiple nodes by changing your `kneard.nix`
 like this:
 
 ```
@@ -233,8 +233,8 @@ like this:
   # We create these keys after the first 'nixos-rebuild switch'
   # As these files are critical, we also recommend tools like https://github.com/Mic92/sops-nix or https://github.com/ryantm/agenix
   # to securely encrypt and manage these files. For both sops-nix and agenix, set the owner to 'neard' so that the service can read it.
-  kuutamo.kuutamod.validatorKeyFile = "/var/lib/secrets/validator_key.json";
-  kuutamo.kuutamod.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
+  kuutamo.kneard.validatorKeyFile = "/var/lib/secrets/validator_key.json";
+  kuutamo.kneard.validatorNodeKeyFile = "/var/lib/secrets/node_key.json";
 }
 ```
 
@@ -257,11 +257,11 @@ curl http://localhost:8500/v1/status/leader
 ```
 
 Just like in the `localnet` example, you can query
-`http://localhost:2233/metrics` on each host or use `kuutamoctl` to see which
+`http://localhost:2233/metrics` on each host or use `kneard-ctl` to see which
 host is currently the designated validator.
 
 # Further reading
 
-- [Configuration](./configuration.md): All configuration options in kuutamod
+- [Configuration](./configuration.md): All configuration options in kneard
 - [Reset neard](./reset-neard): How to reset neard, i.e. after a network fork or when changing the chain.
-- [Failover algorithm](./failover-algorithm.md) describes the runtime behavior of kuutamod in depth
+- [Failover algorithm](./failover-algorithm.md) describes the runtime behavior of kneard in depth

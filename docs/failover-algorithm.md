@@ -1,11 +1,11 @@
 # Primary-Secondary failover design
 
-This page describes the internal kuutamod state machine used
+This page describes the internal kneard state machine used
 to manage neard and failover to instances in case a failure happens.
 
 ## States
 
-When starting up, kuutamod will go through the series of states before it's
+When starting up, kneard will go through the series of states before it's
 promoted as a validator. Here is an overview of all states:
 
 1. Startup:
@@ -47,7 +47,7 @@ kuutamod_state{type="Validating"} 1
 kuutamod_state{type="Voting"} 0
 ```
 
-In this case `kuutamod` is in `Validating` state.
+In this case `kneard` is in `Validating` state.
 
 ## State transitions
 

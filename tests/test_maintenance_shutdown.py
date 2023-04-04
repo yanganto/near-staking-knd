@@ -5,27 +5,27 @@ from pathlib import Path
 
 from command import Command
 from consul import Consul
-from kuutamod import Kuutamod
+from kneard import Kuutamod
 from log_utils import Section, log_note
 from ports import Ports
 from setup_localnet import NearNetwork
 
 
 def test_maintenance_shutdown_metrics(
-    kuutamod: Path,
-    kuutamoctl: Path,
+    kneard: Path,
+    kneard_ctl: Path,
     command: Command,
     consul: Consul,
     near_network: NearNetwork,
     ports: Ports,
 ) -> None:
     leader = Kuutamod.run(
-        neard_home=near_network.home / "kuutamod0",
-        kuutamod=kuutamod,
+        neard_home=near_network.home / "kneard0",
+        kneard=kneard,
         ports=ports,
         near_network=near_network,
         command=command,
-        kuutamoctl=kuutamoctl,
+        kneard_ctl=kneard_ctl,
         consul=consul,
         debug=False,
     )
@@ -114,7 +114,7 @@ def test_maintenance_shutdown_metrics(
         log_note(proc.stdout)
         assert "no maintenance setting now" in proc.stdout
 
-    with Section("test kuutamod shutdown with neard"):
+    with Section("test kneard shutdown with neard"):
         pid = leader.neard_pid()
         assert pid is not None
 

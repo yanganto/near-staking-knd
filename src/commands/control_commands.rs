@@ -1,6 +1,6 @@
-//! Command to kuutamod
+//! Command to kneard
 
-/// Command to kuutamod
+/// Command to kneard
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(clap::Subcommand, PartialEq, Debug, Clone)]
 pub enum Command {

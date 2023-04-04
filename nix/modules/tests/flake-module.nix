@@ -12,7 +12,7 @@
     in
     {
       checks = lib.optionalAttrs pkgs.stdenv.isLinux {
-        kuutamod = import ./kuutamod.nix {
+        kneard = import ./kneard.nix {
           inherit self pkgs;
         };
         neard = import ./neard.nix {
