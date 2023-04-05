@@ -642,14 +642,22 @@ impl StateMachine {
         loop {
             tokio::select! {
                 res = validator.process().wait() => {
-                    match res {
-                        Ok(_) if SHUTDOWN_WITH_NEARD.load(Ordering::Acquire) => return Ok(StateType::Shutdown),  // maintenance shutdown
-                        Ok(res) => info!("Neard shutdown with {}", res),  // maintenance restart
-                        Err(err) => warn!("Cannot get status of neard process {}", err),
-                    }
+                    let state = match res {
+                        Ok(_) if SHUTDOWN_WITH_NEARD.load(Ordering::Acquire) => { // maintenance shutdown
+                            StateType::Shutdown
+                        },
+                        Ok(res) => { // maintenance restart
+                            info!("Neard shutdown with {}", res);
+                            StateType::Startup
+                        },
+                        Err(err) => {
+                            warn!("Cannot get status of neard process {}", err);
+                            StateType::Startup
+                        }
+                    };
                     drop(validator);
                     session.destroy().await;
-                    return Ok(StateType::Startup)
+                    return Ok(state)
                 }
                 _ = self.exit_signal_handler.recv() => {
                     drop(validator);
