@@ -49,11 +49,7 @@ impl CommandClient {
                 resp.status
             )
         };
-        Ok(Some(
-            parse_response(res)
-                .await
-                .context("cannot parse validator")?,
-        ))
+        parse_response(res).await.context("cannot parse validator")
     }
 
     /// Initiatiate or cancel maintenance shutdown or restart
