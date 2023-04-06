@@ -319,35 +319,65 @@ fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
 #[tokio::main]
 pub async fn main() -> Result<()> {
     let args = Args::parse();
-    let config = deploy::load_configuration(&args.config).with_context(|| {
-        format!(
-            "failed to parse configuration file: {}",
-            &args.config.display()
-        )
-    })?;
-    let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
 
     let res = match args.action {
-        Command::GenerateConfig(ref config_args) => {
-            generate_config(&args, config_args, &config, &flake)
+        Command::GenerateConfig(_)
+        | Command::Install(_)
+        | Command::DryUpdate(_)
+        | Command::Update(_)
+        | Command::Rollback(_) => {
+            let config = deploy::load_configuration(&args.config, true).with_context(|| {
+                format!(
+                    "failed to parse configuration file: {}",
+                    &args.config.display()
+                )
+            })?;
+            let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
+            match args.action {
+                Command::GenerateConfig(ref config_args) => {
+                    generate_config(&args, config_args, &config, &flake)
+                }
+                Command::Install(ref install_args) => install(&args, install_args, &config, &flake),
+                Command::DryUpdate(ref dry_update_args) => {
+                    dry_update(&args, dry_update_args, &config, &flake)
+                }
+                Command::Update(ref update_args) => {
+                    update(&args, update_args, &config, &flake).await
+                }
+                Command::Rollback(ref rollback_args) => {
+                    rollback(&args, rollback_args, &config, &flake).await
+                }
+                _ => unreachable!(),
+            }
         }
-        Command::Install(ref install_args) => install(&args, install_args, &config, &flake),
-        Command::DryUpdate(ref dry_update_args) => {
-            dry_update(&args, dry_update_args, &config, &flake)
-        }
-        Command::Update(ref update_args) => update(&args, update_args, &config, &flake).await,
-        Command::Rollback(ref rollback_args) => {
-            rollback(&args, rollback_args, &config, &flake).await
-        }
-        Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
-        Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
+        Command::Proxy(_)
+        | Command::Restart(_)
+        | Command::MaintenanceRestart(_)
+        | Command::MaintenanceShutdown(_)
+        | Command::Ssh(_) => {
+            let config = deploy::load_configuration(&args.config, false).with_context(|| {
+                format!(
+                    "failed to load configuration file: {}",
+                    &args.config.display()
+                )
+            })?;
+            match args.action {
+                Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
+                Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
 
-        // Service will restart after graceful shutdown
-        Command::Restart(ref args) => maintenance_operation(args, false, &config),
+                // Service will restart after graceful shutdown
+                Command::Restart(ref args) => maintenance_operation(args, false, &config),
 
-        // Deprecated
-        Command::MaintenanceRestart(ref args) => maintenance_operation(args, true, &config),
-        Command::MaintenanceShutdown(ref args) => maintenance_operation(args, false, &config),
+                // Deprecated
+                Command::MaintenanceRestart(ref maintenance_operation_args) => {
+                    maintenance_operation(maintenance_operation_args, true, &config)
+                }
+                Command::MaintenanceShutdown(ref maintenance_operation_args) => {
+                    maintenance_operation(maintenance_operation_args, false, &config)
+                }
+                _ => unreachable!(),
+            }
+        }
     };
     res.with_context(|| format!("kuutamo failed doing {:?}", args.action))
 }

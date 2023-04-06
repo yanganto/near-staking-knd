@@ -273,6 +273,7 @@ fn validate_host(
     host: &HostConfig,
     default: &HostConfig,
     working_directory: Option<&Path>,
+    load_keys: bool,
 ) -> Result<Host> {
     let name = name.to_string();
 
@@ -433,11 +434,12 @@ fn validate_host(
         .map(|v| v.to_path_buf());
 
     let validator_keys = match (
+        load_keys,
         validator_key_file,
         validator_node_key_file,
         &host.encrypted_kuutamo_app_file,
     ) {
-        (key_file, node_key_file, Some(encrypted_kuutamo_app_file)) => {
+        (true, key_file, node_key_file, Some(encrypted_kuutamo_app_file)) => {
             if let Some(ref key_file) = key_file {
                 warn!(
                     "using {}, and ignore {}",
@@ -461,7 +463,7 @@ fn validate_host(
                 ask_password_for(encrypted_kuutamo_app_file)?,
             )?)
         }
-        (Some(validator_key_file), Some(validator_node_key_file), _) => {
+        (true, Some(validator_key_file), Some(validator_node_key_file), _) => {
             let validator_key_path = if validator_key_file.is_absolute() {
                 validator_key_file
             } else {
@@ -481,10 +483,10 @@ fn validate_host(
                 validator_node_key_path,
             )?)
         }
-        (None, Some(_), _) => {
+        (true, None, Some(_), _) => {
             bail!("hosts.{name} has a validator_node_key_file but not a validator_key_file")
         }
-        (Some(_), None, _) => {
+        (true, Some(_), None, _) => {
             bail!("hosts.{name} has a validator_key_file but not a validator_node_key_file")
         }
         _ => None,
@@ -644,7 +646,11 @@ pub struct Config {
 }
 
 /// Parse toml configuration
-pub fn parse_config(content: &str, working_directory: Option<&Path>) -> Result<Config> {
+pub fn parse_config(
+    content: &str,
+    working_directory: Option<&Path>,
+    load_keys: bool,
+) -> Result<Config> {
     let mut config: ConfigFile = toml::from_str(content)?;
     let hosts = config
         .hosts
@@ -652,7 +658,13 @@ pub fn parse_config(content: &str, working_directory: Option<&Path>) -> Result<C
         .map(|(name, host)| {
             Ok((
                 name.clone(),
-                validate_host(name, host, &config.host_defaults, working_directory)?,
+                validate_host(
+                    name,
+                    host,
+                    &config.host_defaults,
+                    working_directory,
+                    load_keys,
+                )?,
             ))
         })
         .collect::<Result<_>>()?;
@@ -661,11 +673,12 @@ pub fn parse_config(content: &str, working_directory: Option<&Path>) -> Result<C
     Ok(Config { hosts, global })
 }
 
-/// Load configuration from path
-pub fn load_configuration(path: &Path) -> Result<Config> {
+/// Load and validate configuration from path
+/// The key will not provide without load_keys flag
+pub fn load_configuration(path: &Path, load_keys: bool) -> Result<Config> {
     let content = fs::read_to_string(path).context("Cannot read file")?;
     let working_directory = path.parent();
-    parse_config(&content, working_directory)
+    parse_config(&content, working_directory, load_keys)
 }
 
 #[test]
@@ -704,7 +717,7 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#;
 
-    let config = parse_config(config_str, None)?;
+    let config = parse_config(config_str, None, true)?;
     assert_eq!(config.global.flake, "github:myfork/near-staking-knd");
 
     let hosts = &config.hosts;
@@ -729,7 +742,7 @@ ipv6_address = "2605:9880:400::3"
     );
     let k = hosts["validator-00"].validator_keys.as_ref().unwrap();
     assert_eq!(k.validator_key, NearKeyFile {
-        account_id: String::from("kneard"),
+        account_id: String::from("kuutamod0"),
         public_key: String::from("ed25519:3XGPceVrDHPaysJ2LV2iftYjnRVAJm31GkJCnG4cGLp1"),
         secret_key: String::from("ed25519:22eQKH8uYsesa8qy5g4yCwmpr6hmy2srmUnC155EbV6vxSAkeMioZucdcGxnDQ1HHPtTRGpFGexUtPdKGEMV5BE1"),
     });
@@ -744,7 +757,7 @@ ipv6_address = "2605:9880:400::3"
 
     // we delete the node_key.json, `parse-config` will generate it for us:
     fs::remove_file("node_key.json").unwrap();
-    let config = parse_config(config_str, None)?;
+    let config = parse_config(config_str, None, true)?;
     let validator_node_key = &config.hosts["validator-00"]
         .validator_keys
         .as_ref()
@@ -791,7 +804,7 @@ fn test_validate_host() {
         ..Default::default()
     };
     assert_eq!(
-        validate_host("ipv4-only", &config, &HostConfig::default(), None).unwrap(),
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true).unwrap(),
         Host {
             name: "ipv4-only".to_string(),
             nixos_module: "single-node-validator-mainnet".to_string(),
@@ -815,18 +828,18 @@ fn test_validate_host() {
     // If `ipv6_address` is provied, the `ipv6_gateway` and `ipv6_cidr` should be provided too,
     // else the error will raise
     config.ipv6_address = Some("2607:5300:203:6cdf::".into());
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None).is_err());
+    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_err());
 
     config.ipv6_gateway = Some(
         "2607:5300:0203:6cff:00ff:00ff:00ff:00ff"
             .parse::<IpAddr>()
             .unwrap(),
     );
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None).is_err());
+    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_err());
 
     // The `ipv6_cidr` could be provided by subnet in address field
     config.ipv6_address = Some("2607:5300:203:6cdf::/64".into());
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None).is_ok());
+    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_ok());
 }
 
 #[test]
