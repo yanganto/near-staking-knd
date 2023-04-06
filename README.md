@@ -80,7 +80,7 @@ Options:
   -V, --version          Print version
 ```
 
-## New node install 
+## New Solo node install 
 
 1. New pool deployments can be done via the webapp UI at [near.kuutamo.app](https://near.kuutamo.app) - ([GitHub](https://github.com/kuutamolabs/near-staking-ui))
 
