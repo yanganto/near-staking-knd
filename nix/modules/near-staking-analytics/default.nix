@@ -1,5 +1,6 @@
 { config
 , lib
+, pkgs
 , ...
 }:
 let
@@ -46,8 +47,17 @@ in
         MAINNET_NEAR_ARCHIVAL_RPC_URL = "https://archival-rpc.mainnet.near.org";
       };
       serviceConfig = {
-        ExecStart = "${cfg.package}/bin/near-staking-analytics";
+        ExecStartPre = pkgs.writers.writeDash "generate_jwt" ''
+          if ! [ -e $STATE_DIRECTORY/jwt.token ]; then
+            base64 /dev/urandom | head -c 20 > $STATE_DIRECTORY/jwt.token
+          fi
+        '';
+        ExecStart = pkgs.writeShellScript "near-staking-analytics" ''
+          JWT_TOKEN_KEY=$(cat $STATE_DIRECTORY/jwt.token); export JWT_TOKEN_KEY
+          ${cfg.package}/bin/near-staking-analytics
+        '';
         DynamicUser = true;
+        StateDirectory = "near-staking-analytics";
       };
     };
     services.nginx = lib.mkIf (cfg.domain != null) {
