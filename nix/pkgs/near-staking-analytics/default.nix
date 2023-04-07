@@ -7,6 +7,8 @@ stdenv.mkDerivation rec {
     buildInputs = [ python3 ];
     sourceOverrides = {
       buildRequirePatchShebangs = true;
+      # bcrypt dependency
+      "@mapbox/node-pre-gyp" = npmlock2nix.v2.packageRequirePatchShebangs;
     };
   };
   installPhase = ''
