@@ -45,6 +45,62 @@ async fn show_active_validator(kuutamo_client: &CommandClient, args: &Args) -> R
     Ok(())
 }
 
+async fn set_maintenance_shutdown(
+    kuutamo_client: &CommandClient,
+    control_socket: &PathBuf,
+    operation_arg: MaintenanceOperationArgs,
+) -> Result<()> {
+    let MaintenanceOperationArgs {
+        minimum_length,
+        shutdown_at,
+        cancel,
+        wait,
+        ..
+    } = operation_arg;
+    if minimum_length.is_some() && shutdown_at.is_some() {
+        return Err(anyhow!(
+            "We can not guarantee minimum maintenance window for a specified shutdown block height"
+        ));
+    } else {
+        let r = kuutamo_client
+            .maintenance_operation(minimum_length, shutdown_at, cancel, false)
+            .await;
+        if r.is_ok() && wait {
+            // Wait for kuutamod to terminate
+            while UnixStream::connect(&control_socket).await.is_ok() {
+                sleep(Duration::from_millis(100)).await
+            }
+        }
+        r
+    }
+}
+
+async fn set_maintenance_restart(
+    kuutamo_client: &CommandClient,
+    operation_arg: MaintenanceOperationArgs,
+) -> Result<()> {
+    let MaintenanceOperationArgs {
+        minimum_length,
+        shutdown_at,
+        cancel,
+        wait,
+        ..
+    } = operation_arg;
+    if minimum_length.is_some() && shutdown_at.is_some() {
+        Err(anyhow!(
+            "We can not guarantee minimum maintenance window for a specified shutdown block height"
+        ))
+    } else {
+        let r = kuutamo_client
+            .maintenance_operation(minimum_length, shutdown_at, cancel, true)
+            .await;
+        if r.is_ok() && wait {
+            eprintln!("waiting for neard restart is not implemented");
+        }
+        r
+    }
+}
+
 async fn show_maintenance_status(kuutamo_client: &CommandClient) -> Result<()> {
     Ok(println!("{}", &kuutamo_client.maintenance_status().await?))
 }
@@ -56,46 +112,11 @@ pub async fn main() {
     let kuutamo_client = CommandClient::new(&args.control_socket);
     let res = match args.action {
         Command::ActiveValidator => show_active_validator(&kuutamo_client, &args).await,
-        Command::MaintenanceShutdown(MaintenanceOperationArgs {
-            minimum_length,
-            shutdown_at,
-            cancel,
-            wait,
-            ..
-        }) => {
-            if minimum_length.is_some() && shutdown_at.is_some() {
-                Err(anyhow!("We can not guarantee minimum maintenance window for a specified shutdown block height"))
-            } else {
-                let r = kuutamo_client
-                    .maintenance_operation(minimum_length, shutdown_at, cancel, false)
-                    .await;
-                if r.is_ok() && wait {
-                    // Wait for kneard to terminate
-                    while UnixStream::connect(&args.control_socket).await.is_ok() {
-                        sleep(Duration::from_millis(100)).await
-                    }
-                }
-                r
-            }
+        Command::MaintenanceShutdown(operation_arg) => {
+            set_maintenance_shutdown(&kuutamo_client, &args.control_socket, operation_arg).await
         }
-        Command::MaintenanceRestart(MaintenanceOperationArgs {
-            minimum_length,
-            shutdown_at,
-            cancel,
-            wait,
-            ..
-        }) => {
-            if minimum_length.is_some() && shutdown_at.is_some() {
-                Err(anyhow!("We can not guarantee minimum maintenance window for a specified shutdown block height"))
-            } else {
-                let r = kuutamo_client
-                    .maintenance_operation(minimum_length, shutdown_at, cancel, true)
-                    .await;
-                if r.is_ok() && wait {
-                    eprintln!("waiting for neard restart is not implemented");
-                }
-                r
-            }
+        Command::MaintenanceRestart(operation_arg) => {
+            set_maintenance_restart(&kuutamo_client, operation_arg).await
         }
         Command::MaintenanceStatus => show_maintenance_status(&kuutamo_client).await,
     };
