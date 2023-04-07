@@ -1,9 +1,18 @@
-{ near-staking-ui, stdenv, npmlock2nix, nodejs }:
+{ near-staking-ui, stdenv, npmlock2nix, nodejs, python3 }:
 stdenv.mkDerivation rec {
   name = "near-staking-analytics";
   src = near-staking-ui;
   node_modules = npmlock2nix.v2.node_modules {
     src = src + "/backend";
+    buildInputs = [
+      # node-pre-gyp dependency
+      python3
+    ];
+
+    # bcrypt dependency
+    sourceOverrides = {
+      "@mapbox/node-pre-gyp" = npmlock2nix.v2.packageRequirePatchShebangs;
+    };
   };
   installPhase = ''
     cd backend
