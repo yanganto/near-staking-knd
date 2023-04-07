@@ -4,13 +4,10 @@ stdenv.mkDerivation rec {
   src = near-staking-ui;
   node_modules = npmlock2nix.v2.node_modules {
     src = src + "/backend";
-    buildInputs = [
-      # node-pre-gyp dependency
-      python3
-    ];
-
-    # bcrypt dependency
+    buildInputs = [ python3 ];
     sourceOverrides = {
+      buildRequirePatchShebangs = true;
+      # bcrypt dependency
       "@mapbox/node-pre-gyp" = npmlock2nix.v2.packageRequirePatchShebangs;
     };
   };
