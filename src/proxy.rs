@@ -57,7 +57,7 @@ pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
         if status.success() {
             proxy(host, local_port).await?;
         } else {
-            bail!("kuutamod is not running, nothing worth proxy")
+            bail!("kuutamod is not running, cannot proxy rpc service. Check `systemctl status kuutamod` on the server for more details")
         }
     }
     Ok(())
