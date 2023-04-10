@@ -41,7 +41,7 @@ pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
 
     if VersionReq::parse(">=0.2")?.matches(&version) {
         tokio::select! {
-            _ = async_timeout_ssh(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--watch".into()], true) => println!("Could not proxy, because neard does not provide rpc service now."),
+            _ = async_timeout_ssh(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--watch".into()], true) => println!("rpc service of neard is not running, cannot proxy rpc service. Check `systemctl status kuutamod` on the server for more details."),
             _ = proxy(host, local_port) => (),
         }
     } else {
@@ -57,7 +57,7 @@ pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
         if status.success() {
             proxy(host, local_port).await?;
         } else {
-            bail!("kuutamod is not running, cannot proxy rpc service. Check `systemctl status kuutamod` on the server for more details")
+            bail!("kuutamod is not running, cannot proxy rpc service. Check `systemctl status kuutamod` on the server for more details.")
         }
     }
     Ok(())
