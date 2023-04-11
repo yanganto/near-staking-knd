@@ -121,10 +121,12 @@ enum Command {
     Rollback(RollbackArgs),
     /// Proxy remote rpc to local
     Proxy(ProxyArgs),
-    /// Ask Kuutamod to schedule a shutdown in maintenance windows, then it will be restart
+    /// Schedule a restart in a maintenance window
+    Restart(control_commands::MaintenanceOperationArgs),
+    /// (Deprecated) Ask kneard to schedule a shutdown in maintenance windows, then it will be restart
     /// due to supervision by kneard
     MaintenanceRestart(control_commands::MaintenanceOperationArgs),
-    /// Ask Kuutamod to schedule a shutdown in maintenance windows
+    /// (Deprecated) Ask kneard to schedule a shutdown in maintenance windows
     MaintenanceShutdown(control_commands::MaintenanceOperationArgs),
     /// SSH into a host
     Ssh(SshArgs),
@@ -338,9 +340,14 @@ pub async fn main() -> Result<()> {
             rollback(&args, rollback_args, &config, &flake).await
         }
         Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
+        Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
+
+        // Service will restart after graceful shutdown
+        Command::Restart(ref args) => maintenance_operation(args, false, &config),
+
+        // Deprecated
         Command::MaintenanceRestart(ref args) => maintenance_operation(args, true, &config),
         Command::MaintenanceShutdown(ref args) => maintenance_operation(args, false, &config),
-        Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
     };
     res.with_context(|| format!("kuutamo failed doing {:?}", args.action))
 }
