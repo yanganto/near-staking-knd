@@ -105,11 +105,11 @@ def write_near_key(home: Path, account_id: str) -> None:
     )
 
 
-def setup_kuutamod_home(home: Path) -> None:
+def setup_kneard_home(home: Path) -> None:
     write_near_key(home.parent, home.name)
     # Delete validator keys as those are provided by neard!
     (home / "validator_key.json").unlink()
-    # kuutamod will either place voter_node_key or the validator node key at node_key.json
+    # kneard will either place voter_node_key or the validator node key at node_key.json
     (home / "node_key.json").rename(home / "voter_node_key.json")
 
 
@@ -117,8 +117,8 @@ def setup_additional_keys(near_home: Path, num_nodes: int) -> None:
     write_near_key(near_home, "owner")
     write_near_key(near_home, "validator")
 
-    setup_kuutamod_home(near_home / "kuutamod0")
-    setup_kuutamod_home(near_home / "kuutamod1")
+    setup_kneard_home(near_home / "kneard0")
+    setup_kneard_home(near_home / "kneard1")
 
     genesis_path = near_home / "node0" / "genesis.json"
 
@@ -148,8 +148,8 @@ def setup_additional_keys(near_home: Path, num_nodes: int) -> None:
     for i in range(num_nodes):
         (near_home / f"node{i}" / "genesis.json").write_text(genesis_content)
 
-    (near_home / "kuutamod0" / "genesis.json").write_text(genesis_content)
-    (near_home / "kuutamod1" / "genesis.json").write_text(genesis_content)
+    (near_home / "kneard0" / "genesis.json").write_text(genesis_content)
+    (near_home / "kneard1" / "genesis.json").write_text(genesis_content)
 
 
 @dataclass
@@ -211,7 +211,7 @@ def setup_network_config(near_home: Path, start_port: int) -> NearNetwork:
     nodes = []
     with open(near_tmp.joinpath("nodes"), "w") as f:
         node_names = [f"node{i}" for i in range(num_nodes)]
-        node_names.extend([f"kuutamod{i}" for i in range(num_kuutamo_nodes)])
+        node_names.extend([f"kneard{i}" for i in range(num_kuutamo_nodes)])
         for i, name in enumerate(node_names):
             path = near_tmp / name / "config.json"
 

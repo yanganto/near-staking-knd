@@ -34,7 +34,7 @@ impl CommandClient {
         let url = Uri::new(&self.socket_path, "/active_validator").into();
         let res = Client::unix().get(url).await.with_context(|| {
             format!(
-                "failed to connect to kuutamod via {}",
+                "failed to connect to kneard via {}",
                 self.socket_path.display()
             )
         })?;
@@ -49,11 +49,7 @@ impl CommandClient {
                 resp.status
             )
         };
-        Ok(Some(
-            parse_response(res)
-                .await
-                .context("cannot parse validator")?,
-        ))
+        parse_response(res).await.context("cannot parse validator")
     }
 
     /// Initiatiate or cancel maintenance shutdown or restart
@@ -83,7 +79,7 @@ impl CommandClient {
 
         let res = Client::unix().request(req).await.with_context(|| {
             format!(
-                "failed to connect to kuutamod via {}",
+                "failed to connect to kneard via {}",
                 self.socket_path.display()
             )
         })?;
@@ -110,7 +106,7 @@ impl CommandClient {
         let url = Uri::new(&self.socket_path, "/maintenance_status").into();
         let res = Client::unix().get(url).await.with_context(|| {
             format!(
-                "failed to connect to kuutamod via {}",
+                "failed to connect to kneard via {}",
                 self.socket_path.display()
             )
         })?;

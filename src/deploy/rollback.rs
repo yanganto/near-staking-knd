@@ -3,10 +3,7 @@ use log::info;
 
 use crate::deploy::nixos_rebuild;
 
-use super::{
-    utils::{handle_maintenance_shutdown, timeout_ssh},
-    Host, NixosFlake,
-};
+use super::{utils::handle_maintenance_shutdown, Host, NixosFlake};
 
 /// Rollback a nixos machine
 pub async fn rollback(
@@ -23,14 +20,9 @@ pub async fn rollback(
             nixos_rebuild("rollback", host, flake, false)?;
         } else {
             nixos_rebuild("build", host, flake, true)?;
-            let r = match timeout_ssh(host, &["systemctl", "disable", "kuutamod"], true) {
-                Ok(_) => handle_maintenance_shutdown(host, required_time_in_blocks)
-                    .await
-                    .and_then(|_| nixos_rebuild("rollback", host, flake, true)),
-                Err(e) => Err(e),
-            };
-            let _ = timeout_ssh(host, &["systemctl", "enable", "kuutamod"], true)?;
-            r?
+            handle_maintenance_shutdown(host, required_time_in_blocks)
+                .await
+                .and_then(|_| nixos_rebuild("rollback", host, flake, true))?
         }
     }
     Ok(())

@@ -27,7 +27,7 @@ jobs:
         run: nix run --inputs-from .# nixpkgs#nixpkgs-fmt -- .
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Upgrade near-cli
           branch: near-cli

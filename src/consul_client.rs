@@ -190,7 +190,7 @@ impl ConsulClient {
         map.insert("TTL", &ttl);
         // Delete old locks
         map.insert("Behavior", "delete");
-        // Delete locks without delay if ttl or session is expired. kuutamod
+        // Delete locks without delay if ttl or session is expired. kneard
         // will stop validating before the ttl expires.
         map.insert("LockDelay", "0s");
 

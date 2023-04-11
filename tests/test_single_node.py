@@ -21,7 +21,7 @@ def assert_key_equal(expected: Path, current: Path) -> None:
 
 
 def test_single_node(
-    kuutamod: Path,
+    kneard: Path,
     command: Command,
     consul_with_acls: Consul,
     near_network: NearNetwork,
@@ -32,7 +32,7 @@ def test_single_node(
     validator_key = near_network.home / "node3" / "validator_key.json"
     validator_node_key = near_network.home / "node3" / "node_key.json"
 
-    neard_home = near_network.home / "kuutamod0"
+    neard_home = near_network.home / "kneard0"
     voter_node_key = neard_home / "voter_node_key.json"
     exporter_port = ports.allocate(3)
     validator_port = exporter_port + 1
@@ -41,7 +41,7 @@ def test_single_node(
     consul_token = consul_with_acls.management_token
     assert consul_token is not None
     temporary_file.write(consul_token)
-    # Check if kuutamod handles trailing newline gracefully
+    # Check if kneard handles trailing newline gracefully
     temporary_file.write("\n")
     temporary_file.flush()
 
@@ -60,11 +60,11 @@ def test_single_node(
         RUST_BACKTRACE="1",
     )
 
-    proc = command.run([str(kuutamod)], extra_env=env)
+    proc = command.run([str(kneard)], extra_env=env)
     try:
         wait_for_port("127.0.0.1", exporter_port, proc=proc)
 
-        # kuutamod reduces its oom score a bit
+        # kneard reduces its oom score a bit
         assert Path(f"/proc/{proc.pid}/oom_score_adj").read_text() == "100\n"
 
         # Should start on voter port (This check might racy)
@@ -91,6 +91,6 @@ def test_single_node(
         assert res.get('kuutamod_state{type="Syncing"}') == "0"
         assert res.get('kuutamod_state{type="Voting"}') == "0"
     finally:
-        # terminate kuutamod -> neard properly so we can cleanup the temporary directory
+        # terminate kneard -> neard properly so we can cleanup the temporary directory
         proc.send_signal(signal.SIGTERM)
         proc.wait()

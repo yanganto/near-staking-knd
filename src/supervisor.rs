@@ -55,7 +55,7 @@ const CONSUL_ACQUIRE_LEADER_FREQUENCY: Duration = Duration::from_secs(1);
 const CONSUL_LEADER_TIMEOUT: Duration = Duration::from_secs(25);
 /// How often we query neard's `/status` endpoint
 const NEARD_STATUS_FREQUENCY: Duration = Duration::from_secs(1);
-/// Shutdown kuutamod if neard shutdown as expected
+/// Shutdown kneard if neard shutdown as expected
 pub static SHUTDOWN_WITH_NEARD: AtomicBool = AtomicBool::new(false);
 
 // When adding states also update `initialize_state_gauge`
@@ -642,14 +642,22 @@ impl StateMachine {
         loop {
             tokio::select! {
                 res = validator.process().wait() => {
-                    match res {
-                        Ok(_) if SHUTDOWN_WITH_NEARD.load(Ordering::Acquire) => return Ok(StateType::Shutdown),  // maintenance shutdown
-                        Ok(res) => info!("Neard shutdown with {}", res),  // maintenance restart
-                        Err(err) => warn!("Cannot get status of neard process {}", err),
-                    }
+                    let state = match res {
+                        Ok(_) if SHUTDOWN_WITH_NEARD.load(Ordering::Acquire) => { // maintenance shutdown
+                            StateType::Shutdown
+                        },
+                        Ok(res) => { // maintenance restart
+                            info!("Neard shutdown with {}", res);
+                            StateType::Startup
+                        },
+                        Err(err) => {
+                            warn!("Cannot get status of neard process {}", err);
+                            StateType::Startup
+                        }
+                    };
                     drop(validator);
                     session.destroy().await;
-                    return Ok(StateType::Startup)
+                    return Ok(state)
                 }
                 _ = self.exit_signal_handler.recv() => {
                     drop(validator);

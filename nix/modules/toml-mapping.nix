@@ -17,10 +17,10 @@ in
 
     kuutamo.disko.disks = cfg.disks;
 
-    # FIXME: this should be provided by kuutamoctl
+    # FIXME: this should be provided by kneard-ctl
     users.extraUsers.root.openssh.authorizedKeys.keys = cfg.public_ssh_keys;
 
-    kuutamo.kuutamod.publicAddress = cfg.ipv6_address or cfg.ipv4_address;
+    kuutamo.kneard.publicAddress = cfg.ipv6_address or cfg.ipv4_address;
 
     kuutamo.network.macAddress = cfg.mac_address or null;
     kuutamo.network.interface = cfg.interface;

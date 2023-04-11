@@ -1,6 +1,6 @@
-//! Command to kuutamod
+//! Command to kneard
 
-/// Command to kuutamod
+/// Command to kneard
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(clap::Subcommand, PartialEq, Debug, Clone)]
 pub enum Command {
@@ -29,7 +29,7 @@ pub struct MaintenanceOperationArgs {
     #[arg(long)]
     pub shutdown_at: Option<u64>,
 
-    /// Cancel the maintenance shutdwon setting
+    /// Cancel the maintenance shutdown setting
     #[arg(long)]
     pub cancel: bool,
 

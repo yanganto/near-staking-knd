@@ -37,24 +37,24 @@ RELEASE_BUILD = os.environ.get("KUUTAMOD_BIN")
 
 
 @pytest.fixture
-def kuutamod(cargo: Cargo) -> Path:
+def kneard(cargo: Cargo) -> Path:
     global BUILD
     global RELEASE_BUILD
     if RELEASE_BUILD is not None:
-        return Path(RELEASE_BUILD).joinpath("kuutamod")
+        return Path(RELEASE_BUILD).joinpath("kneard")
 
     if BUILD is None:
         BUILD = cargo.build()
-    return BUILD.joinpath("kuutamod")
+    return BUILD.joinpath("kneard")
 
 
 @pytest.fixture
-def kuutamoctl(cargo: Cargo) -> Path:
+def kneard_ctl(cargo: Cargo) -> Path:
     global BUILD
     global RELEASE_BUILD
     if RELEASE_BUILD is not None:
-        return Path(RELEASE_BUILD).joinpath("kuutamoctl")
+        return Path(RELEASE_BUILD).joinpath("kneard-ctl")
 
     if BUILD is None:
         BUILD = cargo.build()
-    return BUILD.joinpath("kuutamoctl")
+    return BUILD.joinpath("kneard-ctl")

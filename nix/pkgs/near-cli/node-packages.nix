@@ -4,13 +4,13 @@
 
 let
   sources = {
-    "@babel/code-frame-7.18.6" = {
+    "@babel/code-frame-7.21.4" = {
       name = "_at_babel_slash_code-frame";
       packageName = "@babel/code-frame";
-      version = "7.18.6";
+      version = "7.21.4";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.18.6.tgz";
-        sha512 = "TDCmlK5eOvH+eH7cdAFlNXeVJqWIQ7gW9tY1GJIpUtFb6CmjVyq2VM3u71bOyR8CRihcCgMUYoDNyLXao3+70Q==";
+        url = "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.21.4.tgz";
+        sha512 = "LYvhNKfwWSPpocw8GI7gpK2nq3HSDuEPC/uSYaALSJu9xjsalaaYFOq0Pwt5KmVqwEbZlDu81aLXwBOmD/Fv9g==";
       };
     };
     "@babel/helper-validator-identifier-7.19.1" = {
@@ -67,13 +67,13 @@ let
         sha512 = "4w+P0VkbjzEXC7kv8T1GJ/9AVaP9I6uasMZ/JcdwZBS3qwvKo5A5z9uGhP5c7TvItzcmPb44b5Mw2kT+WjUuAA==";
       };
     };
-    "@ledgerhq/devices-8.0.0" = {
+    "@ledgerhq/devices-8.0.1" = {
       name = "_at_ledgerhq_slash_devices";
       packageName = "@ledgerhq/devices";
-      version = "8.0.0";
+      version = "8.0.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/devices/-/devices-8.0.0.tgz";
-        sha512 = "gSnRT0KPca+LIpaC6D/WZQjOAlSI5uCvK1dmxXtKhODLAj735rX5Z3SnGnLUavRCHNbUi44FzgvloF5BKTkh7A==";
+        url = "https://registry.npmjs.org/@ledgerhq/devices/-/devices-8.0.1.tgz";
+        sha512 = "8uuyR8DGowYBLatur+MyJtRJ8RYDWSFFqGnNmgBBdlRG6VPf9vjhrFZlmYqukWesPwkZNZstP475W4TS+j6EFw==";
       };
     };
     "@ledgerhq/errors-5.50.0" = {
@@ -85,13 +85,13 @@ let
         sha512 = "gu6aJ/BHuRlpU7kgVpy2vcYk6atjB4iauP2ymF7Gk0ez0Y/6VSMVSJvubeEQN+IV60+OBK0JgeIZG7OiHaw8ow==";
       };
     };
-    "@ledgerhq/errors-6.12.3" = {
+    "@ledgerhq/errors-6.12.4" = {
       name = "_at_ledgerhq_slash_errors";
       packageName = "@ledgerhq/errors";
-      version = "6.12.3";
+      version = "6.12.4";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/errors/-/errors-6.12.3.tgz";
-        sha512 = "djiMSgB/7hnK3aLR/c5ZMMivxjcI7o2+y3VKcsZZpydPoVf9+FXqeJPRfOwmJ0JxbQ//LinUfWpIfHew8LkaVw==";
+        url = "https://registry.npmjs.org/@ledgerhq/errors/-/errors-6.12.4.tgz";
+        sha512 = "qi5poMrcIuFuivdzRjjQsNp7rRwUA5v3eo6D4yEy+l+w8wT4d4JtQ5u1TbrlGfFHfgLq7Lv6dsvh2ooLyWTyfg==";
       };
     };
     "@ledgerhq/hw-transport-5.51.1" = {
@@ -103,31 +103,31 @@ let
         sha512 = "6wDYdbWrw9VwHIcoDnqWBaDFyviyjZWv6H9vz9Vyhe4Qd7TIFmbTl/eWs6hZvtZBza9K8y7zD8ChHwRI4s9tSw==";
       };
     };
-    "@ledgerhq/hw-transport-6.28.1" = {
+    "@ledgerhq/hw-transport-6.28.2" = {
       name = "_at_ledgerhq_slash_hw-transport";
       packageName = "@ledgerhq/hw-transport";
-      version = "6.28.1";
+      version = "6.28.2";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.28.1.tgz";
-        sha512 = "RaZe+abn0zBIz82cE9tp7Y7aZkHWWbEaE2yJpfxT8AhFz3fx+BU0kLYzuRN9fmA7vKueNJ1MTVUCY+Ex9/CHSQ==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.28.2.tgz";
+        sha512 = "2LxQdZnhSzu394brKuUZIWfuT2YAyNI3glRMf8+yHx3wUFqi10v8NzII99SHDyT8tN3Ovzmq+hbGHvrR2PqYRA==";
       };
     };
-    "@ledgerhq/hw-transport-node-hid-6.27.12" = {
+    "@ledgerhq/hw-transport-node-hid-6.27.13" = {
       name = "_at_ledgerhq_slash_hw-transport-node-hid";
       packageName = "@ledgerhq/hw-transport-node-hid";
-      version = "6.27.12";
+      version = "6.27.13";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-6.27.12.tgz";
-        sha512 = "Y3GGgZK27K587P3671bCF4pbbfFYq6eVECnxoxtVwt0kdquRfpt3mxWlU51LIL+XgDEwBwt2QdB+6eyLHmWKQA==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-6.27.13.tgz";
+        sha512 = "j4c1UOMylX9cE9ebTh+qqMfzZDJpK8WZ7/kalxdY/MHWQcO+F2XAMvEqdZOaMjSIhI0vbgL/OoEvO2nxGFhObA==";
       };
     };
-    "@ledgerhq/hw-transport-node-hid-noevents-6.27.12" = {
+    "@ledgerhq/hw-transport-node-hid-noevents-6.27.13" = {
       name = "_at_ledgerhq_slash_hw-transport-node-hid-noevents";
       packageName = "@ledgerhq/hw-transport-node-hid-noevents";
-      version = "6.27.12";
+      version = "6.27.13";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.27.12.tgz";
-        sha512 = "f99lIcdEz78jHVfr57Vl9sgP/WpAuM3X26lLDSTKmNHDxLSx7IQaK/eJOcFG4XLk5K7dK/zoyXqq13zcLL2tPg==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.27.13.tgz";
+        sha512 = "Lq85zoc95eb5npudlgTARVrB57jbk8oZ8KuyVOovNm1AjR0OrYfl0iCqw49h+SL/UFWWVyBisLg6IOYCpj1SNQ==";
       };
     };
     "@ledgerhq/hw-transport-u2f-5.36.0-deprecated" = {
@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-18.15.6" = {
+    "@types/node-18.15.11" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "18.15.6";
+      version = "18.15.11";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-18.15.6.tgz";
-        sha512 = "YErOafCZpK4g+Rp3Q/PBgZNAsWKGunQTm9FA3/Pbcm0VCriTEzcrutQ/SxSc0rytAp0NoFWue669jmKhEtd0sA==";
+        url = "https://registry.npmjs.org/@types/node/-/node-18.15.11.tgz";
+        sha512 = "E5Kwq2n4SbMzQOn6wnmBjuK9ouqlURrcZDVfbo9ftDDTFt3nk7ZKK4GMOzoYgnpQJKcxwQw+lGaBvvlMo0qN/Q==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -1678,13 +1678,13 @@ let
         sha512 = "NpmrnejpY1AdlRpDZ0schJQJtfBaoUheRfiYtQpcq9TkwPgqKZCRULV5L3hHmLc0ep7KRtikbPQ9R2ztN/3cyQ==";
       };
     };
-    "node-abi-3.33.0" = {
+    "node-abi-3.35.0" = {
       name = "node-abi";
       packageName = "node-abi";
-      version = "3.33.0";
+      version = "3.35.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.33.0.tgz";
-        sha512 = "7GGVawqyHF4pfd0YFybhv/eM9JwTtPqx0mAanQ146O3FlSh3pA24zf9IRQTOsfTSqXTNzPSP5iagAJ94jjuVog==";
+        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.35.0.tgz";
+        sha512 = "jAlSOFR1Bls963NmFwxeQkNTzqjUF0NThm8Le7eRIRGzFUVJuMOFZDLv5Y30W/Oaw+KEebEJLAigwO9gQHoEmw==";
       };
     };
     "node-addon-api-3.2.1" = {
@@ -2011,13 +2011,13 @@ let
         sha512 = "b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==";
       };
     };
-    "semver-7.3.8" = {
+    "semver-7.4.0" = {
       name = "semver";
       packageName = "semver";
-      version = "7.3.8";
+      version = "7.4.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/semver/-/semver-7.3.8.tgz";
-        sha512 = "NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==";
+        url = "https://registry.npmjs.org/semver/-/semver-7.4.0.tgz";
+        sha512 = "RgOxM8Mw+7Zus0+zcLEUn8+JfoLpj/huFTItQy2hsM4khuC1HYRDp0cU482Ewn/Fcy6bCjufD8vAj7voC66KQw==";
       };
     };
     "semver-diff-3.1.1" = {
@@ -2482,7 +2482,7 @@ in
       sha512 = "0EaNAw5SKSIIJrJajG32CNMGfBtZTgIrOVKSXBTWpvo+F0OozsbvuO4UG3ZSRNThXHijxybp58SqPiU3JuzXGA==";
     };
     dependencies = [
-      sources."@babel/code-frame-7.18.6"
+      sources."@babel/code-frame-7.21.4"
       sources."@babel/helper-validator-identifier-7.19.1"
       (sources."@babel/highlight-7.18.6" // {
         dependencies = [
@@ -2497,11 +2497,11 @@ in
       sources."@jest/environment-27.5.1"
       sources."@jest/fake-timers-27.5.1"
       sources."@jest/types-27.5.1"
-      sources."@ledgerhq/devices-8.0.0"
-      sources."@ledgerhq/errors-6.12.3"
-      sources."@ledgerhq/hw-transport-6.28.1"
-      sources."@ledgerhq/hw-transport-node-hid-6.27.12"
-      sources."@ledgerhq/hw-transport-node-hid-noevents-6.27.12"
+      sources."@ledgerhq/devices-8.0.1"
+      sources."@ledgerhq/errors-6.12.4"
+      sources."@ledgerhq/hw-transport-6.28.2"
+      sources."@ledgerhq/hw-transport-node-hid-6.27.13"
+      sources."@ledgerhq/hw-transport-node-hid-noevents-6.27.13"
       (sources."@ledgerhq/hw-transport-u2f-5.36.0-deprecated" // {
         dependencies = [
           sources."@ledgerhq/devices-5.51.1"
@@ -2535,7 +2535,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-18.15.6"
+      sources."@types/node-18.15.11"
       sources."@types/stack-utils-2.0.1"
       sources."@types/yargs-16.0.5"
       sources."@types/yargs-parser-21.0.0"
@@ -2706,7 +2706,7 @@ in
       sources."near-hd-key-1.2.1"
       sources."near-ledger-js-0.2.1"
       sources."near-seed-phrase-0.2.0"
-      sources."node-abi-3.33.0"
+      sources."node-abi-3.35.0"
       sources."node-addon-api-3.2.1"
       sources."node-fetch-2.6.9"
       sources."node-gyp-build-4.6.0"
@@ -2753,7 +2753,7 @@ in
       sources."rxjs-6.6.7"
       sources."safe-buffer-5.2.1"
       sources."safer-buffer-2.1.2"
-      sources."semver-7.3.8"
+      sources."semver-7.4.0"
       (sources."semver-diff-3.1.1" // {
         dependencies = [
           sources."semver-6.3.0"

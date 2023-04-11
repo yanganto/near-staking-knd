@@ -22,7 +22,7 @@ jobs:
           bash -x ./.github/workflows/update-neard-configuration.sh ${{matrix.network}}
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Upgrade near configuration for ${{matrix.network}}
           branch: near-config-${{matrix.network}}
@@ -47,7 +47,7 @@ jobs:
           curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/genesis.json > nix/modules/neard/${{matrix.network}}/genesis.json
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Upgrade near configuration for ${{matrix.network}}
           branch: near-genesis-${{matrix.network}}

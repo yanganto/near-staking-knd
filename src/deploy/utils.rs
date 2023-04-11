@@ -57,6 +57,8 @@ async fn async_timeout_ssh(
 async fn watch_maintenance_status(host: &Host, flag: &AtomicBool) {
     while flag.load(Ordering::Relaxed) {
         sleep(Duration::from_secs(1)).await;
+        // TODO:
+        // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
         if let Ok(output) = timeout_ssh(host, &["kuutamoctl", "maintenance-status"], true) {
             let _ = tokio::io::stdout().write_all(&output.stdout).await;
         }
@@ -72,6 +74,8 @@ pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u
         r = async_timeout_ssh(
             host,
             vec![
+                // TODO:
+                // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
                 "kuutamoctl".into(),
                 "maintenance-shutdown".into(),
                 "--wait".to_string(),

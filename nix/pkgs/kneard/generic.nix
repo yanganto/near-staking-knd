@@ -9,7 +9,7 @@
 }:
 { cargoLock, enableLint, additionalBuildFlags ? [ ] }:
 rustPlatform.buildRustPackage ({
-  name = "kuutamod" + lib.optionalString enableLint "-clippy";
+  name = "kneard" + lib.optionalString enableLint "-clippy";
   # avoid trigger rebuilds if unrelated files are changed
   src = runCommand "src" { } ''
     install -D ${../../../Cargo.toml} $out/Cargo.toml
@@ -21,7 +21,12 @@ rustPlatform.buildRustPackage ({
   buildInputs = [ openssl ];
   nativeBuildInputs = [ pkg-config python3.pkgs.pytest ] ++ lib.optionals enableLint [ clippy mypy ];
 
-  cargoBuildFlags = [ "--bin" "kuutamoctl" "--bin" "kuutamod" ] ++ additionalBuildFlags;
+  cargoBuildFlags = [ "--bin" "kneard-ctl" "--bin" "kneard" ] ++ additionalBuildFlags;
+
+  # allow rollback from v0.2.* to v0.1.0
+  postInstall = ''
+    ln -s $out/bin/kneard-ctl $out/bin/kuutamoctl
+  '';
 
   doCheck = false;
 

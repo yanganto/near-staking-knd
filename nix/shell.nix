@@ -50,20 +50,14 @@
             pkgs.clippy
             pkgs.mold
 
-            # kuutamod deps
+            # kneard deps
             self'.packages.neard
             pkgs.consul
             pkgs.hivemind
-            (pkgs.writeShellScriptBin "local-near" ''
-              export NEAR_ENV=local
-              export NEAR_CLI_LOCALNET_RPC_SERVER_URL=http://localhost:33300
-              # direnv sets PROJ_ROOT
-              exec "${pkgs.nodePackages.near-cli}/bin/near" --keyPath $PROJ_ROOT/src/kuutamod/.data/near/localnet/owner/validator_key.json "$@"
-            '')
           ]
-          ++ self'.packages.kuutamod.buildInputs;
+          ++ self'.packages.kneard.buildInputs;
         CORE_CONTRACTS = self.inputs.core-contracts;
-        inherit (self'.packages.kuutamod) nativeBuildInputs;
+        inherit (self'.packages.kneard) nativeBuildInputs;
         NEARD_VERSION = "${self'.packages.neard.version}";
         passthru = {
           inherit formatters;
