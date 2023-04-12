@@ -2,7 +2,7 @@
 //!
 
 use crate::deploy::Host;
-use crate::utils::ssh::async_timeout_ssh;
+use crate::utils::ssh::ssh_with_timeout_async;
 use anyhow::{anyhow, bail, Context, Result};
 use semver::{Version, VersionReq};
 use std::process::{Command, Output};
@@ -30,7 +30,7 @@ async fn proxy(host: &Host, local_port: u16) -> Result<()> {
 /// Proxy RPC service
 pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
     let Output { stdout, .. } =
-        async_timeout_ssh(host, vec!["kuutamoctl".into(), "-V".into()], true)
+        ssh_with_timeout_async(host, vec!["kuutamoctl".into(), "-V".into()], true)
             .await
             .context("Failed to fetch kuutamoctl version")?;
     let version_str =
@@ -41,13 +41,13 @@ pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
 
     if VersionReq::parse(">=0.2")?.matches(&version) {
         tokio::select! {
-            _ = async_timeout_ssh(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--watch".into()], true) => println!("rpc service of neard is not running, cannot proxy rpc service. Check `systemctl status kuutamod` on the server for more details."),
+            _ = ssh_with_timeout_async(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--watch".into()], true) => println!("rpc service of neard is not running, cannot proxy rpc service. Check `systemctl status kuutamod` on the server for more details."),
             _ = proxy(host, local_port) => (),
         }
     } else {
         // check on kuutamod if there is no check-rpc command
         println!("{:} version is not supported for check rpc service status, so we check on kuutamod status before proxy", version_str.unwrap_or("Current"));
-        let Output { status, .. } = async_timeout_ssh(
+        let Output { status, .. } = ssh_with_timeout_async(
             host,
             vec!["systemctl".into(), "is-active".into(), "kuutamod".into()],
             true,

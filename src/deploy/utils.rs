@@ -1,4 +1,4 @@
-use crate::utils::ssh::{async_timeout_ssh, timeout_ssh};
+use crate::utils::ssh::{ssh_with_timeout, ssh_with_timeout_async};
 ///! utils for deploy and control remote machines
 use anyhow::Result;
 use std::process::Output;
@@ -14,7 +14,7 @@ async fn watch_maintenance_status(host: &Host, flag: &AtomicBool) {
         sleep(Duration::from_secs(1)).await;
         // TODO:
         // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
-        if let Ok(output) = timeout_ssh(host, &["kuutamoctl", "maintenance-status"], true) {
+        if let Ok(output) = ssh_with_timeout(host, &["kuutamoctl", "maintenance-status"], true) {
             let _ = tokio::io::stdout().write_all(&output.stdout).await;
         }
     }
@@ -26,7 +26,7 @@ pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u
 
     tokio::select! {
         _ = watch_maintenance_status(host, &flag) => (),
-        r = async_timeout_ssh(
+        r = ssh_with_timeout_async(
             host,
             vec![
                 // TODO:

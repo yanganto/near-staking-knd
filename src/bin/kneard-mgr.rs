@@ -269,7 +269,7 @@ fn maintenance_operation(
         (Some(_), Some(_)) => bail!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
         ),
-        (Some(minimum_length), None) => utils::ssh::timeout_ssh(
+        (Some(minimum_length), None) => utils::ssh::ssh_with_timeout(
             &hosts[0],
             // TODO:
             // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
@@ -278,8 +278,8 @@ fn maintenance_operation(
         )?,
         // TODO:
         // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
-        (None, None) => utils::ssh::timeout_ssh(&hosts[0], &["kuutamoctl", action], true)?,
-        (None, Some(shutdown_at)) => utils::ssh::timeout_ssh(
+        (None, None) => utils::ssh::ssh_with_timeout(&hosts[0], &["kuutamoctl", action], true)?,
+        (None, Some(shutdown_at)) => utils::ssh::ssh_with_timeout(
             &hosts[0],
             &[
                 // TODO:
@@ -313,7 +313,7 @@ fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
         .as_ref()
         .map_or_else(|| [].as_slice(), |v| v.as_slice());
     let command = command.iter().map(|s| s.as_str()).collect::<Vec<_>>();
-    kneard::utils::ssh::local_ssh(&hosts, command.as_slice())
+    kneard::utils::ssh::ssh(&hosts, command.as_slice())
 }
 
 /// The kuutamo program entry point
@@ -363,7 +363,7 @@ pub async fn main() -> Result<()> {
                 )
             })?;
             match args.action {
-                Command::Proxy(ref proxy_args) => proxy(proxy_args, &config),
+                Command::Proxy(ref proxy_args) => proxy(proxy_args, &config).await,
                 Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
 
                 // Service will restart after graceful shutdown

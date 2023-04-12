@@ -5,7 +5,7 @@ use anyhow::{Context, Result};
 use std::process::{Command, Output};
 
 /// set up ssh connection to a host
-pub fn local_ssh(hosts: &[Host], command: &[&str]) -> Result<()> {
+pub fn ssh(hosts: &[Host], command: &[&str]) -> Result<()> {
     for host in hosts {
         let target = host.deploy_ssh_target();
         let mut args = vec![];
@@ -19,7 +19,11 @@ pub fn local_ssh(hosts: &[Host], command: &[&str]) -> Result<()> {
 }
 
 /// execute remote ssh
-pub fn timeout_ssh(host: &Host, command: &[&str], learn_known_host_key: bool) -> Result<Output> {
+pub fn ssh_with_timeout(
+    host: &Host,
+    command: &[&str],
+    learn_known_host_key: bool,
+) -> Result<Output> {
     let target = host.deploy_ssh_target();
     let mut args = vec!["-o", "ConnectTimeout=10", "-o", "StrictHostKeyChecking=no"];
     if !learn_known_host_key {
@@ -38,7 +42,7 @@ pub fn timeout_ssh(host: &Host, command: &[&str], learn_known_host_key: bool) ->
 }
 
 /// execute remote ssh async
-pub async fn async_timeout_ssh(
+pub async fn ssh_with_timeout_async(
     host: &Host,
     mut command: Vec<String>,
     learn_known_host_key: bool,
