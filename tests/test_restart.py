@@ -11,7 +11,7 @@ from ports import Ports
 from setup_localnet import NearNetwork
 
 
-def test_maintenance_shutdown_metrics(
+def test_restart(
     kneard: Path,
     kneard_ctl: Path,
     command: Command,
@@ -43,14 +43,14 @@ def test_maintenance_shutdown_metrics(
             time.sleep(0.1)
         leader.wait_rpc_port()
 
-    # Book a far away block height, so we can check on metric before shutdown
-    with Section("test maintenance shutdown metrics"):
+    # Book a far away block height, so we can check on metric before neard shutdown
+    with Section("test maintenance metrics"):
         pid = leader.neard_pid()
         assert pid is not None
 
         proc = leader.execute_command(
-            "maintenance-shutdown",
-            "--shutdown-at",
+            "restart",
+            "--schedule-at",
             "1000",
         )
         assert proc.returncode == 0
@@ -84,7 +84,7 @@ def test_maintenance_shutdown_metrics(
 
     with Section("test cancel maintenance shutdown"):
         proc = leader.execute_command(
-            "maintenance-shutdown",
+            "restart",
             "--cancel",
         )
         assert proc.returncode == 0
@@ -119,9 +119,9 @@ def test_maintenance_shutdown_metrics(
         assert pid is not None
 
         proc = leader.execute_command(
-            "maintenance-shutdown",
+            "restart",
             "--wait",
-            "1",  # Use one block window for maintenance shutdown in test
+            "1",  # Use one block window for maintenance restart in test
         )
         assert proc.returncode == 0
         assert "shutdown at block height:" in proc.stdout
