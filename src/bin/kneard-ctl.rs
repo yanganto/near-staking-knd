@@ -58,9 +58,9 @@ async fn set_maintenance_shutdown(
         ..
     } = operation_arg;
     if minimum_length.is_some() && shutdown_at.is_some() {
-        return Err(anyhow!(
+        Err(anyhow!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
-        ));
+        ))
     } else {
         let r = kuutamo_client
             .maintenance_operation(minimum_length, shutdown_at, cancel, false)
