@@ -4,7 +4,7 @@
 }:
 let
   biosBoot = {
-    type = "partition";
+    part-type = "primary";
     start = "0MB";
     end = "1MB";
     name = "boot";
@@ -12,7 +12,6 @@ let
   };
 
   efiBoot = {
-    type = "partition";
     name = "ESP";
     start = "1MB";
     end = "500MB";
@@ -24,7 +23,7 @@ let
   };
 
   raidPart = {
-    type = "partition";
+    part-type = "primary";
     name = "raid-root";
     start = "500MB";
     end = "100%";
