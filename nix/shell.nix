@@ -12,10 +12,9 @@
         config.treefmt.build.wrapper
         pkgs.clippy
       ];
-      stdenv' = if pkgs.stdenv.hostPlatform.isGnu then pkgs.fastStdenv else pkgs.stdenv;
     in
     {
-      devShells.default = stdenv'.mkDerivation {
+      devShells.default = pkgs.stdenv.mkDerivation {
         name = "env";
         phases = [ "buildPhase" ];
         buildPhase = "touch $out";
