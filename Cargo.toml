@@ -19,7 +19,7 @@ nix = "0.26.2"
 serde = { version = "1.0.160", features = ["derive"] }
 serde_derive = "1.0.151"
 toml = "0.7.3"
-serde_json = "1.0.95"
+serde_json = "1.0.96"
 near-primitives = "0.15.0"
 log = { version = "0.4.17", features = ["std"] }
 clap = { version = "4.2.2", features = ["derive", "env"] }
