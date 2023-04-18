@@ -4,7 +4,7 @@
 
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
-use kneard::commands::control_commands::{Command, MaintenanceOperationArgs};
+use kneard::commands::control_commands::{CheckRpcArgs, Command, MaintenanceOperationArgs};
 use kneard::commands::CommandClient;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -105,6 +105,17 @@ async fn show_maintenance_status(kuutamo_client: &CommandClient) -> Result<()> {
     Ok(println!("{}", &kuutamo_client.maintenance_status().await?))
 }
 
+async fn check_rpc_status(kuutamo_client: &CommandClient, watch: bool) -> Result<()> {
+    if watch {
+        while kuutamo_client.rpc_status().await.is_ok() {
+            sleep(Duration::from_secs(1)).await;
+        }
+        Ok(())
+    } else {
+        Ok(println!("{}", &kuutamo_client.rpc_status().await?))
+    }
+}
+
 /// The kneard-ctl program entry point
 #[tokio::main]
 pub async fn main() {
@@ -119,6 +130,7 @@ pub async fn main() {
             set_maintenance_restart(&kuutamo_client, operation_arg).await
         }
         Command::MaintenanceStatus => show_maintenance_status(&kuutamo_client).await,
+        Command::CheckRpc(CheckRpcArgs { watch }) => check_rpc_status(&kuutamo_client, watch).await,
     };
     if let Err(e) = res {
         eprintln!("{e}");

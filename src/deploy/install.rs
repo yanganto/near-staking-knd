@@ -9,7 +9,8 @@ use std::{
     time::Duration,
 };
 
-use crate::deploy::{command::status_to_pretty_err, utils::timeout_ssh};
+use crate::deploy::command::status_to_pretty_err;
+use crate::utils::ssh::ssh_with_timeout;
 
 use super::{Host, NixosFlake};
 
@@ -86,7 +87,10 @@ pub fn install(
 
             // Wait for the machine to come back and learn add it's ssh key to our host
             loop {
-                if timeout_ssh(host, &["exit", "0"], true)?.status.success() {
+                if ssh_with_timeout(host, &["exit", "0"], true)?
+                    .status
+                    .success()
+                {
                     break;
                 }
                 if let Ok(chan) = CTRL_WAS_PRESSED.lock() {
