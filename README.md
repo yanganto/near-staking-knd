@@ -66,7 +66,7 @@ Commands:
   update           Update validator
   rollback         Rollback validator
   proxy            Proxy remote rpc to local
-  restart          Schedule a restart in a window where no blocks 'or chunks' are expected to be produced by the validator
+  restart          Schedule a restart in a window where no blocks or chunks are expected to be produced by the validator
   ssh              SSH into a host
   help             Print this message or the help of the given subcommand(s)
 
