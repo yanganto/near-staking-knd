@@ -278,7 +278,7 @@ async fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
     let hosts = filter_hosts(&proxy_args.host, &config.hosts)?;
     if hosts.len() > 1 {
         println!(
-            "proxy action only work on singly host, kneard-mgr will proxy {}",
+            "Multiple hosts detected in configuration. Will proxy to machine: {}",
             hosts[0].name
         );
     }
