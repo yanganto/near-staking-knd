@@ -152,7 +152,7 @@ enum Command {
     Rollback(RollbackArgs),
     /// Proxy remote rpc to local
     Proxy(ProxyArgs),
-    /// Schedule a restart in a window where no blocks 'or chunks' are expected to be produced by the validator
+    /// Schedule a restart in a window where no blocks or chunks are expected to be produced by the validator
     Restart(RestartArgs),
     /// SSH into a host
     Ssh(SshArgs),
