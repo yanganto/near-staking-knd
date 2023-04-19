@@ -1678,13 +1678,13 @@ let
         sha512 = "NpmrnejpY1AdlRpDZ0schJQJtfBaoUheRfiYtQpcq9TkwPgqKZCRULV5L3hHmLc0ep7KRtikbPQ9R2ztN/3cyQ==";
       };
     };
-    "node-abi-3.35.0" = {
+    "node-abi-3.40.0" = {
       name = "node-abi";
       packageName = "node-abi";
-      version = "3.35.0";
+      version = "3.40.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.35.0.tgz";
-        sha512 = "jAlSOFR1Bls963NmFwxeQkNTzqjUF0NThm8Le7eRIRGzFUVJuMOFZDLv5Y30W/Oaw+KEebEJLAigwO9gQHoEmw==";
+        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.40.0.tgz";
+        sha512 = "zNy02qivjjRosswoYmPi8hIKJRr8MpQyeKT6qlcq/OnOgA3Rhoae+IYOqsM9V5+JnHWmxKnWOT2GxvtqdtOCXA==";
       };
     };
     "node-addon-api-3.2.1" = {
@@ -2706,7 +2706,7 @@ in
       sources."near-hd-key-1.2.1"
       sources."near-ledger-js-0.2.1"
       sources."near-seed-phrase-0.2.0"
-      sources."node-abi-3.35.0"
+      sources."node-abi-3.40.0"
       sources."node-addon-api-3.2.1"
       sources."node-fetch-2.6.9"
       sources."node-gyp-build-4.6.0"
