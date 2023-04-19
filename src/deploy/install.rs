@@ -87,7 +87,7 @@ pub fn install(
 
             // Wait for the machine to come back and learn add it's ssh key to our host
             loop {
-                if ssh_with_timeout(host, &["exit", "0"], true)?
+                if ssh_with_timeout(host, &["exit", "0"], true, true)?
                     .status
                     .success()
                 {

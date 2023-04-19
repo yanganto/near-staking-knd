@@ -7,7 +7,7 @@ use std::process::Output;
 /// async check the version of kuutamoctl meet requirement or not
 pub async fn require_async(host: &Host, requirement: &str) -> Result<(bool, String)> {
     let Output { stdout, .. } =
-        ssh_with_timeout_async(host, vec!["kuutamoctl".into(), "-V".into()], true)
+        ssh_with_timeout_async(host, vec!["kuutamoctl".into(), "-V".into()], true, false)
             .await
             .context("Failed to fetch kuutamoctl version")?;
     let version_str =
@@ -24,7 +24,7 @@ pub async fn require_async(host: &Host, requirement: &str) -> Result<(bool, Stri
 
 /// check the version of kuutamoctl meet requirement or not
 pub fn require(host: &Host, requirement: &str) -> Result<(bool, String)> {
-    let Output { stdout, .. } = ssh_with_timeout(host, &["kuutamoctl", "-V"], true)
+    let Output { stdout, .. } = ssh_with_timeout(host, &["kuutamoctl", "-V"], true, false)
         .context("Failed to fetch kuutamoctl version")?;
     let version_str =
         std::str::from_utf8(&stdout).map(|s| s.rsplit_once(' ').map(|(_, v)| v.trim()))?;

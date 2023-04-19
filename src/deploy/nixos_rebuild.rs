@@ -84,7 +84,7 @@ pub fn nixos_rebuild(
         ")",
     ];
 
-    let output = ssh_with_timeout(host, &args, true)?;
+    let output = ssh_with_timeout(host, &args, true, true)?;
     if !output.status.success() {
         warn!(
             "Fail to send deployment event: {}",

@@ -13,9 +13,9 @@ use super::Host;
 async fn watch_maintenance_status(host: &Host, flag: &AtomicBool) {
     while flag.load(Ordering::Relaxed) {
         sleep(Duration::from_secs(1)).await;
-        // TODO:
-        // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
-        if let Ok(output) = ssh_with_timeout(host, &["kuutamoctl", "maintenance-status"], true) {
+        if let Ok(output) =
+            ssh_with_timeout(host, &["kuutamoctl", "maintenance-status"], true, true)
+        {
             let _ = tokio::io::stdout().write_all(&output.stdout).await;
         }
     }
@@ -25,7 +25,7 @@ async fn watch_maintenance_status(host: &Host, flag: &AtomicBool) {
 pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u64) -> Result<()> {
     let flag = AtomicBool::new(true);
 
-    let Output { stdout, .. } = ssh_with_timeout(host, &["kuutamoctl", "-V"], true)
+    let Output { stdout, .. } = ssh_with_timeout(host, &["kuutamoctl", "-V"], true, true)
         .context("Failed to fetch kuutamoctl version")?;
     let version_str =
         std::str::from_utf8(&stdout).map(|s| s.rsplit_once(' ').map(|(_, v)| v.trim()))?;
@@ -46,6 +46,7 @@ pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u
                     "--wait".to_string(),
                     required_time_in_blocks.to_string(),
                 ],
+                true,
                 true,
             ) => {
                 flag.store(false, Ordering::Relaxed);
@@ -73,6 +74,7 @@ pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u
                     "--wait".to_string(),
                     required_time_in_blocks.to_string(),
                 ],
+                true,
                 true,
             ) => {
                 flag.store(false, Ordering::Relaxed);

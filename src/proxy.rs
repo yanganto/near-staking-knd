@@ -32,7 +32,7 @@ pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
     match require_async(host, ">=0.2").await? {
         (true, _) => {
             tokio::select! {
-                _ = ssh_with_timeout_async(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--watch".into()], true) => println!("rpc service of neard is not running, cannot proxy rpc service. Check `systemctl status kuutamod` on the server for more details."),
+                _ = ssh_with_timeout_async(host, vec!["kuutamoctl".into(), "check-rpc".into(), "--watch".into()], true, true) => println!("rpc service of neard is not running, cannot proxy rpc service. Check `systemctl status kuutamod` on the server for more details."),
                 _ = proxy(host, local_port) => (),
             }
         }
@@ -42,6 +42,7 @@ pub async fn rpc(host: &Host, local_port: u16) -> Result<()> {
             let Output { status, .. } = ssh_with_timeout_async(
                 host,
                 vec!["systemctl".into(), "is-active".into(), "kuutamod".into()],
+                true,
                 true,
             )
             .await
