@@ -15,6 +15,9 @@ pub enum Command {
 
     /// Check the status of rpc service
     CheckRpc(CheckRpcArgs),
+
+    /// Show system info
+    SystemInfo(SystemInfoArgs),
 }
 
 /// Arguments for restart command
@@ -44,4 +47,12 @@ pub struct CheckRpcArgs {
     /// Cli will keep blocking when rpc service up
     #[clap(long)]
     pub watch: bool,
+}
+
+/// Arguments for system info command
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+pub struct SystemInfoArgs {
+    /// Cli will show system info with inline format
+    #[clap(long)]
+    pub inline: bool,
 }
