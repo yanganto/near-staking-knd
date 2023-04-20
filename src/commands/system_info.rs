@@ -5,9 +5,8 @@ use std::env;
 pub fn system_info(inline: bool) -> Result<()> {
     let info = vec![
         ("version", env!("CARGO_PKG_VERSION")),
-        ("branch", env!("VERGEN_GIT_BRANCH")),
-        ("hash", env!("VERGEN_GIT_DESCRIBE")),
-        ("commit-date", env!("VERGEN_GIT_COMMIT_DATE")),
+        ("git-sha", env!("VERGEN_GIT_SHA")),
+        ("git-commit-date", env!("VERGEN_GIT_COMMIT_DATE")),
     ];
 
     if inline {

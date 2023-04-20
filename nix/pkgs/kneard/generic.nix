@@ -16,6 +16,7 @@ rustPlatform.buildRustPackage ({
     install -D ${../../../Cargo.lock} $out/Cargo.lock
     cp -r ${../../../src} $out/src
     cp -r ${../../../build.rs} $out/build.rs
+    cp -r ${../../../system-info.toml} $out/system-info.toml
   '';
   inherit cargoLock;
 
