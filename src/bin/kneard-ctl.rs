@@ -100,7 +100,10 @@ pub async fn main() {
         }
         Command::MaintenanceStatus => show_maintenance_status(&kuutamo_client).await,
         Command::CheckRpc(CheckRpcArgs { watch }) => check_rpc_status(&kuutamo_client, watch).await,
-        Command::SystemInfo(SystemInfoArgs { inline }) => system_info::system_info(inline),
+        Command::SystemInfo(SystemInfoArgs { inline }) => {
+            system_info::system_info(inline);
+            Ok(())
+        }
     };
     if let Err(e) = res {
         eprintln!("{e}");

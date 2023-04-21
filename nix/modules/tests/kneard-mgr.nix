@@ -132,6 +132,6 @@ in
       assert "validator-00" == hostname, f"'validator-00' != '{hostname}'"
 
       system_info = installer.succeed("${lib.getExe kneard-mgr} --config ${tomlConfig} system-info").strip()
-      assert system_info.startswith("[validator-00]\nversion: 0.3.0\ngit-sha:"), f"unexpected system info: {system_info}"
+      assert system_info.startswith("[validator-00]\nkneard-version: 0.3.0\ngit-sha:"), f"unexpected system info: {system_info}"
     '';
 })
