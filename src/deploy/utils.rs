@@ -1,6 +1,7 @@
+use crate::utils::ssh::{ssh_with_timeout, ssh_with_timeout_async};
 ///! utils for deploy and control remote machines
-use anyhow::{Context, Result};
-use std::process::{Command, Output};
+use anyhow::Result;
+use std::process::Output;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use tokio::io::AsyncWriteExt;
@@ -8,58 +9,12 @@ use tokio::time::sleep;
 
 use super::Host;
 
-/// execute remote ssh
-pub fn timeout_ssh(host: &Host, command: &[&str], learn_known_host_key: bool) -> Result<Output> {
-    let target = host.deploy_ssh_target();
-    let mut args = vec!["-o", "ConnectTimeout=10", "-o", "StrictHostKeyChecking=no"];
-    if !learn_known_host_key {
-        args.push("-o");
-        args.push("UserKnownHostsFile=/dev/null");
-    }
-    args.push(&target);
-    args.push("--");
-    args.extend(command);
-    println!("$ ssh {}", args.join(" "));
-    let output = Command::new("ssh")
-        .args(args)
-        .output()
-        .context("Failed to run ssh...")?;
-    Ok(output)
-}
-
-async fn async_timeout_ssh(
-    host: &Host,
-    mut command: Vec<String>,
-    learn_known_host_key: bool,
-) -> Result<Output> {
-    let target = host.deploy_ssh_target();
-    let mut args = vec![
-        "-o".to_string(),
-        "ConnectTimeout=10".to_string(),
-        "-o".to_string(),
-        "StrictHostKeyChecking=no".to_string(),
-    ];
-    if !learn_known_host_key {
-        args.push("-o".to_string());
-        args.push("UserKnownHostsFile=/dev/null".to_string());
-    }
-    args.push(target);
-    args.push("--".to_string());
-    args.append(&mut command);
-    println!("$ ssh {}", args.join(" "));
-    let output = tokio::process::Command::new("ssh")
-        .args(args)
-        .output()
-        .await?;
-    Ok(output)
-}
-
 async fn watch_maintenance_status(host: &Host, flag: &AtomicBool) {
     while flag.load(Ordering::Relaxed) {
         sleep(Duration::from_secs(1)).await;
         // TODO:
         // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
-        if let Ok(output) = timeout_ssh(host, &["kuutamoctl", "maintenance-status"], true) {
+        if let Ok(output) = ssh_with_timeout(host, &["kuutamoctl", "maintenance-status"], true) {
             let _ = tokio::io::stdout().write_all(&output.stdout).await;
         }
     }
@@ -71,7 +26,7 @@ pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u
 
     tokio::select! {
         _ = watch_maintenance_status(host, &flag) => (),
-        r = async_timeout_ssh(
+        r = ssh_with_timeout_async(
             host,
             vec![
                 // TODO:

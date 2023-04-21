@@ -146,6 +146,7 @@ impl CommandServer {
                 self.handle_maintenance_operation(req, true).await
             }
             (&Method::GET, "/maintenance_status") => self.handle_maintenance_status().await,
+            (&Method::GET, "/rpc_status") => self.handle_rpc_status().await,
             _ => Ok(not_found()),
         }
     }
@@ -216,6 +217,16 @@ impl CommandServer {
             (_, Err(_), _) => gateway_timeout("fail to fetch current block from neard"),
         };
 
+        Ok(resp)
+    }
+
+    async fn handle_rpc_status(&self) -> hyper::Result<Response<Body>> {
+        let resp = match self.near_client.status().await {
+            Ok(_) => Response::new(Body::from(
+                "{\"status\": 200, \"message\": \"rpc service ready\"}",
+            )),
+            Err(_) => gateway_timeout("fail to fetch status from rpc service"),
+        };
         Ok(resp)
     }
 
