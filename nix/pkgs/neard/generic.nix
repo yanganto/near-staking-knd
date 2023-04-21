@@ -63,9 +63,10 @@ rustPlatform.buildRustPackage rec {
     $out/bin/neard --version | grep -q "nix:${version}"
   '';
   preBuild = ''
-    diff -q ${toolchainFile} ./rust-toolchain.toml > /dev/null || {
+    # We dont need build wasm target, so we only make sure the channel is correct
+    [[ $( cat ${toolchainFile} | grep channel ) == $( cat ./rust-toolchain.toml | grep channel ) ]]  || {
       echo -e "\033[0;1;31mERROR: ${toolchainFile} differs with ./rust-toolchain.toml. \033[0m" >&2
-      echo -e "\033[0;1;31mPlease update nix/pkgs/neard/unstable-rust-toolchain.toml or nix/pkgs/neard/unstable-rust-toolchain.toml\033[0m" >&2
+      echo -e "\033[0;1;31mPlease update nix/pkgs/neard/stable-rust-toolchain.toml or nix/pkgs/neard/unstable-rust-toolchain.toml\033[0m" >&2
       exit 1
     }
   '';

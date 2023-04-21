@@ -149,6 +149,7 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#,
         None,
+        true,
     )?;
     let flake = generate_nixos_flake(&config)?;
     let flake_path = flake.path();
