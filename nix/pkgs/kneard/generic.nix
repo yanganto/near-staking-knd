@@ -15,8 +15,6 @@ rustPlatform.buildRustPackage ({
     install -D ${../../../Cargo.toml} $out/Cargo.toml
     install -D ${../../../Cargo.lock} $out/Cargo.lock
     cp -r ${../../../src} $out/src
-    cp -r ${../../../build.rs} $out/build.rs
-    cp -r ${../../../system-info.toml} $out/system-info.toml
   '';
   inherit cargoLock;
 
@@ -48,7 +46,6 @@ rustPlatform.buildRustPackage ({
     install -D ${../../../nix/modules/tests/validator_key.json} $out/nix/modules/tests/validator_key.json
     install -D ${../../../nix/modules/tests/node_key.json} $out/nix/modules/tests/node_key.json
     cp -r ${../../../src} $out/src
-    cp -r ${../../../build.rs} $out/build.rs
     cp -r ${../../../tests} $out/tests
     install -D ${../../../pyproject.toml} $out/pyproject.toml
   '';

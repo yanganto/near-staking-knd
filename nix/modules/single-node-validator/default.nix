@@ -1,10 +1,15 @@
-{ lib, ... }: {
+{ lib, self, ... }: {
   imports = [
     ../network.nix
     ../hardware.nix
     ../consul.nix
     ../toml-mapping.nix
   ];
+
+  environment.etc."system-info.toml".text = lib.mkDefault ''
+    git_sha = "${self.rev or "dirty"}"
+    git_commit_date = "${self.lastModifiedDate}"
+  '';
 
   # we want `kuutamo update` to also restart `kuutamod.service`(for kneard)
   systemd.services.kuutamod.reloadIfChanged = lib.mkForce false;

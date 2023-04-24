@@ -44,7 +44,7 @@
           inputs.srvos.nixosModules.server
           inputs.disko.nixosModules.disko
         ];
-
+        _module.args.self = self;
       };
 
       single-node-validator-mainnet = {

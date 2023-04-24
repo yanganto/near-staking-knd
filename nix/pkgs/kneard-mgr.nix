@@ -21,7 +21,6 @@ rustPlatform.buildRustPackage {
     install -D ${../../nix/modules/tests/validator_key.json} $out/nix/modules/tests/validator_key.json
     install -D ${../../nix/modules/tests/node_key.json} $out/nix/modules/tests/node_key.json
     cp -r ${../../src} $out/src
-    cp -r ${../../build.rs} $out/build.rs
     pushd $out/src/deploy
     ls -la ../../nix/modules/tests/node_key.json
   '';

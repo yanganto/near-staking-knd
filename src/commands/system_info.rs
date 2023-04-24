@@ -1,6 +1,13 @@
 use anyhow::{bail, Result};
 use regex::Regex;
+use serde_derive::Deserialize;
 use std::env;
+
+#[derive(Deserialize)]
+struct SystemInfo {
+    git_sha: String,
+    git_commit_date: String,
+}
 
 fn parse_neard_version(raw_version: &str) -> Result<(String, String, String)> {
     let mut develop_version = false;
@@ -38,24 +45,27 @@ fn neard_versions() -> Result<(String, String, String)> {
     }
 }
 
+fn read_system_info() -> Result<SystemInfo> {
+    if let Ok(content) = std::fs::read_to_string("/etc/system-info.toml") {
+        Ok(toml::from_str::<SystemInfo>(&content)?)
+    } else {
+        bail!("fail to read /etc/system-info.toml")
+    }
+}
+
 /// Collect and print out system info
 pub fn system_info(inline: bool) {
-    let info = if let Ok((neard_version, protocol_version, db_version)) = neard_versions() {
-        vec![
-            ("kneard-version", env!("CARGO_PKG_VERSION").into()),
-            ("git-sha", env!("VERGEN_GIT_SHA").into()),
-            ("git-commit-date", env!("VERGEN_GIT_COMMIT_DATE").into()),
-            ("neard-version", neard_version),
-            ("neard-protocol-version", protocol_version),
-            ("neard-db-version", db_version),
-        ]
-    } else {
-        vec![
-            ("keanrd-version", env!("CARGO_PKG_VERSION").into()),
-            ("git-sha", env!("VERGEN_GIT_SHA").into()),
-            ("git-commit-date", env!("VERGEN_GIT_COMMIT_DATE").into()),
-        ]
-    };
+    let mut info = vec![("kneard-version", env!("CARGO_PKG_VERSION").into())];
+    if let Ok(system_info) = read_system_info() {
+        info.push(("git-sha", system_info.git_sha));
+        info.push(("git-commit-date", system_info.git_commit_date));
+    }
+
+    if let Ok((neard_version, protocol_version, db_version)) = neard_versions() {
+        info.push(("neard-version", neard_version));
+        info.push(("neard-protocol-version", protocol_version));
+        info.push(("neard-db-version", db_version));
+    }
 
     if inline {
         let system_info: Vec<String> = info.iter().map(|i| format!("{}={}", i.0, i.1)).collect();
