@@ -137,7 +137,7 @@ enum Command {
 #[clap(author, version, about, long_about = None)]
 struct Args {
     /// configuration file to load
-    #[clap(long, default_value = "kuutamo.toml", env = "KUUTAMO_CONFIG")]
+    #[clap(long, default_value = "kneard.toml", env = "KUUTAMO_CONFIG")]
     config: PathBuf,
 
     /// skip interactive dialogs by assuming the answer is yes
