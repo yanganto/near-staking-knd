@@ -74,7 +74,7 @@ Commands:
   help             Print this message or the help of the given subcommand(s)
 
 Options:
-      --config <CONFIG>  configuration file to load [env: KUUTAMO_CONFIG=] [default: kuutamo.toml]
+      --config <CONFIG>  configuration file to load [env: KUUTAMO_CONFIG=] [default: kneard.toml]
       --yes              skip interactive dialogs by assuming the answer is yes
   -h, --help             Print help
   -V, --version          Print version
