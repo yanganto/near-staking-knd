@@ -14,6 +14,8 @@ These are two different machines. The kneard manager, `kneard-mgr` will run on y
 
 ## Server Setup
 
+You will need a server with any Linux OS installed. You will need SSH root access with a key. 
+
 We have validated:
 
 - [OVH](https://www.ovhcloud.com/en-gb/bare-metal/advance/adv-1/) - Advance 1 Gen 2, 64GB RAM, 2 x 960GB NVMe, with Ubuntu
@@ -34,6 +36,7 @@ Before [installing Ubuntu on the server](https://docs.latitude.sh/docs/deploymen
 ```bash
 $ mkdir -p ~/.config/nix/ && printf 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 ```
+
 3. Trust pre-built binaries (optional):
 
 ```bash
@@ -71,7 +74,7 @@ Commands:
   help             Print this message or the help of the given subcommand(s)
 
 Options:
-      --config <CONFIG>  configuration file to load [env: KUUTAMO_CONFIG=] [default: kuutamo.toml]
+      --config <CONFIG>  configuration file to load [env: KUUTAMO_CONFIG=] [default: kneard.toml]
       --yes              skip interactive dialogs by assuming the answer is yes
   -h, --help             Print help
   -V, --version          Print version
@@ -80,11 +83,16 @@ Options:
 
 ## New Solo node install 
 
-1. New pool deployments can be done via the webapp UI at [near.kuutamo.app](https://near.kuutamo.app) - ([GitHub](https://github.com/kuutamolabs/near-staking-ui))
+1. New pool deployments can be done via the webapp UI `Get Started` flow at [near.kuutamo.app](https://near.kuutamo.app) - ([GitHub](https://github.com/kuutamolabs/near-staking-ui))
 
-2. Download encrypted kuutamo app key file and config file from webapp UI
+2. Download encrypted kuutamo app key file and config file (`kneard.toml`) via `Manage` button in UI:
 
 3. Create a new directory and put the two files in it.
+
+```
+[you@workstation:~/my-near-validator-1/]$ ls
+my-pool.pool.devnet.zip  kneard.toml
+```
 
 4. In this directory run:
 

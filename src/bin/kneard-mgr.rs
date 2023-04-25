@@ -11,7 +11,7 @@ use kneard::utils;
 use semver::{Version, VersionReq};
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Output;
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -162,7 +162,7 @@ enum Command {
 #[clap(author, version, about, long_about = None)]
 struct Args {
     /// configuration file to load
-    #[clap(long, default_value = "kuutamo.toml", env = "KUUTAMO_CONFIG")]
+    #[clap(long, default_value = "kneard.toml", env = "KUUTAMO_CONFIG")]
     config: PathBuf,
 
     /// skip interactive dialogs by assuming the answer is yes
@@ -402,7 +402,15 @@ fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
 /// The kuutamo program entry point
 #[tokio::main]
 pub async fn main() -> Result<()> {
-    let args = Args::parse();
+    let mut args = Args::parse();
+
+    if args.config.to_str() == Some("kneard.toml")
+        && !Path::new("kneard.toml").exists()
+        && Path::new("kuutamo.toml").exists()
+    {
+        println!("`kuutamo.toml` is deprecated, please switch to `kneard.toml`");
+        args.config = "kuutamo.toml".into();
+    }
 
     let res = match args.action {
         Command::GenerateConfig(_)
