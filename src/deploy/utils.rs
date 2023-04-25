@@ -56,7 +56,7 @@ pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u
                 }
                 else {
                     let _ = tokio::io::stderr().write_all(&stderr).await;
-                    anyhow::bail!("could not execute restart")
+                    anyhow::bail!("Could not find a suitable maintenance window, please try again later")
                 }
             }
         }
@@ -83,7 +83,7 @@ pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u
                 }
                 else {
                     let _ = tokio::io::stderr().write_all(&stderr).await;
-                    anyhow::bail!("could not execute maintenance shutdown")
+                    anyhow::bail!("Could not find a suitable maintenance window, please try again later")
                 }
             }
         }
