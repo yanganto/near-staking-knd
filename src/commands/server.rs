@@ -19,7 +19,7 @@ use tokio::sync::mpsc::{self, Sender};
 
 use crate::{ipc, near_client::NeardClient, settings::Settings, supervisor::SHUTDOWN_WITH_NEARD};
 
-use super::{active_validator::active_validator, MaintenanceOperation};
+use super::{active_validator::active_validator, ScheduleRestartOperation};
 
 fn server_error<T: Display>(msg: T) -> Response<Body>
 where
@@ -139,30 +139,20 @@ impl CommandServer {
                 r#"{"status": 200, "message": "OK"}"#,
             ))),
             (&Method::GET, "/active_validator") => self.handle_active_validator().await,
-            (&Method::POST, "/maintenance_restart") => {
-                self.handle_maintenance_operation(req, false).await
-            }
-            (&Method::POST, "/maintenance_shutdown") => {
-                self.handle_maintenance_operation(req, true).await
-            }
+            (&Method::POST, "/schedule_restart") => self.handle_schedule_restart(req).await,
             (&Method::GET, "/maintenance_status") => self.handle_maintenance_status().await,
             (&Method::GET, "/rpc_status") => self.handle_rpc_status().await,
             _ => Ok(not_found()),
         }
     }
 
-    async fn handle_maintenance_operation(
-        &self,
-        req: Request<Body>,
-        shutdown_with_neard: bool,
-    ) -> hyper::Result<Response<Body>> {
+    async fn handle_schedule_restart(&self, req: Request<Body>) -> hyper::Result<Response<Body>> {
         let (tx, mut rx) = mpsc::channel(1);
-        let args: MaintenanceOperation = ok_or_500!(json_request(req).await);
-        let req = ipc::Request::MaintenanceOperation(
+        let args: ScheduleRestartOperation = ok_or_500!(json_request(req).await);
+        let req = ipc::Request::ScheduleRestartOperation(
             args.minimum_length,
-            args.shutdown_at,
+            args.schedule_at,
             args.cancel,
-            shutdown_with_neard,
             tx,
         );
 
@@ -175,14 +165,12 @@ impl CommandServer {
         match rx.recv().await {
             Some(r) => match r.shutdown_at_blockheight {
                 Ok(Some(height)) => Ok(Response::new(Body::from(format!(
-                    "{{\"status\": 200, \"message\": \"shutdown at block height: {height}\"}}",
+                    "{{\"status\": 200, \"message\": \"will shutdown at block height: {height}\"}}",
                 )))),
                 Ok(None) => Ok(Response::new(Body::from(
-                    r#"{"status": 200, "message": "shutdown at current block"}"#,
+                    r#"{"status": 200, "message": "is shutting down at current block"}"#,
                 ))),
-                Err(e) => Ok(server_error(format!(
-                    "fail to setup maintenance window: {e:}"
-                ))),
+                Err(e) => Ok(server_error(format!("fail to schedule restart: {e:}"))),
             },
             None => Ok(server_error("channel to supervisor was closed")),
         }

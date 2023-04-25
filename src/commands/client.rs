@@ -5,7 +5,7 @@ use hyper::{Body, Client, Method, Request, Response};
 use hyperlocal::{UnixClientExt, Uri};
 use serde::de::DeserializeOwned;
 
-use super::{active_validator::Validator, ApiResponse, MaintenanceOperation};
+use super::{active_validator::Validator, ApiResponse, ScheduleRestartOperation};
 
 async fn parse_response<T: DeserializeOwned>(req: Response<Body>) -> Result<T> {
     let body_bytes = hyper::body::to_bytes(req.into_body()).await?;
@@ -52,23 +52,18 @@ impl CommandClient {
         parse_response(res).await.context("cannot parse validator")
     }
 
-    /// Initiatiate or cancel maintenance shutdown or restart
-    pub async fn maintenance_operation(
+    /// Initiatiate or cancel the schedule of restart
+    pub async fn schedule_restart(
         &self,
         minimum_length: Option<u64>,
-        shutdown_at: Option<u64>,
+        schedule_at: Option<u64>,
         cancel: bool,
-        restart: bool,
     ) -> Result<()> {
-        let url = if restart {
-            hyperlocal::Uri::new(&self.socket_path, "/maintenance_restart")
-        } else {
-            hyperlocal::Uri::new(&self.socket_path, "/maintenance_shutdown")
-        };
+        let url = hyperlocal::Uri::new(&self.socket_path, "/schedule_restart");
 
-        let body = serde_json::to_string(&MaintenanceOperation {
+        let body = serde_json::to_string(&ScheduleRestartOperation {
             minimum_length,
-            shutdown_at,
+            schedule_at,
             cancel,
         })?;
         let req = Request::builder()
