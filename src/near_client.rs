@@ -6,6 +6,7 @@ use reqwest::{Client, Url};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::HashMap;
+use tokio::time::{sleep_until, Duration, Instant};
 
 /// The result for maintenance windows rpc
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -102,19 +103,31 @@ impl NeardClient {
     ) -> Result<MaintenanceWindowRPCResult> {
         let mut params = HashMap::<String, serde_json::Value>::new();
         params.insert("account_id".into(), account_id.as_str().into());
-        let res = self
-            .client
-            .post(self.url.clone())
-            .json(&Self::rpc_request(
-                "EXPERIMENTAL_maintenance_windows",
-                params,
-            ))
-            .send()
-            .await
-            .context("Failed to get maintenance windows")?;
 
-        let r: MaintenanceWindowJsonRpcStatusResponse = res.json().await?;
-        Ok(r.result)
+        let mut res = None;
+        for _ in 0..3 {
+            if let Ok(r) = self
+                .client
+                .post(self.url.clone())
+                .json(&Self::rpc_request(
+                    "EXPERIMENTAL_maintenance_windows",
+                    params.clone(),
+                ))
+                .send()
+                .await
+            {
+                res = Some(r);
+                break;
+            }
+            sleep_until(Instant::now() + Duration::from_secs(1)).await;
+        }
+
+        if let Some(res) = res {
+            let r: MaintenanceWindowJsonRpcStatusResponse = res.json().await?;
+            Ok(r.result)
+        } else {
+            anyhow::bail!("Failed to get maintenance windows from neard rpc with 3 times retry")
+        }
     }
 
     /// Request metrics
