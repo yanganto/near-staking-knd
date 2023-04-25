@@ -55,7 +55,7 @@ impl Drop for DisableTerminalEcho {
 ///
 /// Some providers include the subnet in their address shown in the webinterface i.e. 2607:5300:203:5cdf::/64
 /// This format is rejected by IpAddr in Rust and we store subnets in a different configuration option.
-/// This struct detects such cashes in the kuutamo.toml file and converting it to 2607:5300:203:5cdf:: with a warning message, providing a more user-friendly experience.
+/// This struct detects such cashes in the kneard.toml file and converting it to 2607:5300:203:5cdf:: with a warning message, providing a more user-friendly experience.
 type IpV6String = String;
 
 trait AsIpAddr {
