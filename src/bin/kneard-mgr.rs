@@ -10,7 +10,7 @@ use kneard::proxy;
 use kneard::utils;
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct InstallArgs {
@@ -319,7 +319,15 @@ fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
 /// The kuutamo program entry point
 #[tokio::main]
 pub async fn main() -> Result<()> {
-    let args = Args::parse();
+    let mut args = Args::parse();
+
+    if args.config.to_str() == Some("kneard.toml")
+        && !Path::new("kneard.toml").exists()
+        && Path::new("kuutamo.toml").exists()
+    {
+        println!("`kuutamo.toml` is deprecated, please switch to `kneard.toml`");
+        args.config = "kuutamo.toml".into();
+    }
 
     let res = match args.action {
         Command::GenerateConfig(_)
