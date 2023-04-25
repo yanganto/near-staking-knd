@@ -106,7 +106,7 @@ impl NeardClient {
 
         let mut res = None;
         for _ in 0..3 {
-            if let Ok(r) = self
+            match self
                 .client
                 .post(self.url.clone())
                 .json(&Self::rpc_request(
@@ -116,8 +116,11 @@ impl NeardClient {
                 .send()
                 .await
             {
-                res = Some(r);
-                break;
+                Ok(r) => {
+                    res = Some(r);
+                    break;
+                }
+                Err(e) => println!("fail to fetch maintenance windows: {e}"),
             }
             sleep_until(Instant::now() + Duration::from_secs(1)).await;
         }
@@ -126,7 +129,7 @@ impl NeardClient {
             let r: MaintenanceWindowJsonRpcStatusResponse = res.json().await?;
             Ok(r.result)
         } else {
-            anyhow::bail!("Failed to get maintenance windows from neard rpc with 3 times retry")
+            anyhow::bail!("Failed to get maintenance windows from neard RPC. Please try again.")
         }
     }
 
