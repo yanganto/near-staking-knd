@@ -120,7 +120,7 @@ impl NeardClient {
                     res = Some(r);
                     break;
                 }
-                Err(e) => println!("fail to fetch maintenance windows: {e}"),
+                Err(e) => eprintln!("fail to fetch maintenance windows: {e}"),
             }
             sleep_until(Instant::now() + Duration::from_secs(1)).await;
         }
