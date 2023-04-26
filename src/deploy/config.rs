@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::TempDir;
 use toml;
+use url::Url;
 
 use super::command::status_to_pretty_err;
 use super::secrets::Secrets;
@@ -156,6 +157,9 @@ struct HostConfig {
 
     #[serde(default)]
     encrypted_kuutamo_app_file: Option<PathBuf>,
+
+    #[serde(default)]
+    telegraf_config_file: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
@@ -164,6 +168,13 @@ pub struct ValidatorKeys {
     pub validator_key: NearKeyFile,
     // Near validator node key
     pub validator_node_key: NearKeyFile,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct TelegrafOutputConfig {
+    pub url: Url,
+    pub username: String,
+    pub password: String,
 }
 
 /// Global configuration affecting all hosts
@@ -219,6 +230,10 @@ pub struct Host {
     /// Validator keys used by neard
     #[serde(skip_serializing)]
     pub validator_keys: Option<ValidatorKeys>,
+
+    /// Setup telegraf output config to the monitor server
+    #[serde(skip_serializing)]
+    pub telegraf_config: Option<TelegrafOutputConfig>,
 }
 
 impl Host {
@@ -492,6 +507,20 @@ fn validate_host(
         _ => None,
     };
 
+    let telegraf_config_file = host
+        .telegraf_config_file
+        .as_ref()
+        .or(default.telegraf_config_file.as_ref());
+
+    let telegraf_config = if let Some(telegraf_config_file) = telegraf_config_file {
+        let content = fs::read_to_string(telegraf_config_file).with_context(|| {
+            format!("cannot read telegraf_config_file: '{telegraf_config_file}'")
+        })?;
+        Some(toml::from_str::<TelegrafOutputConfig>(&content)?)
+    } else {
+        None
+    };
+
     Ok(Host {
         name,
         nixos_module,
@@ -509,6 +538,7 @@ fn validate_host(
         validator_keys,
         public_ssh_keys,
         disks,
+        telegraf_config,
     })
 }
 
@@ -822,6 +852,7 @@ fn test_validate_host() {
             public_ssh_keys: vec!["".to_string()],
             disks: vec!["/dev/nvme0n1".into(), "/dev/nvme1n1".into()],
             validator_keys: None,
+            telegraf_config: None,
         }
     );
 

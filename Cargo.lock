@@ -1019,6 +1019,7 @@ dependencies = [
  "tempfile",
  "tokio",
  "toml 0.7.3",
+ "url",
  "zip",
 ]
 
@@ -2128,6 +2129,7 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
+ "serde",
 ]
 
 [[package]]

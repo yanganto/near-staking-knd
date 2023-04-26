@@ -54,6 +54,16 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
         host_file
             .write_all(host_toml.as_bytes())
             .with_context(|| format!("Cannot write {}", host_path.display()))?;
+        if let Some(telegraf_config) = &host.telegraf_config {
+            let telegraf_path = tmp_dir.path().join(format!("{name}-telegraf.toml"));
+            let mut telegraf_file = File::create(&telegraf_path)
+                .with_context(|| format!("could not create {}", telegraf_path.display()))?;
+            let telegraf_config_toml = toml::to_string(&telegraf_config)
+                .with_context(|| format!("cannot serialize {name} telegraf config to toml"))?;
+            telegraf_file
+                .write_all(telegraf_config_toml.as_bytes())
+                .with_context(|| format!("Cannot write {}", telegraf_path.display()))?;
+        }
     }
     let configurations = config
         .hosts
@@ -63,12 +73,14 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
             nixos_modules.push(host.nixos_module.clone());
             nixos_modules.extend_from_slice(host.extra_nixos_modules.as_slice());
 
-            let modules = nixos_modules
+            let mut modules = nixos_modules
                 .iter()
                 .map(|m| format!("      near-staking-knd.nixosModules.\"{m}\""))
-                .collect::<Vec<_>>()
-                .join("\n");
-
+                .collect::<Vec<_>>();
+            if host.telegraf_config.is_some() {
+                modules.push(format!(r#"{{ kuutamo.monitorConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "{name}-telegraf.toml"; path = ./{name}-telegraf.toml; }})); }}"#));
+            }
+            let modules = modules.join("\n");
             format!(
                 r#"  nixosConfigurations."{name}" = near-staking-knd.inputs.nixpkgs.lib.nixosSystem {{
     system = "x86_64-linux";
