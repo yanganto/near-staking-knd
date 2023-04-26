@@ -22,6 +22,7 @@ __pycache__/
 
 # kuutamo test configuration
 kuutamo.toml
+kneard.toml
 node_key.json
 validator_key.json
 node_key.zip

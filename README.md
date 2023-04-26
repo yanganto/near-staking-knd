@@ -63,22 +63,22 @@ Subcommand to run
 Usage: kneard-mgr [OPTIONS] <COMMAND>
 
 Commands:
-  generate-config       Generate NixOS configuration
-  install               Install Validator on a given machine. This will remove all data of the current system!
-  dry-update            Upload update to host and show which actions would be performed on an update
-  update                Update validator
-  rollback              Rollback validator
-  proxy                 Proxy remote rpc to local
-  maintenance-restart   Ask Kuutamod to schedule a shutdown in maintenance windows, then it will be restart due to supervision by kneard
-  maintenance-shutdown  Ask Kuutamod to schedule a shutdown in maintenance windows
-  ssh                   SSH into a host
-  help                  Print this message or the help of the given subcommand(s)
+  generate-config  Generate NixOS configuration
+  install          Install Validator on a given machine. This will remove all data of the current system!
+  dry-update       Upload update to host and show which actions would be performed on an update
+  update           Update validator
+  rollback         Rollback validator
+  proxy            Proxy remote rpc to local
+  restart          Schedule a restart in a window where no blocks or chunks are expected to be produced by the validator
+  ssh              SSH into a host
+  help             Print this message or the help of the given subcommand(s)
 
 Options:
       --config <CONFIG>  configuration file to load [env: KUUTAMO_CONFIG=] [default: kneard.toml]
       --yes              skip interactive dialogs by assuming the answer is yes
   -h, --help             Print help
   -V, --version          Print version
+
 ```
 
 ## New Solo node install 

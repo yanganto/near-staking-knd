@@ -355,18 +355,12 @@ async fn handle_request(
         Some(req) => req,
     };
     match req {
-        ipc::Request::MaintenanceOperation(
-            window_length,
-            shutdown_at,
-            cancel,
-            shutdown_with,
-            resp_chan,
-        ) => {
+        ipc::Request::ScheduleRestartOperation(window_length, shutdown_at, cancel, resp_chan) => {
             if cancel {
                 if let Some(pid) = validator_pid {
                     let res = cancel_maintenance_shutdown(near_rpc_port, pid, near_home);
                     if let Err(e) = resp_chan
-                        .send(ipc::MaintenanceOperationResponse {
+                        .send(ipc::ScheduleRestartOperationResponse {
                             shutdown_at_blockheight: res.await,
                         })
                         .await
@@ -389,34 +383,25 @@ async fn handle_request(
                     shutdown_at,
                 );
                 if let Err(e) = resp_chan
-                    .send(ipc::MaintenanceOperationResponse {
+                    .send(ipc::ScheduleRestartOperationResponse {
                         shutdown_at_blockheight: res.await,
                     })
                     .await
                 {
-                    warn!("Failed to respond to ipc request for setting up maintenance shutdown on active node: {}", e);
+                    warn!("Failed to respond to ipc request for setting up maintenance restart on active node: {}", e);
                 };
-                if shutdown_with {
-                    SHUTDOWN_WITH_NEARD.store(true, Ordering::Release);
-                }
+                SHUTDOWN_WITH_NEARD.store(true, Ordering::Release);
                 None
             } else {
                 if let Err(e) = resp_chan
-                    .send(ipc::MaintenanceOperationResponse {
+                    .send(ipc::ScheduleRestartOperationResponse {
                         shutdown_at_blockheight: Ok(None),
                     })
                     .await
                 {
-                    warn!("Failed to respond to ipc request for setting up maintenance shutdown on passive node: {}", e);
+                    warn!("Failed to respond to ipc request for setting up maintenance restart on passive node: {}", e);
                 };
-
-                if shutdown_with {
-                    Some(StateType::Shutdown)
-                } else {
-                    // If we are already in startup phase, this would not actually trigger a
-                    // restart... which should be fine.
-                    Some(StateType::Startup)
-                }
+                Some(StateType::Shutdown)
             }
         }
     }
