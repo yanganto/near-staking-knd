@@ -4,7 +4,7 @@
 
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
-use kneard::commands::control_commands::{CheckRpcArgs, Command, MaintenanceOperationArgs};
+use kneard::commands::control_commands::{CheckRpcArgs, Command, RestartArgs};
 use kneard::commands::CommandClient;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -45,57 +45,29 @@ async fn show_active_validator(kuutamo_client: &CommandClient, args: &Args) -> R
     Ok(())
 }
 
-async fn set_maintenance_shutdown(
+async fn schedule_restart(
     kuutamo_client: &CommandClient,
     control_socket: &PathBuf,
-    operation_arg: MaintenanceOperationArgs,
+    restart_arg: RestartArgs,
 ) -> Result<()> {
-    let MaintenanceOperationArgs {
-        minimum_length,
-        shutdown_at,
-        cancel,
-        wait,
-        ..
-    } = operation_arg;
-    if minimum_length.is_some() && shutdown_at.is_some() {
+    if restart_arg.minimum_length.is_some() && restart_arg.schedule_at.is_some() {
         Err(anyhow!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
         ))
     } else {
+        // After graceful shutdown,
         let r = kuutamo_client
-            .maintenance_operation(minimum_length, shutdown_at, cancel, false)
+            .schedule_restart(
+                restart_arg.minimum_length,
+                restart_arg.schedule_at,
+                restart_arg.cancel,
+            )
             .await;
-        if r.is_ok() && wait {
+        if r.is_ok() && restart_arg.wait {
             // Wait for kuutamod to terminate
             while UnixStream::connect(&control_socket).await.is_ok() {
                 sleep(Duration::from_millis(100)).await
             }
-        }
-        r
-    }
-}
-
-async fn set_maintenance_restart(
-    kuutamo_client: &CommandClient,
-    operation_arg: MaintenanceOperationArgs,
-) -> Result<()> {
-    let MaintenanceOperationArgs {
-        minimum_length,
-        shutdown_at,
-        cancel,
-        wait,
-        ..
-    } = operation_arg;
-    if minimum_length.is_some() && shutdown_at.is_some() {
-        Err(anyhow!(
-            "We can not guarantee minimum maintenance window for a specified shutdown block height"
-        ))
-    } else {
-        let r = kuutamo_client
-            .maintenance_operation(minimum_length, shutdown_at, cancel, true)
-            .await;
-        if r.is_ok() && wait {
-            eprintln!("waiting for neard restart is not implemented");
         }
         r
     }
@@ -123,11 +95,8 @@ pub async fn main() {
     let kuutamo_client = CommandClient::new(&args.control_socket);
     let res = match args.action {
         Command::ActiveValidator => show_active_validator(&kuutamo_client, &args).await,
-        Command::MaintenanceShutdown(operation_arg) => {
-            set_maintenance_shutdown(&kuutamo_client, &args.control_socket, operation_arg).await
-        }
-        Command::MaintenanceRestart(operation_arg) => {
-            set_maintenance_restart(&kuutamo_client, operation_arg).await
+        Command::Restart(operation_arg) => {
+            schedule_restart(&kuutamo_client, &args.control_socket, operation_arg).await
         }
         Command::MaintenanceStatus => show_maintenance_status(&kuutamo_client).await,
         Command::CheckRpc(CheckRpcArgs { watch }) => check_rpc_status(&kuutamo_client, watch).await,

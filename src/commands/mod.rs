@@ -12,19 +12,19 @@ pub use client::CommandClient;
 pub use server::spawn_control_server;
 
 #[derive(Parser, PartialEq, Serialize, Deserialize, Debug, Clone)]
-struct MaintenanceOperation {
-    /// Specify the minimum length in blocks for the maintenance shutdown, if not provided,
-    /// neard will try to shutdown in the longest maintenance window in the current epoch
+struct ScheduleRestartOperation {
+    /// Specify the minimum length in blocks of the maintenance window, if not provided,
+    /// neard will try to restart in the longest maintenance window in the current epoch
     minimum_length: Option<u64>,
 
-    /// Cancel the maintenance shutdown setting
+    /// Cancel the schedule
     #[arg(long)]
     pub cancel: bool,
 
-    /// Specify the block height to shutdown at, and will not check on it in maintenance window or
+    /// Specify the block height to schedule at, and will not check on it in maintenance window or
     /// not.
     #[arg(long)]
-    shutdown_at: Option<u64>,
+    schedule_at: Option<u64>,
 }
 
 #[derive(PartialEq, Serialize, Deserialize, Debug, Clone)]

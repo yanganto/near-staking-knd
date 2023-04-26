@@ -2,15 +2,17 @@
 
 #![deny(missing_docs)]
 
-use anyhow::{bail, Context, Result};
+use crate::utils::ssh::ssh_with_timeout;
+use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
-use kneard::commands::control_commands;
 use kneard::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
 use kneard::proxy;
 use kneard::utils;
+use semver::{Version, VersionReq};
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
+use std::process::Output;
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct InstallArgs {
@@ -106,6 +108,34 @@ struct SshArgs {
     command: Option<Vec<String>>,
 }
 
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+struct RestartArgs {
+    /// Comma-separated lists of hosts to perform the restart
+    #[clap(long, default_value = "")]
+    hosts: String,
+
+    /// Specify the minimum length in blocks of maintenance window to restart at, if not provided,
+    /// kneard will try to pick the longest maintenance window in the current epoch.
+    pub minimum_length: Option<u64>,
+
+    /// Specify the block height to restart at, and will not check on it in maintenance window or
+    /// not.
+    #[arg(long)]
+    pub restart_at: Option<u64>,
+
+    /// Gracefully restart immediately
+    #[arg(long)]
+    pub immediately: bool,
+
+    /// Cancel the restart setting
+    #[arg(long)]
+    pub cancel: bool,
+
+    /// Cli will wait for restart
+    #[clap(long)]
+    pub wait: bool,
+}
+
 /// Subcommand to run
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(clap::Subcommand, PartialEq, Debug, Clone)]
@@ -122,13 +152,8 @@ enum Command {
     Rollback(RollbackArgs),
     /// Proxy remote rpc to local
     Proxy(ProxyArgs),
-    /// Schedule a restart in a maintenance window
-    Restart(control_commands::MaintenanceOperationArgs),
-    /// (Deprecated) Ask kneard to schedule a shutdown in maintenance windows, then it will be restart
-    /// due to supervision by kneard
-    MaintenanceRestart(control_commands::MaintenanceOperationArgs),
-    /// (Deprecated) Ask kneard to schedule a shutdown in maintenance windows
-    MaintenanceShutdown(control_commands::MaintenanceOperationArgs),
+    /// Schedule a restart in a window where no blocks or chunks are expected to be produced by the validator
+    Restart(RestartArgs),
     /// SSH into a host
     Ssh(SshArgs),
 }
@@ -251,59 +276,117 @@ async fn rollback(
 
 async fn proxy(proxy_args: &ProxyArgs, config: &Config) -> Result<()> {
     let hosts = filter_hosts(&proxy_args.host, &config.hosts)?;
+    if hosts.len() > 1 {
+        println!(
+            "Multiple hosts detected in configuration. Will proxy to machine: {}",
+            hosts[0].name
+        );
+    }
     proxy::rpc(&hosts[0], proxy_args.local_port).await
 }
 
-fn maintenance_operation(
-    args: &control_commands::MaintenanceOperationArgs,
-    restart: bool,
-    config: &Config,
-) -> Result<()> {
-    let hosts = filter_hosts(&args.host, &config.hosts)?;
-    let action = if restart {
-        "maintenance-restart"
-    } else {
-        "maintenance-shutdown"
-    };
-    let output = match (args.minimum_length, args.shutdown_at) {
+/// For v0.1
+fn maintenance_shutdown(
+    host: &Host,
+    minimum_length: Option<u64>,
+    schedule_at: Option<u64>,
+) -> Result<Output> {
+    match (minimum_length, schedule_at) {
         (Some(_), Some(_)) => bail!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
         ),
         (Some(minimum_length), None) => utils::ssh::ssh_with_timeout(
-            &hosts[0],
-            // TODO:
-            // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
-            &["kuutamoctl", action, &minimum_length.to_string()],
-            true,
-        )?,
-        // TODO:
-        // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
-        (None, None) => utils::ssh::ssh_with_timeout(&hosts[0], &["kuutamoctl", action], true)?,
-        (None, Some(shutdown_at)) => utils::ssh::ssh_with_timeout(
-            &hosts[0],
+            host,
             &[
-                // TODO:
-                // use kuutamoctl (v0.1.0) for backward compatible, change to "kneard-ctl" after (v0.2.1)
                 "kuutamoctl",
-                action,
-                "--shutdown-at",
-                &shutdown_at.to_string(),
+                "maintenance-shutdown",
+                &minimum_length.to_string(),
             ],
             true,
-        )?,
+        ),
+        (None, None) => {
+            utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "maintenance-shutdown"], true)
+        }
+        (None, Some(schedule_at)) => utils::ssh::ssh_with_timeout(
+            host,
+            &[
+                "kuutamoctl",
+                "maintenance-shutdown",
+                "--shutdown-at",
+                &schedule_at.to_string(),
+            ],
+            true,
+        ),
+    }
+}
+
+/// For v0.2.1
+fn schedule_restart(
+    host: &Host,
+    minimum_length: Option<u64>,
+    schedule_at: Option<u64>,
+) -> Result<Output> {
+    match (minimum_length, schedule_at) {
+        (Some(_), Some(_)) => bail!(
+            "We can not guarantee minimum maintenance window for a specified shutdown block height"
+        ),
+        (Some(minimum_length), None) => utils::ssh::ssh_with_timeout(
+            host,
+            &["kuutamoctl", "restart", &minimum_length.to_string()],
+            true,
+        ),
+        (None, None) => utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "restart"], true),
+        (None, Some(schedule_at)) => utils::ssh::ssh_with_timeout(
+            host,
+            &[
+                "kuutamoctl",
+                "restart",
+                "--schedule-at",
+                &schedule_at.to_string(),
+            ],
+            true,
+        ),
+    }
+}
+
+fn restart(args: &RestartArgs, config: &Config) -> Result<()> {
+    let schedule_at = if args.immediately {
+        // scheule at a past block height to gracefully restart immediately
+        Some(1)
+    } else {
+        args.restart_at
     };
 
-    io::stdout()
-        .write_all(&output.stdout)
-        .with_context(|| "Fail to dump stdout of kuutamctl")?;
-    if output.status.success() {
-        Ok(())
-    } else {
+    let hosts = filter_hosts(&args.hosts, &config.hosts)?;
+
+    for host in hosts.iter() {
+        let Output { stdout, .. } = ssh_with_timeout(host, &["kuutamoctl", "-V"], true)
+            .context("Failed to fetch kuutamoctl version")?;
+        let version_str =
+            std::str::from_utf8(&stdout).map(|s| s.rsplit_once(' ').map(|(_, v)| v.trim()))?;
+        let version =
+            Version::parse(version_str.ok_or(anyhow!("version is not prefix with binary name"))?)
+                .context("Failed to parse kuutamoctl version")?;
+
+        let output = if VersionReq::parse(">=0.2.1")?.matches(&version) {
+            schedule_restart(host, args.minimum_length, schedule_at)?
+        } else {
+            maintenance_shutdown(host, args.minimum_length, schedule_at)?
+        };
+
         io::stdout()
-            .write_all(&output.stderr)
-            .with_context(|| "Fail to dump stderr of kuutamctl")?;
-        bail!("Fail to setup maintenance shutdown");
+            .write_all(&output.stdout)
+            .with_context(|| "Fail to dump stdout of kuutamctl")?;
+        if output.status.success() {
+            println!("{} restart", host.name);
+        } else {
+            io::stdout()
+                .write_all(&output.stderr)
+                .with_context(|| "Fail to dump stderr of kuutamctl")?;
+            bail!("Fail to trigger restart");
+        }
     }
+    Ok(())
 }
 
 fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
@@ -359,11 +442,7 @@ pub async fn main() -> Result<()> {
                 _ => unreachable!(),
             }
         }
-        Command::Proxy(_)
-        | Command::Restart(_)
-        | Command::MaintenanceRestart(_)
-        | Command::MaintenanceShutdown(_)
-        | Command::Ssh(_) => {
+        Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) => {
             let config = deploy::load_configuration(&args.config, false).with_context(|| {
                 format!(
                     "failed to load configuration file: {}",
@@ -373,17 +452,7 @@ pub async fn main() -> Result<()> {
             match args.action {
                 Command::Proxy(ref proxy_args) => proxy(proxy_args, &config).await,
                 Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
-
-                // Service will restart after graceful shutdown
-                Command::Restart(ref args) => maintenance_operation(args, false, &config),
-
-                // Deprecated
-                Command::MaintenanceRestart(ref maintenance_operation_args) => {
-                    maintenance_operation(maintenance_operation_args, true, &config)
-                }
-                Command::MaintenanceShutdown(ref maintenance_operation_args) => {
-                    maintenance_operation(maintenance_operation_args, false, &config)
-                }
+                Command::Restart(ref args) => restart(args, &config),
                 _ => unreachable!(),
             }
         }
