@@ -368,7 +368,7 @@ fn restart(args: &RestartArgs, config: &Config) -> Result<()> {
             Version::parse(version_str.ok_or(anyhow!("version is not prefix with binary name"))?)
                 .context("Failed to parse kuutamoctl version")?;
 
-        let output = if VersionReq::parse(">=0.2.1")?.matches(&version) {
+        let output = if VersionReq::parse(">=0.2.0")?.matches(&version) {
             schedule_restart(host, args.minimum_length, schedule_at)?
         } else {
             maintenance_shutdown(host, args.minimum_length, schedule_at)?
