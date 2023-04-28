@@ -418,12 +418,14 @@ pub async fn main() -> Result<()> {
         | Command::DryUpdate(_)
         | Command::Update(_)
         | Command::Rollback(_) => {
-            let config = deploy::load_configuration(&args.config, true).with_context(|| {
-                format!(
-                    "failed to parse configuration file: {}",
-                    &args.config.display()
-                )
-            })?;
+            let config = deploy::load_configuration(&args.config, true)
+                .await
+                .with_context(|| {
+                    format!(
+                        "failed to parse configuration file: {}",
+                        &args.config.display()
+                    )
+                })?;
             let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
             match args.action {
                 Command::GenerateConfig(ref config_args) => {
@@ -443,12 +445,14 @@ pub async fn main() -> Result<()> {
             }
         }
         Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) => {
-            let config = deploy::load_configuration(&args.config, false).with_context(|| {
-                format!(
-                    "failed to load configuration file: {}",
-                    &args.config.display()
-                )
-            })?;
+            let config = deploy::load_configuration(&args.config, false)
+                .await
+                .with_context(|| {
+                    format!(
+                        "failed to load configuration file: {}",
+                        &args.config.display()
+                    )
+                })?;
             match args.action {
                 Command::Proxy(ref proxy_args) => proxy(proxy_args, &config).await,
                 Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),

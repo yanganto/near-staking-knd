@@ -4,6 +4,7 @@ use log::{info, warn};
 use nix::libc::STDIN_FILENO;
 use nix::sys::termios;
 use regex::Regex;
+use reqwest::{header::AUTHORIZATION, Client};
 use serde::Serialize;
 use serde_derive::Deserialize;
 use std::collections::HashMap;
@@ -19,6 +20,8 @@ use url::Url;
 use super::command::status_to_pretty_err;
 use super::secrets::Secrets;
 use super::NixosFlake;
+
+pub static KUUTAMO_MONITOR: &str = "https://grafana.monitoring-00-cluster.kuutamo.computer";
 
 struct DisableTerminalEcho {
     flags: Option<termios::Termios>,
@@ -287,7 +290,7 @@ fn validate_global(global_config: &GlobalConfig) -> Result<Global> {
     Ok(Global { flake })
 }
 
-fn validate_host(
+async fn validate_host(
     name: &str,
     host: &HostConfig,
     default: &HostConfig,
@@ -528,6 +531,22 @@ fn validate_host(
     let kmonitoring_token = fs::read_to_string("kuutamo-monitoring.token")
         .ok()
         .map(|s| s.trim().into());
+    if let Some(ref token) = kmonitoring_token {
+        let client = Client::new();
+        let status = client
+            .get(KUUTAMO_MONITOR)
+            .header(AUTHORIZATION, token)
+            .send()
+            .await
+            .with_context(|| "Could not validate kuutamo-monitoring.token (network issue)")?
+            .status();
+        if status.is_client_error() {
+            bail!("kuutamo-monitoring.token is invalid")
+        }
+        if status.is_server_error() {
+            bail!("Could not validate kuutamo-monitoring.token (server issue)")
+        }
+    }
 
     Ok(Host {
         name,
@@ -685,28 +704,26 @@ pub struct Config {
 }
 
 /// Parse toml configuration
-pub fn parse_config(
+pub async fn parse_config(
     content: &str,
     working_directory: Option<&Path>,
     load_keys: bool,
 ) -> Result<Config> {
     let mut config: ConfigFile = toml::from_str(content)?;
-    let hosts = config
-        .hosts
-        .iter_mut()
-        .map(|(name, host)| {
-            Ok((
-                name.clone(),
-                validate_host(
-                    name,
-                    host,
-                    &config.host_defaults,
-                    working_directory,
-                    load_keys,
-                )?,
-            ))
-        })
-        .collect::<Result<_>>()?;
+    let mut hosts = HashMap::new();
+    for (name, host) in config.hosts.iter_mut() {
+        hosts.insert(
+            name.clone(),
+            validate_host(
+                name,
+                host,
+                &config.host_defaults,
+                working_directory,
+                load_keys,
+            )
+            .await?,
+        );
+    }
 
     let global = validate_global(&config.global)?;
     Ok(Config { hosts, global })
@@ -714,14 +731,14 @@ pub fn parse_config(
 
 /// Load and validate configuration from path
 /// The key will not provide without load_keys flag
-pub fn load_configuration(path: &Path, load_keys: bool) -> Result<Config> {
+pub async fn load_configuration(path: &Path, load_keys: bool) -> Result<Config> {
     let content = fs::read_to_string(path).context("Cannot read file")?;
     let working_directory = path.parent();
-    parse_config(&content, working_directory, load_keys)
+    parse_config(&content, working_directory, load_keys).await
 }
 
-#[test]
-pub fn test_parse_config() -> Result<()> {
+#[tokio::test]
+pub async fn test_parse_config() -> Result<()> {
     use std::str::FromStr;
 
     let validator_key = include_str!("../../nix/modules/tests/validator_key.json");
@@ -756,7 +773,7 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#;
 
-    let config = parse_config(config_str, None, true)?;
+    let config = parse_config(config_str, None, true).await?;
     assert_eq!(config.global.flake, "github:myfork/near-staking-knd");
 
     let hosts = &config.hosts;
@@ -796,7 +813,7 @@ ipv6_address = "2605:9880:400::3"
 
     // we delete the node_key.json, `parse-config` will generate it for us:
     fs::remove_file("node_key.json").unwrap();
-    let config = parse_config(config_str, None, true)?;
+    let config = parse_config(config_str, None, true).await?;
     let validator_node_key = &config.hosts["validator-00"]
         .validator_keys
         .as_ref()
@@ -830,8 +847,8 @@ fn test_invalid_string_for_ipv6() {
     assert!(invalid_str.normalize().is_err());
 }
 
-#[test]
-fn test_validate_host() {
+#[tokio::test]
+async fn test_validate_host() {
     let mut config = HostConfig {
         ipv4_address: Some("192.168.0.1".parse::<IpAddr>().unwrap()),
         ipv4_cidr: Some(0),
@@ -843,7 +860,9 @@ fn test_validate_host() {
         ..Default::default()
     };
     assert_eq!(
-        validate_host("ipv4-only", &config, &HostConfig::default(), None, true).unwrap(),
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .unwrap(),
         Host {
             name: "ipv4-only".to_string(),
             nixos_module: "single-node-validator-mainnet".to_string(),
@@ -869,18 +888,30 @@ fn test_validate_host() {
     // If `ipv6_address` is provied, the `ipv6_gateway` and `ipv6_cidr` should be provided too,
     // else the error will raise
     config.ipv6_address = Some("2607:5300:203:6cdf::".into());
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_err());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_err()
+    );
 
     config.ipv6_gateway = Some(
         "2607:5300:0203:6cff:00ff:00ff:00ff:00ff"
             .parse::<IpAddr>()
             .unwrap(),
     );
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_err());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_err()
+    );
 
     // The `ipv6_cidr` could be provided by subnet in address field
     config.ipv6_address = Some("2607:5300:203:6cdf::/64".into());
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_ok());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_ok()
+    );
 }
 
 #[test]

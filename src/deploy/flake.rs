@@ -5,6 +5,7 @@ use std::{fs::File, path::Path};
 use tempfile::{Builder, TempDir};
 
 use super::command::status_to_pretty_err;
+use super::config::KUUTAMO_MONITOR;
 use super::Config;
 
 /// The nixos flake
@@ -68,9 +69,9 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
             let kmonitor_path = tmp_dir.path().join(format!("{name}-kmonitor.toml"));
             let mut kmonitor_file = File::create(&kmonitor_path)
                 .with_context(|| format!("could not create {}", kmonitor_path.display()))?;
-            kmonitor_file.write_all(
-                b"url = \"https://grafana.monitoring-00-cluster.kuutamo.computer/api/v1/push\"\n",
-            )?;
+            kmonitor_file.write_all(b"url = \"")?;
+            kmonitor_file.write_all(KUUTAMO_MONITOR.as_bytes())?;
+            kmonitor_file.write_all(b"/api/v1/push\"\n")?;
             kmonitor_file.write_all(b"token = \"")?;
             kmonitor_file.write_all(kmonitoring_token.as_bytes())?;
             kmonitor_file.write_all(b"\"\n")?;
@@ -143,8 +144,8 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
     Ok(NixosFlake { tmp_dir })
 }
 
-#[test]
-pub fn test_nixos_flake() -> Result<()> {
+#[tokio::test]
+async fn test_nixos_flake() -> Result<()> {
     use crate::deploy::config::parse_config;
     use std::process::Command;
 
@@ -176,7 +177,8 @@ ipv6_address = "2605:9880:400::3"
 "#,
         None,
         true,
-    )?;
+    )
+    .await?;
     let flake = generate_nixos_flake(&config)?;
     let flake_path = flake.path();
     let flake_nix = flake_path.join("flake.nix");
