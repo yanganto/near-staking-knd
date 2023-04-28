@@ -85,9 +85,9 @@ Options:
 
 1. New pool deployments can be done via the webapp UI `Get Started` flow at [near.kuutamo.app](https://near.kuutamo.app) - ([GitHub](https://github.com/kuutamolabs/near-staking-ui))
 
-2. Download encrypted kuutamo app key file and config file (`kneard.toml`) via `Manage` button in UI:
+2. Download encrypted kuutamo app key file, config file (`kneard.toml`) and monitoring access token (`kuutamo-monitoring.token`) via `Manage` button in UI:
 
-3. Create a new directory and put the two files in it.
+3. Create a new directory and put these files in it.
 
 ```
 [you@workstation:~/my-near-validator-1/]$ ls
