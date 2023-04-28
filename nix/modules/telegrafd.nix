@@ -61,13 +61,22 @@
               password = config.kuutamo.telegraf.password or "";
             };
           };
+          kmonitor = if config.kuutamo.telegraf.kmonitoring_token == "" then { } else {
+            http = {
+              url = config.kuutamo.telegraf.kmonitoring_url;
+              data_format = "prometheus";
+              headers = {
+                Authorization = config.kuutamo.telegraf.kmonitoring_token;
+              };
+            };
+          };
         in
         {
           prometheus_client = {
             listen = ":9273";
             metric_version = 2;
           };
-        } // monitor;
+        } // monitor // kmonitor;
     };
   };
   security.sudo.extraRules = [

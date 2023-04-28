@@ -64,6 +64,17 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
                 .write_all(telegraf_config_toml.as_bytes())
                 .with_context(|| format!("Cannot write {}", telegraf_path.display()))?;
         }
+        if let Some(kmonitoring_token) = &host.kmonitoring_token {
+            let kmonitor_path = tmp_dir.path().join(format!("{name}-kmonitor.toml"));
+            let mut kmonitor_file = File::create(&kmonitor_path)
+                .with_context(|| format!("could not create {}", kmonitor_path.display()))?;
+            kmonitor_file.write_all(
+                b"url = \"https://grafana.monitoring-00-cluster.kuutamo.computer/api/v1/push\"\n",
+            )?;
+            kmonitor_file.write_all(b"token = \"")?;
+            kmonitor_file.write_all(kmonitoring_token.as_bytes())?;
+            kmonitor_file.write_all(b"\"\n")?;
+        }
     }
     let configurations = config
         .hosts
@@ -79,6 +90,9 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
                 .collect::<Vec<_>>();
             if host.telegraf_config.is_some() {
                 modules.push(format!(r#"{{ kuutamo.monitorConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "{name}-telegraf.toml"; path = ./{name}-telegraf.toml; }})); }}"#));
+            }
+            if host.kmonitoring_token.is_some() {
+                modules.push(format!(r#"{{ kuutamo.KMonitorConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "{name}-kmonitor.toml"; path = ./{name}-kmonitor.toml; }})); }}"#));
             }
             let modules = modules.join("\n");
             format!(

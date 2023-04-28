@@ -3,6 +3,7 @@
 let
   cfg = config.kuutamo.deployConfig;
   monitor_cfg = config.kuutamo.monitorConfig;
+  kmonitor_cfg = config.kuutamo.KMonitorConfig;
   settingsFormat = pkgs.formats.toml { };
 in
 {
@@ -14,6 +15,11 @@ in
   options.kuutamo.monitorConfig = lib.mkOption {
     default = { url = ""; username = ""; password = ""; };
     description = lib.mdDoc "monitor toml configuration from kneard-mgr cli";
+    inherit (settingsFormat) type;
+  };
+  options.kuutamo.KMonitorConfig = lib.mkOption {
+    default = { url = ""; token = ""; };
+    description = lib.mdDoc "kuutamo monitor access token from kneard-mgr cli";
     inherit (settingsFormat) type;
   };
 
@@ -42,5 +48,8 @@ in
     kuutamo.telegraf.url = monitor_cfg.url;
     kuutamo.telegraf.username = monitor_cfg.username;
     kuutamo.telegraf.password = monitor_cfg.password;
+
+    kuutamo.telegraf.kmonitoring_url = kmonitor_cfg.url;
+    kuutamo.telegraf.kmonitoring_token = kmonitor_cfg.token;
   };
 }

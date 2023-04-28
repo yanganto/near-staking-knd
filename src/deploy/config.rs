@@ -234,6 +234,10 @@ pub struct Host {
     /// Setup telegraf output config to the monitor server
     #[serde(skip_serializing)]
     pub telegraf_config: Option<TelegrafOutputConfig>,
+
+    /// Setup telegraf output config for kuutamo monitor server
+    #[serde(skip_serializing)]
+    pub kmonitoring_token: Option<String>,
 }
 
 impl Host {
@@ -521,6 +525,10 @@ fn validate_host(
         None
     };
 
+    let kmonitoring_token = fs::read_to_string("kuutamo-monitoring.token")
+        .ok()
+        .map(|s| s.trim().into());
+
     Ok(Host {
         name,
         nixos_module,
@@ -539,6 +547,7 @@ fn validate_host(
         public_ssh_keys,
         disks,
         telegraf_config,
+        kmonitoring_token,
     })
 }
 
@@ -853,6 +862,7 @@ fn test_validate_host() {
             disks: vec!["/dev/nvme0n1".into(), "/dev/nvme1n1".into()],
             validator_keys: None,
             telegraf_config: None,
+            kmonitoring_token: None,
         }
     );
 
