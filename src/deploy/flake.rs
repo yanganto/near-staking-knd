@@ -5,7 +5,6 @@ use std::{fs::File, path::Path};
 use tempfile::{Builder, TempDir};
 
 use super::command::status_to_pretty_err;
-use super::config::KUUTAMO_MONITOR;
 use super::Config;
 
 /// The nixos flake
@@ -65,16 +64,16 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
                 .write_all(telegraf_config_toml.as_bytes())
                 .with_context(|| format!("Cannot write {}", telegraf_path.display()))?;
         }
-        if let Some(kmonitoring_token) = &host.kmonitoring_token {
+        if let Some(kmonitor_config) = &host.kmonitor_config {
             let kmonitor_path = tmp_dir.path().join(format!("{name}-kmonitor.toml"));
             let mut kmonitor_file = File::create(&kmonitor_path)
                 .with_context(|| format!("could not create {}", kmonitor_path.display()))?;
-            kmonitor_file.write_all(b"url = \"")?;
-            kmonitor_file.write_all(KUUTAMO_MONITOR.as_bytes())?;
-            kmonitor_file.write_all(b"/api/v1/push\"\n")?;
-            kmonitor_file.write_all(b"token = \"")?;
-            kmonitor_file.write_all(kmonitoring_token.as_bytes())?;
-            kmonitor_file.write_all(b"\"\n")?;
+            let kmonitor_config_toml = toml::to_string(&kmonitor_config).with_context(|| {
+                format!("cannot serialize {name} kuutamo monitor config to toml")
+            })?;
+            kmonitor_file
+                .write_all(kmonitor_config_toml.as_bytes())
+                .with_context(|| format!("Cannot write {}", kmonitor_path.display()))?;
         }
     }
     let configurations = config
@@ -92,7 +91,7 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
             if host.telegraf_config.is_some() {
                 modules.push(format!(r#"{{ kuutamo.monitorConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "{name}-telegraf.toml"; path = ./{name}-telegraf.toml; }})); }}"#));
             }
-            if host.kmonitoring_token.is_some() {
+            if host.kmonitor_config.is_some() {
                 modules.push(format!(r#"{{ kuutamo.KMonitorConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "{name}-kmonitor.toml"; path = ./{name}-kmonitor.toml; }})); }}"#));
             }
             let modules = modules.join("\n");
@@ -176,7 +175,8 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#,
         None,
-        true,
+        None,
+        false,
     )
     .await?;
     let flake = generate_nixos_flake(&config)?;

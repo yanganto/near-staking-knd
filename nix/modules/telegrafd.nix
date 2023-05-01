@@ -61,13 +61,12 @@
               password = config.kuutamo.telegraf.password or "";
             };
           };
-          kmonitor = if config.kuutamo.telegraf.kmonitoring_token == "" then { } else {
+          kmonitor = if config.kuutamo.telegraf.kmonitoring_user_id == "" then { } else {
             http = {
               url = config.kuutamo.telegraf.kmonitoring_url;
-              data_format = "prometheus";
-              headers = {
-                Authorization = config.kuutamo.telegraf.kmonitoring_token;
-              };
+              data_format = "prometheusremotewrite";
+              username = "${config.kuutamo.telegraf.kmonitoring_protocol}-${config.kuutamo.telegraf.kmonitoring_user_id}";
+              password = config.kuutamo.telegraf.kmonitoring_password;
             };
           };
         in

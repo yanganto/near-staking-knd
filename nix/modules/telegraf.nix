@@ -25,10 +25,22 @@
       description = "url to kuutamo monitor";
     };
 
-    kuutamo.telegraf.kmonitoring_token = lib.mkOption {
+    kuutamo.telegraf.kmonitoring_protocol = lib.mkOption {
       type = lib.types.str;
       default = "";
-      description = "access token for kuutamo monitor";
+      description = "protocol to kuutamo monitor";
+    };
+
+    kuutamo.telegraf.kmonitoring_user_id = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "user_id for kuutamo monitor";
+    };
+
+    kuutamo.telegraf.kmonitoring_password = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "password for kuutamo monitor";
     };
   };
 }

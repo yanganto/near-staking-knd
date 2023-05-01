@@ -1,10 +1,11 @@
 use anyhow::{anyhow, bail, Context, Result};
+use base64::{engine::general_purpose, Engine as _};
 use format_serde_error::SerdeError;
 use log::{info, warn};
 use nix::libc::STDIN_FILENO;
 use nix::sys::termios;
 use regex::Regex;
-use reqwest::{header::AUTHORIZATION, Client};
+use reqwest::Client;
 use serde::Serialize;
 use serde_derive::Deserialize;
 use std::collections::HashMap;
@@ -21,7 +22,15 @@ use super::command::status_to_pretty_err;
 use super::secrets::Secrets;
 use super::NixosFlake;
 
-pub static KUUTAMO_MONITOR: &str = "https://grafana.monitoring-00-cluster.kuutamo.computer";
+/// Kuutamo monitor environment parameters
+pub struct MonitorEnv<'a> {
+    /// Url for monitor server
+    pub monitor_url: &'a Url,
+    /// Protocol for user prefix
+    pub monitor_protocol: &'a String,
+    /// Path to default token
+    pub default_token_file: &'a PathBuf,
+}
 
 struct DisableTerminalEcho {
     flags: Option<termios::Termios>,
@@ -106,14 +115,18 @@ struct ConfigFile {
     hosts: HashMap<String, HostConfig>,
 }
 
+/// Neard keys
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct NearKeyFile {
+    /// near account
     pub account_id: String,
+    /// near public key
     pub public_key: String,
     // Credential files generated which near cli works with have private_key
     // rather than secret_key field.  To make it possible to read those from
     // neard add private_key as an alias to this field so either will work.
     #[serde(alias = "private_key")]
+    /// near secret key
     pub secret_key: String,
 }
 
@@ -162,21 +175,42 @@ struct HostConfig {
     encrypted_kuutamo_app_file: Option<PathBuf>,
 
     #[serde(default)]
-    telegraf_config_file: Option<String>,
+    telegraf_config_file: Option<PathBuf>,
+
+    #[serde(default)]
+    kuutamo_monitoring_token_file: Option<PathBuf>,
 }
 
+/// Near validator keys
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct ValidatorKeys {
-    // Near validator key
+    /// Near validator key
     pub validator_key: NearKeyFile,
-    // Near validator node key
+    /// Near validator node key
     pub validator_node_key: NearKeyFile,
 }
 
+/// Telegraf monitor
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct TelegrafOutputConfig {
+    /// url for monitor
     pub url: Url,
+    /// username for monitor
     pub username: String,
+    /// password for monitor
+    pub password: String,
+}
+
+/// Kuutamo monitor
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct KmonitorConfig {
+    /// url for kuutamo monitor
+    pub url: Url,
+    /// protocol for kuutamo monitor
+    pub protocol: String,
+    /// user_id for kuutamo monitor
+    pub user_id: String,
+    /// password for kuutamo monitor
     pub password: String,
 }
 
@@ -234,13 +268,13 @@ pub struct Host {
     #[serde(skip_serializing)]
     pub validator_keys: Option<ValidatorKeys>,
 
-    /// Setup telegraf output config to the monitor server
+    /// Setup telegraf output config to the self host monitor server
     #[serde(skip_serializing)]
     pub telegraf_config: Option<TelegrafOutputConfig>,
 
-    /// Setup telegraf output config for kuutamo monitor server
+    /// Setup telegraf output auth for kuutamo monitor server
     #[serde(skip_serializing)]
-    pub kmonitoring_token: Option<String>,
+    pub kmonitor_config: Option<KmonitorConfig>,
 }
 
 impl Host {
@@ -294,6 +328,7 @@ async fn validate_host(
     name: &str,
     host: &HostConfig,
     default: &HostConfig,
+    monitor_env: Option<&MonitorEnv<'_>>,
     working_directory: Option<&Path>,
     load_keys: bool,
 ) -> Result<Host> {
@@ -521,32 +556,60 @@ async fn validate_host(
 
     let telegraf_config = if let Some(telegraf_config_file) = telegraf_config_file {
         let content = fs::read_to_string(telegraf_config_file).with_context(|| {
-            format!("cannot read telegraf_config_file: '{telegraf_config_file}'")
+            format!(
+                "cannot read telegraf_config_file: '{}'",
+                telegraf_config_file.display()
+            )
         })?;
         Some(toml::from_str::<TelegrafOutputConfig>(&content)?)
     } else {
         None
     };
 
-    let kmonitoring_token = fs::read_to_string("kuutamo-monitoring.token")
-        .ok()
-        .map(|s| s.trim().into());
-    if let Some(ref token) = kmonitoring_token {
-        let client = Client::new();
-        let status = client
-            .get(KUUTAMO_MONITOR)
-            .header(AUTHORIZATION, token)
-            .send()
-            .await
-            .with_context(|| "Could not validate kuutamo-monitoring.token (network issue)")?
-            .status();
-        if status.is_client_error() {
-            bail!("kuutamo-monitoring.token is invalid")
+    let kmonitor_config = if let Some(monitor_env) = monitor_env {
+        let kmonitor_auth = if load_keys {
+            fs::read_to_string(
+                host.kuutamo_monitoring_token_file
+                    .as_ref()
+                    .unwrap_or(monitor_env.default_token_file),
+            )
+            .ok()
+            .map(|s| s.trim().into())
+            .and_then(|t| decode_token(t).ok())
+        } else {
+            None
+        };
+
+        if let Some((ref user_id, ref password)) = kmonitor_auth {
+            let client = Client::new();
+            if let Ok(r) = client
+                .get(format!(
+                    "https:://{}",
+                    monitor_env.monitor_url.domain().unwrap_or_default()
+                ))
+                .basic_auth(
+                    format!("{}-{}", monitor_env.monitor_protocol, user_id),
+                    Some(password),
+                )
+                .send()
+                .await
+            {
+                if r.status() == reqwest::StatusCode::UNAUTHORIZED {
+                    eprintln!("token for kuutamo monitoring.token is invalid, please check, else the monitor will not work after deploy");
+                }
+            } else {
+                eprintln!("Could not validate kuutamo-monitoring.token (network issue)");
+            }
         }
-        if status.is_server_error() {
-            bail!("Could not validate kuutamo-monitoring.token (server issue)")
-        }
-    }
+        kmonitor_auth.map(|(user_id, password)| KmonitorConfig {
+            url: monitor_env.monitor_url.clone(),
+            protocol: monitor_env.monitor_protocol.clone(),
+            user_id,
+            password,
+        })
+    } else {
+        None
+    };
 
     Ok(Host {
         name,
@@ -566,7 +629,7 @@ async fn validate_host(
         public_ssh_keys,
         disks,
         telegraf_config,
-        kmonitoring_token,
+        kmonitor_config,
     })
 }
 
@@ -706,6 +769,7 @@ pub struct Config {
 /// Parse toml configuration
 pub async fn parse_config(
     content: &str,
+    monitoring_env: Option<&MonitorEnv<'_>>,
     working_directory: Option<&Path>,
     load_keys: bool,
 ) -> Result<Config> {
@@ -718,6 +782,7 @@ pub async fn parse_config(
                 name,
                 host,
                 &config.host_defaults,
+                monitoring_env,
                 working_directory,
                 load_keys,
             )
@@ -731,10 +796,24 @@ pub async fn parse_config(
 
 /// Load and validate configuration from path
 /// The key will not provide without load_keys flag
-pub async fn load_configuration(path: &Path, load_keys: bool) -> Result<Config> {
-    let content = fs::read_to_string(path).context("Cannot read file")?;
-    let working_directory = path.parent();
-    parse_config(&content, working_directory, load_keys).await
+pub async fn load_configuration(
+    config: &Path,
+    monitor_env: Option<&MonitorEnv<'_>>,
+    load_keys: bool,
+) -> Result<Config> {
+    let content = fs::read_to_string(config).context("Cannot read file")?;
+    let working_directory = config.parent();
+    parse_config(&content, monitor_env, working_directory, load_keys).await
+}
+
+fn decode_token(s: String) -> Result<(String, String)> {
+    let binding =
+        general_purpose::STANDARD_NO_PAD.decode(s.trim_matches(|c| c == '=' || c == '\n'))?;
+    let decode_str = std::str::from_utf8(&binding)?;
+    decode_str
+        .split_once(':')
+        .map(|(u, p)| (u.trim().to_string(), p.trim().to_string()))
+        .ok_or(anyhow!("token should be `username: password` pair"))
 }
 
 #[tokio::test]
@@ -773,7 +852,7 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#;
 
-    let config = parse_config(config_str, None, true).await?;
+    let config = parse_config(config_str, None, None, true).await?;
     assert_eq!(config.global.flake, "github:myfork/near-staking-knd");
 
     let hosts = &config.hosts;
@@ -813,7 +892,7 @@ ipv6_address = "2605:9880:400::3"
 
     // we delete the node_key.json, `parse-config` will generate it for us:
     fs::remove_file("node_key.json").unwrap();
-    let config = parse_config(config_str, None, true).await?;
+    let config = parse_config(config_str, None, None, true).await?;
     let validator_node_key = &config.hosts["validator-00"]
         .validator_keys
         .as_ref()
@@ -860,9 +939,16 @@ async fn test_validate_host() {
         ..Default::default()
     };
     assert_eq!(
-        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
-            .await
-            .unwrap(),
+        validate_host(
+            "ipv4-only",
+            &config,
+            &HostConfig::default(),
+            None,
+            None,
+            true
+        )
+        .await
+        .unwrap(),
         Host {
             name: "ipv4-only".to_string(),
             nixos_module: "single-node-validator-mainnet".to_string(),
@@ -881,37 +967,52 @@ async fn test_validate_host() {
             disks: vec!["/dev/nvme0n1".into(), "/dev/nvme1n1".into()],
             validator_keys: None,
             telegraf_config: None,
-            kmonitoring_token: None,
+            kmonitor_config: None,
         }
     );
 
     // If `ipv6_address` is provied, the `ipv6_gateway` and `ipv6_cidr` should be provided too,
     // else the error will raise
     config.ipv6_address = Some("2607:5300:203:6cdf::".into());
-    assert!(
-        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
-            .await
-            .is_err()
-    );
+    assert!(validate_host(
+        "ipv4-only",
+        &config,
+        &HostConfig::default(),
+        None,
+        None,
+        true
+    )
+    .await
+    .is_err());
 
     config.ipv6_gateway = Some(
         "2607:5300:0203:6cff:00ff:00ff:00ff:00ff"
             .parse::<IpAddr>()
             .unwrap(),
     );
-    assert!(
-        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
-            .await
-            .is_err()
-    );
+    assert!(validate_host(
+        "ipv4-only",
+        &config,
+        &HostConfig::default(),
+        None,
+        None,
+        true
+    )
+    .await
+    .is_err());
 
     // The `ipv6_cidr` could be provided by subnet in address field
     config.ipv6_address = Some("2607:5300:203:6cdf::/64".into());
-    assert!(
-        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
-            .await
-            .is_ok()
-    );
+    assert!(validate_host(
+        "ipv4-only",
+        &config,
+        &HostConfig::default(),
+        None,
+        None,
+        true
+    )
+    .await
+    .is_ok());
 }
 
 #[test]
@@ -933,4 +1034,16 @@ pub fn test_decrypt_and_unzip_file() {
         public_key: String::from("ed25519:8Qn4z2ir1akQuS1nZB5RjyLt4fiw7rH626pk5Qv3pvtv"),
         secret_key: String::from("ed25519:4UzKpf3gP8FtvpED8BE3YWUhc5JVNnwptdBZHCe5ZKLm9jXtec2JQ3TNzFFPLUFshcr8yyDBTPN2tej3CgjNctEi"),
     });
+}
+
+#[test]
+fn test_token_decode() {
+    let token = "MjoyRE5HTWx6YWxoQVQzN0M1NVgwSG53WFFkZlpjZG5CZXhXVFJobEloRVFvVTluRW8=";
+    assert_eq!(
+        decode_token(token.to_string()).unwrap(),
+        (
+            "2".to_string(),
+            "2DNGMlzalhAT37C55X0HnwXQdfZcdnBexWTRhlIhEQoU9nEo".to_string()
+        )
+    )
 }

@@ -18,7 +18,12 @@ in
     inherit (settingsFormat) type;
   };
   options.kuutamo.KMonitorConfig = lib.mkOption {
-    default = { url = ""; token = ""; };
+    default = {
+      protocol = "";
+      url = "";
+      user_id = "";
+      password = "";
+    };
     description = lib.mdDoc "kuutamo monitor access token from kneard-mgr cli";
     inherit (settingsFormat) type;
   };
@@ -50,6 +55,8 @@ in
     kuutamo.telegraf.password = monitor_cfg.password;
 
     kuutamo.telegraf.kmonitoring_url = kmonitor_cfg.url;
-    kuutamo.telegraf.kmonitoring_token = kmonitor_cfg.token;
+    kuutamo.telegraf.kmonitoring_protocol = kmonitor_cfg.protocol;
+    kuutamo.telegraf.kmonitoring_user_id = kmonitor_cfg.user_id;
+    kuutamo.telegraf.kmonitoring_password = kmonitor_cfg.password;
   };
 }

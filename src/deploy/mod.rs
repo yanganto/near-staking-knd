@@ -10,7 +10,8 @@ pub use rollback::rollback;
 pub use update::update;
 
 pub(crate) mod command;
-mod config;
+/// node configure
+pub mod config;
 mod dry_update;
 mod flake;
 mod generate_config;
