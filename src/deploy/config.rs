@@ -490,7 +490,7 @@ fn validate_host(
             bail!("hosts.{name} has a validator_key_file but not a validator_node_key_file")
         }
         (true, None, None, None) => {
-            bail!("There is no crucial file or key information, please check your configuration.")
+            bail!("There is neither a validator_node_key_file nor validator_key_file provided, please check your configuration.")
         }
         _ => None,
     };
