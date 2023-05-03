@@ -1,7 +1,6 @@
 use std::process::Command;
 
 use crate::deploy::command;
-use crate::utils::ssh::ssh_with_timeout;
 
 use super::{Host, NixosFlake};
 use anyhow::{Context, Result};
@@ -71,25 +70,5 @@ pub fn nixos_rebuild(
         }
     }
 
-    let args = vec![
-        "systemd-run",
-        "--collect",
-        "--unit nixos-upgrade",
-        "echo",
-        "level=info",
-        "$(",
-        "kneard-ctl",
-        "system-info",
-        "--inline",
-        ")",
-    ];
-
-    let output = ssh_with_timeout(host, &args, true, true)?;
-    if !output.status.success() {
-        warn!(
-            "Fail to send deployment event: {}",
-            std::str::from_utf8(&output.stdout).unwrap_or("stdout utf-8 decode error")
-        );
-    }
     Ok(())
 }

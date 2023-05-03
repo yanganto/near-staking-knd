@@ -1,4 +1,4 @@
-{ lib, self, ... }: {
+{ config, lib, self, ... }: {
   imports = [
     ../network.nix
     ../hardware.nix
@@ -9,6 +9,9 @@
   environment.etc."system-info.toml".text = lib.mkDefault ''
     git_sha = "${self.rev or "dirty"}"
     git_commit_date = "${self.lastModifiedDate}"
+  '';
+  system.activationScripts.nixos-upgrade = ''
+    ${config.systemd.package}/bin/systemd-run --collect --unit nixos-upgrade echo level=info message="kneard node updated" $(kneard-ctl system-info --inline)
   '';
 
   # we want `kuutamo update` to also restart `kuutamod.service`(for kneard)
