@@ -579,34 +579,11 @@ async fn validate_host(
         } else {
             None
         };
-
-        if let Some((ref user_id, ref password)) = kmonitor_auth {
-            let client = Client::new();
-            if let Ok(r) = client
-                .get(format!(
-                    "https:://{}",
-                    monitor_env.monitor_url.domain().unwrap_or_default()
-                ))
-                .basic_auth(
-                    format!("{}-{}", monitor_env.monitor_protocol, user_id),
-                    Some(password),
-                )
-                .send()
-                .await
-            {
-                if r.status() == reqwest::StatusCode::UNAUTHORIZED {
-                    eprintln!("token for kuutamo monitoring.token is invalid, please check, else the monitor will not work after deploy");
-                }
-            } else {
-                eprintln!("Could not validate kuutamo-monitoring.token (network issue)");
-            }
+        if let Some((user_id, password)) = kmonitor_auth {
+            try_verify_kuutamo_monitoring_config(user_id, password, monitor_env).await
+        } else {
+            None
         }
-        kmonitor_auth.map(|(user_id, password)| KmonitorConfig {
-            url: monitor_env.monitor_url.clone(),
-            protocol: monitor_env.monitor_protocol.clone(),
-            user_id,
-            password,
-        })
     } else {
         None
     };
@@ -630,6 +607,41 @@ async fn validate_host(
         disks,
         telegraf_config,
         kmonitor_config,
+    })
+}
+
+/// Try to access kuutamo monitoring , if auth is invalid the config will drop
+async fn try_verify_kuutamo_monitoring_config(
+    user_id: String,
+    password: String,
+    monitor_env: &MonitorEnv<'_>,
+) -> Option<KmonitorConfig> {
+    let client = Client::new();
+    if let Ok(r) = client
+        .get(format!(
+            "https:://{}",
+            monitor_env.monitor_url.domain().unwrap_or_default()
+        ))
+        .basic_auth(
+            format!("{}-{}", monitor_env.monitor_protocol, user_id),
+            Some(&password),
+        )
+        .send()
+        .await
+    {
+        if r.status() == reqwest::StatusCode::UNAUTHORIZED {
+            eprintln!("token for kuutamo monitoring.token is invalid, please check, else the monitor will not work after deploy");
+            return None;
+        }
+    } else {
+        eprintln!("Could not validate kuutamo-monitoring.token (network issue)");
+    }
+
+    Some(KmonitorConfig {
+        url: monitor_env.monitor_url.clone(),
+        protocol: monitor_env.monitor_protocol.clone(),
+        user_id,
+        password,
     })
 }
 
