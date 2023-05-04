@@ -85,7 +85,7 @@ Options:
 
 1. New pool deployments can be done via the webapp UI `Get Started` flow at [near.kuutamo.app](https://near.kuutamo.app) - ([GitHub](https://github.com/kuutamolabs/near-staking-ui))
 
-2. Download encrypted kuutamo app key file, config file (`kneard.toml`) and monitoring access token (`kuutamo-monitoring.token`) via `Manage` button in UI: (here are [example](example))
+2. Download encrypted kuutamo app key file, config file (`kneard.toml`) and an optional monitoring access token (`kuutamo-monitoring.token`) via `Manage` button in UI: (here are [example](example))
 
 3. Create a new directory and put these files in it.
 
@@ -120,6 +120,16 @@ In the folder:
 $ kneard-mgr update
 ```
 
+## Monitoring Settings
+
+Monitoring is not required for deploy a node.  You can deploy a node without any monitoring setting.
+
+With Kuutamo monitoring token, you can easily set up the node and send the metrics to Kuutamo monitor.
+The default token name is `kuutamo-monitoring.token`, the default monitor is `https://mimir.monitoring-00-cluster.kuutamo.computer`, and the default monitor protocol is for testnet.
+These can be configured by passing options(`--monitor-protocol`, `--monitor-url`, and `--default-token-file`) or environment variables(`KUUTAMO_MONITOR`, `KUUTAMO_MONITOR_PROTOCOL`, and `MONITORING_PASSWORD`) to change.
+
+If you have more than one hosts in `kneard.toml`, and want have a different token for each host, please set `kuutamo_monitoring_token_file` field for the host to point the token file you want to use.
+If you want more monitors than Kuutamo provided, you can set `telegraf_config_file` field for your customized monitor server.
 
 ## Further Information
 
