@@ -5,7 +5,7 @@
 use crate::utils::ssh::ssh_with_timeout;
 use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
-use kneard::deploy::{self, config::MonitorEnv, generate_nixos_flake, Config, Host, NixosFlake};
+use kneard::deploy::{self, generate_nixos_flake, Config, Host, MonitorEnv, NixosFlake};
 use kneard::proxy;
 use kneard::utils;
 use semver::{Version, VersionReq};
