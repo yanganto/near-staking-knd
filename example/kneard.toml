@@ -1,4 +1,4 @@
-# This is a exmaple kneard-mgr will use to deploy or interact a node
+# This is a example kneard-mgr will use to deploy or interact a node
 [global]
 flake = "github:kuutamolabs/near-staking-knd"
 
@@ -10,7 +10,7 @@ public_ssh_keys = [ '''ssh-rsa AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 ]
 
 # admin user for install, Please use ubuntu when you use OVH to install at first time
-# Ubunut did not allow root login
+# Ubuntu did not allow root login
 install_ssh_user = "ubuntu"
 nixos_module = "single-node-validator-testnet"
 
