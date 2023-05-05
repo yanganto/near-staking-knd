@@ -175,10 +175,13 @@ struct HostConfig {
     encrypted_kuutamo_app_file: Option<PathBuf>,
 
     #[serde(default)]
-    telegraf_config_file: Option<PathBuf>,
-
-    #[serde(default)]
     kuutamo_monitoring_token_file: Option<PathBuf>,
+    #[serde(default)]
+    self_monitoring_url: Option<Url>,
+    #[serde(default)]
+    self_monitoring_username: Option<String>,
+    #[serde(default)]
+    self_monitoring_password: Option<String>,
 }
 
 /// Near validator keys
@@ -206,10 +209,7 @@ pub struct TelegrafOutputConfig {
 pub struct KmonitorConfig {
     /// url for kuutamo monitor
     pub url: Url,
-    /// protocol for kuutamo monitor
-    pub protocol: String,
-    /// user_id for kuutamo monitor
-    pub user_id: String,
+    pub username: String,
     /// password for kuutamo monitor
     pub password: String,
 }
@@ -267,10 +267,6 @@ pub struct Host {
     /// Validator keys used by neard
     #[serde(skip_serializing)]
     pub validator_keys: Option<ValidatorKeys>,
-
-    /// Setup telegraf output config to the self host monitor server
-    #[serde(skip_serializing)]
-    pub telegraf_config: Option<TelegrafOutputConfig>,
 
     /// Setup telegraf output auth for kuutamo monitor server
     #[serde(skip_serializing)]
@@ -549,25 +545,8 @@ async fn validate_host(
         _ => None,
     };
 
-    let telegraf_config_file = host
-        .telegraf_config_file
-        .as_ref()
-        .or(default.telegraf_config_file.as_ref());
-
-    let telegraf_config = if let Some(telegraf_config_file) = telegraf_config_file {
-        let content = fs::read_to_string(telegraf_config_file).with_context(|| {
-            format!(
-                "cannot read telegraf_config_file: '{}'",
-                telegraf_config_file.display()
-            )
-        })?;
-        Some(toml::from_str::<TelegrafOutputConfig>(&content)?)
-    } else {
-        None
-    };
-
     let kmonitor_config = if let Some(monitor_env) = monitor_env {
-        let kmonitor_auth = if load_keys {
+        let token_auth = if load_keys {
             fs::read_to_string(
                 host.kuutamo_monitoring_token_file
                     .as_ref()
@@ -579,10 +558,29 @@ async fn validate_host(
         } else {
             None
         };
-        if let Some((user_id, password)) = kmonitor_auth {
-            try_verify_kuutamo_monitoring_config(user_id, password, monitor_env).await
-        } else {
-            None
+        match (
+            &host.self_monitoring_url,
+            &host.self_monitoring_username,
+            &host.self_monitoring_password,
+            token_auth,
+        ) {
+            (Some(url), Some(username), Some(password), _) => Some(KmonitorConfig {
+                url: url.clone(),
+                username: username.to_string(),
+                password: password.to_string(),
+            }),
+            (Some(url), _, _, Some((user_id, password))) => Some(KmonitorConfig {
+                url: url.clone(),
+                username: format!("{}-{}", monitor_env.monitor_protocol, user_id),
+                password,
+            }),
+            (None, _, _, Some((user_id, password))) => {
+                try_verify_kuutamo_monitoring_config(user_id, password, monitor_env).await
+            }
+            _ => {
+                eprintln!("auth information for monitoring is insufficient, will not set up monitoring when deploying");
+                None
+            }
         }
     } else {
         None
@@ -605,7 +603,6 @@ async fn validate_host(
         validator_keys,
         public_ssh_keys,
         disks,
-        telegraf_config,
         kmonitor_config,
     })
 }
@@ -617,15 +614,13 @@ async fn try_verify_kuutamo_monitoring_config(
     monitor_env: &MonitorEnv<'_>,
 ) -> Option<KmonitorConfig> {
     let client = Client::new();
+    let username = format!("{}-{}", monitor_env.monitor_protocol, user_id);
     if let Ok(r) = client
         .get(format!(
             "https:://{}",
             monitor_env.monitor_url.domain().unwrap_or_default()
         ))
-        .basic_auth(
-            format!("{}-{}", monitor_env.monitor_protocol, user_id),
-            Some(&password),
-        )
+        .basic_auth(&username, Some(&password))
         .send()
         .await
     {
@@ -639,8 +634,7 @@ async fn try_verify_kuutamo_monitoring_config(
 
     Some(KmonitorConfig {
         url: monitor_env.monitor_url.clone(),
-        protocol: monitor_env.monitor_protocol.clone(),
-        user_id,
+        username,
         password,
     })
 }
@@ -978,7 +972,6 @@ async fn test_validate_host() {
             public_ssh_keys: vec!["".to_string()],
             disks: vec!["/dev/nvme0n1".into(), "/dev/nvme1n1".into()],
             validator_keys: None,
-            telegraf_config: None,
             kmonitor_config: None,
         }
     );

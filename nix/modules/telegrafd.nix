@@ -54,19 +54,12 @@
       };
       outputs =
         let
-          monitor = if config.kuutamo.telegraf.url == "" then { } else {
-            influxdb = {
-              urls = [ config.kuutamo.telegraf.url or "" ];
+          kmonitor = if config.kuutamo.telegraf.username == "" then { } else {
+            http = {
+              inherit (config.kuutamo.telegraf) url;
+              data_format = "prometheusremotewrite";
               username = config.kuutamo.telegraf.username or "";
               password = config.kuutamo.telegraf.password or "";
-            };
-          };
-          kmonitor = if config.kuutamo.telegraf.kmonitoring_user_id == "" then { } else {
-            http = {
-              url = config.kuutamo.telegraf.kmonitoring_url;
-              data_format = "prometheusremotewrite";
-              username = "${config.kuutamo.telegraf.kmonitoring_protocol}-${config.kuutamo.telegraf.kmonitoring_user_id}";
-              password = config.kuutamo.telegraf.kmonitoring_password;
             };
           };
         in
@@ -75,7 +68,7 @@
             listen = ":9273";
             metric_version = 2;
           };
-        } // monitor // kmonitor;
+        } // kmonitor;
     };
   };
   security.sudo.extraRules = [
