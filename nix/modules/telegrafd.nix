@@ -8,6 +8,7 @@
       inputs = {
         prometheus.urls = [
           "http://localhost:3030/metrics"
+          "http://localhost:2233/metrics"
         ];
         prometheus.metric_version = 2;
         kernel_vmstat = { };
