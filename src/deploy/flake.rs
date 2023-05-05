@@ -162,7 +162,6 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#,
         None,
-        None,
         false,
     )
     .await?;

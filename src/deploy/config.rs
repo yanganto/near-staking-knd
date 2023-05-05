@@ -22,16 +22,6 @@ use super::command::status_to_pretty_err;
 use super::secrets::Secrets;
 use super::NixosFlake;
 
-/// Kuutamo monitor environment parameters
-pub struct MonitorEnv<'a> {
-    /// Url for monitor server
-    pub monitor_url: &'a Url,
-    /// Protocol for user prefix
-    pub monitor_protocol: &'a String,
-    /// Path to default token
-    pub default_token_file: &'a PathBuf,
-}
-
 struct DisableTerminalEcho {
     flags: Option<termios::Termios>,
 }
@@ -207,8 +197,9 @@ pub struct TelegrafOutputConfig {
 /// Kuutamo monitor
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct KmonitorConfig {
-    /// url for kuutamo monitor
-    pub url: Url,
+    /// self host url for monitoring, None for kuutamo monitoring
+    pub url: Option<Url>,
+    /// username for kuutamo monitor
     pub username: String,
     /// password for kuutamo monitor
     pub password: String,
@@ -324,7 +315,6 @@ async fn validate_host(
     name: &str,
     host: &HostConfig,
     default: &HostConfig,
-    monitor_env: Option<&MonitorEnv<'_>>,
     working_directory: Option<&Path>,
     load_keys: bool,
 ) -> Result<Host> {
@@ -545,45 +535,47 @@ async fn validate_host(
         _ => None,
     };
 
-    let kmonitor_config = if let Some(monitor_env) = monitor_env {
-        let token_auth = if load_keys {
-            fs::read_to_string(
-                host.kuutamo_monitoring_token_file
-                    .as_ref()
-                    .unwrap_or(monitor_env.default_token_file),
-            )
-            .ok()
-            .map(|s| s.trim().into())
-            .and_then(|t| decode_token(t).ok())
-        } else {
-            None
-        };
-        match (
-            &host.self_monitoring_url,
-            &host.self_monitoring_username,
-            &host.self_monitoring_password,
-            token_auth,
-        ) {
-            (Some(url), Some(username), Some(password), _) => Some(KmonitorConfig {
-                url: url.clone(),
-                username: username.to_string(),
-                password: password.to_string(),
-            }),
-            (Some(url), _, _, Some((user_id, password))) => Some(KmonitorConfig {
-                url: url.clone(),
-                username: format!("{}-{}", monitor_env.monitor_protocol, user_id),
-                password,
-            }),
-            (None, _, _, Some((user_id, password))) => {
-                try_verify_kuutamo_monitoring_config(user_id, password, monitor_env).await
-            }
-            _ => {
-                eprintln!("auth information for monitoring is insufficient, will not set up monitoring when deploying");
-                None
-            }
-        }
+    let token_auth = if load_keys {
+        fs::read_to_string(
+            host.kuutamo_monitoring_token_file
+                .as_ref()
+                .unwrap_or(&PathBuf::from("kuutamo-monitoring.token")),
+        )
+        .ok()
+        .map(|s| s.trim().into())
+        .and_then(|t| decode_token(t).ok())
     } else {
         None
+    };
+
+    let kmonitor_config = match (
+        &host.self_monitoring_url,
+        &host.self_monitoring_username,
+        &host.self_monitoring_password,
+        token_auth,
+    ) {
+        (url, Some(username), Some(password), _) if url.is_some() => Some(KmonitorConfig {
+            url: url.clone(),
+            username: username.to_string(),
+            password: password.to_string(),
+        }),
+        (url, _, _, Some((user_id, password))) if url.is_some() => Some(KmonitorConfig {
+            url: url.clone(),
+            username: user_id,
+            password,
+        }),
+        (None, _, _, Some((user_id, password))) => {
+            try_verify_kuutamo_monitoring_config(
+                host.nixos_module.clone().or(default.nixos_module.clone()),
+                user_id,
+                password,
+            )
+            .await
+        }
+        _ => {
+            eprintln!("auth information for monitoring is insufficient, will not set up monitoring when deploying");
+            None
+        }
     };
 
     Ok(Host {
@@ -607,36 +599,40 @@ async fn validate_host(
     })
 }
 
-/// Try to access kuutamo monitoring , if auth is invalid the config will drop
+/// Try to access kuutamo monitoring, if auth is invalid the config will drop
 async fn try_verify_kuutamo_monitoring_config(
+    nixos_module: Option<String>,
     user_id: String,
     password: String,
-    monitor_env: &MonitorEnv<'_>,
 ) -> Option<KmonitorConfig> {
-    let client = Client::new();
-    let username = format!("{}-{}", monitor_env.monitor_protocol, user_id);
-    if let Ok(r) = client
-        .get(format!(
-            "https:://{}",
-            monitor_env.monitor_url.domain().unwrap_or_default()
-        ))
-        .basic_auth(&username, Some(&password))
-        .send()
-        .await
-    {
-        if r.status() == reqwest::StatusCode::UNAUTHORIZED {
-            eprintln!("token for kuutamo monitoring.token is invalid, please check, else the monitor will not work after deploy");
-            return None;
+    if let Some(nixos_module) = nixos_module {
+        let client = Client::new();
+        let username = if nixos_module.ends_with("mainnet") {
+            format!("near-mainnet-{}", user_id)
+        } else {
+            format!("near-testnet-{}", user_id)
+        };
+        if let Ok(r) = client
+            .get("https://mimir.monitoring-00-cluster.kuutamo.computer")
+            .basic_auth(&username, Some(&password))
+            .send()
+            .await
+        {
+            if r.status() == reqwest::StatusCode::UNAUTHORIZED {
+                eprintln!("token for kuutamo monitoring.token is invalid, please check, else the monitor will not work after deploy");
+                return None;
+            }
+        } else {
+            eprintln!("Could not validate kuutamo-monitoring.token (network issue)");
         }
+        Some(KmonitorConfig {
+            url: None,
+            username,
+            password,
+        })
     } else {
-        eprintln!("Could not validate kuutamo-monitoring.token (network issue)");
+        None
     }
-
-    Some(KmonitorConfig {
-        url: monitor_env.monitor_url.clone(),
-        username,
-        password,
-    })
 }
 
 fn ask_password_for(file: &Path) -> Result<String> {
@@ -775,7 +771,6 @@ pub struct Config {
 /// Parse toml configuration
 pub async fn parse_config(
     content: &str,
-    monitoring_env: Option<&MonitorEnv<'_>>,
     working_directory: Option<&Path>,
     load_keys: bool,
 ) -> Result<Config> {
@@ -788,7 +783,6 @@ pub async fn parse_config(
                 name,
                 host,
                 &config.host_defaults,
-                monitoring_env,
                 working_directory,
                 load_keys,
             )
@@ -802,14 +796,10 @@ pub async fn parse_config(
 
 /// Load and validate configuration from path
 /// The key will not provide without load_keys flag
-pub async fn load_configuration(
-    config: &Path,
-    monitor_env: Option<&MonitorEnv<'_>>,
-    load_keys: bool,
-) -> Result<Config> {
+pub async fn load_configuration(config: &Path, load_keys: bool) -> Result<Config> {
     let content = fs::read_to_string(config).context("Cannot read file")?;
     let working_directory = config.parent();
-    parse_config(&content, monitor_env, working_directory, load_keys).await
+    parse_config(&content, working_directory, load_keys).await
 }
 
 fn decode_token(s: String) -> Result<(String, String)> {
@@ -858,7 +848,7 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#;
 
-    let config = parse_config(config_str, None, None, true).await?;
+    let config = parse_config(config_str, None, true).await?;
     assert_eq!(config.global.flake, "github:myfork/near-staking-knd");
 
     let hosts = &config.hosts;
@@ -898,7 +888,7 @@ ipv6_address = "2605:9880:400::3"
 
     // we delete the node_key.json, `parse-config` will generate it for us:
     fs::remove_file("node_key.json").unwrap();
-    let config = parse_config(config_str, None, None, true).await?;
+    let config = parse_config(config_str, None, true).await?;
     let validator_node_key = &config.hosts["validator-00"]
         .validator_keys
         .as_ref()
@@ -945,16 +935,9 @@ async fn test_validate_host() {
         ..Default::default()
     };
     assert_eq!(
-        validate_host(
-            "ipv4-only",
-            &config,
-            &HostConfig::default(),
-            None,
-            None,
-            true
-        )
-        .await
-        .unwrap(),
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .unwrap(),
         Host {
             name: "ipv4-only".to_string(),
             nixos_module: "single-node-validator-mainnet".to_string(),
@@ -979,45 +962,30 @@ async fn test_validate_host() {
     // If `ipv6_address` is provied, the `ipv6_gateway` and `ipv6_cidr` should be provided too,
     // else the error will raise
     config.ipv6_address = Some("2607:5300:203:6cdf::".into());
-    assert!(validate_host(
-        "ipv4-only",
-        &config,
-        &HostConfig::default(),
-        None,
-        None,
-        true
-    )
-    .await
-    .is_err());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_err()
+    );
 
     config.ipv6_gateway = Some(
         "2607:5300:0203:6cff:00ff:00ff:00ff:00ff"
             .parse::<IpAddr>()
             .unwrap(),
     );
-    assert!(validate_host(
-        "ipv4-only",
-        &config,
-        &HostConfig::default(),
-        None,
-        None,
-        true
-    )
-    .await
-    .is_err());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_err()
+    );
 
     // The `ipv6_cidr` could be provided by subnet in address field
     config.ipv6_address = Some("2607:5300:203:6cdf::/64".into());
-    assert!(validate_host(
-        "ipv4-only",
-        &config,
-        &HostConfig::default(),
-        None,
-        None,
-        true
-    )
-    .await
-    .is_ok());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_ok()
+    );
 }
 
 #[test]

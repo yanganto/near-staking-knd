@@ -5,7 +5,7 @@
 use crate::utils::ssh::ssh_with_timeout;
 use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
-use kneard::deploy::{self, generate_nixos_flake, Config, Host, MonitorEnv, NixosFlake};
+use kneard::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
 use kneard::proxy;
 use kneard::utils;
 use semver::{Version, VersionReq};
@@ -13,7 +13,6 @@ use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::process::Output;
-use url::Url;
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
 struct InstallArgs {
@@ -165,26 +164,6 @@ struct Args {
     /// configuration file to load
     #[clap(long, default_value = "kneard.toml", env = "KUUTAMO_CONFIG")]
     config: PathBuf,
-
-    /// kuutamo monitor url
-    #[clap(
-        long,
-        default_value = "https://mimir.monitoring-00-cluster.kuutamo.computer/api/v1/push",
-        env = "KUUTAMO_MONITOR"
-    )]
-    monitor_url: Url,
-
-    /// kuutamo monitor protocol
-    #[clap(long, default_value = "near-testnet", env = "KUUTAMO_MONITOR_PROTOCOL")]
-    monitor_protocol: String,
-
-    /// kuutamo monitoring default token to load, could be override by `kuutamo_monitoring_token_file` of host configure
-    #[clap(
-        long,
-        default_value = "kuutamo-monitoring.token",
-        env = "MONITORING_PASSWORD"
-    )]
-    default_token_file: PathBuf,
 
     /// skip interactive dialogs by assuming the answer is yes
     #[clap(long, default_value = "false")]
@@ -439,12 +418,7 @@ pub async fn main() -> Result<()> {
         | Command::DryUpdate(_)
         | Command::Update(_)
         | Command::Rollback(_) => {
-            let monitoring_env = MonitorEnv {
-                monitor_url: &args.monitor_url,
-                monitor_protocol: &args.monitor_protocol,
-                default_token_file: &args.default_token_file,
-            };
-            let config = deploy::load_configuration(&args.config, Some(&monitoring_env), true)
+            let config = deploy::load_configuration(&args.config, true)
                 .await
                 .with_context(|| {
                     format!(
@@ -471,7 +445,7 @@ pub async fn main() -> Result<()> {
             }
         }
         Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) => {
-            let config = deploy::load_configuration(&args.config, None, false)
+            let config = deploy::load_configuration(&args.config, false)
                 .await
                 .with_context(|| {
                     format!(

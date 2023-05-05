@@ -39,7 +39,7 @@ in
     kuutamo.network.ipv6.gateway = cfg.ipv6_gateway or null;
     kuutamo.network.ipv6.cidr = cfg.ipv6_cidr or 128;
 
-    kuutamo.telegraf.url = kmonitor_cfg.url;
+    kuutamo.telegraf.url = kmonitor_cfg.url or "https://mimir.monitoring-00-cluster.kuutamo.computer/api/v1/push";
     kuutamo.telegraf.username = kmonitor_cfg.username;
     kuutamo.telegraf.password = kmonitor_cfg.password;
   };
