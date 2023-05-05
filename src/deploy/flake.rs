@@ -55,7 +55,7 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
             .write_all(host_toml.as_bytes())
             .with_context(|| format!("Cannot write {}", host_path.display()))?;
         if let Some(kmonitor_config) = &host.kmonitor_config {
-            let kmonitor_path = tmp_dir.path().join(format!("{name}-kmonitor.toml"));
+            let kmonitor_path = tmp_dir.path().join(format!("{name}-kmonitor-secret.toml"));
             let mut kmonitor_file = File::create(&kmonitor_path)
                 .with_context(|| format!("could not create {}", kmonitor_path.display()))?;
             let kmonitor_config_toml = toml::to_string(&kmonitor_config).with_context(|| {
@@ -79,7 +79,7 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
                 .map(|m| format!("      near-staking-knd.nixosModules.\"{m}\""))
                 .collect::<Vec<_>>();
             if host.kmonitor_config.is_some() {
-                modules.push(format!(r#"{{ kuutamo.KMonitorConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "{name}-kmonitor.toml"; path = ./{name}-kmonitor.toml; }})); }}"#));
+                modules.push(format!(r#"{{ kuutamo.KMonitorConfig = builtins.fromTOML (builtins.readFile (builtins.path {{ name = "{name}-kmonitor-secret.toml"; path = ./{name}-kmonitor-secret.toml; }})); }}"#));
             }
             let modules = modules.join("\n");
             format!(
