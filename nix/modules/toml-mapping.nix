@@ -2,18 +2,12 @@
 
 let
   cfg = config.kuutamo.deployConfig;
-  kmonitor_cfg = config.kuutamo.KMonitorConfig;
   settingsFormat = pkgs.formats.toml { };
 in
 {
   options.kuutamo.deployConfig = lib.mkOption {
     default = { };
     description = lib.mdDoc "toml configuration from kneard-mgr cli";
-    inherit (settingsFormat) type;
-  };
-  options.kuutamo.KMonitorConfig = lib.mkOption {
-    default = { url = ""; username = ""; password = ""; };
-    description = lib.mdDoc "kuutamo monitor access token from kneard-mgr cli";
     inherit (settingsFormat) type;
   };
 
@@ -38,9 +32,5 @@ in
     kuutamo.network.ipv6.address = cfg.ipv6_address or null;
     kuutamo.network.ipv6.gateway = cfg.ipv6_gateway or null;
     kuutamo.network.ipv6.cidr = cfg.ipv6_cidr or 128;
-
-    kuutamo.telegraf.url = kmonitor_cfg.url or "https://mimir.monitoring-00-cluster.kuutamo.computer/api/v1/push";
-    kuutamo.telegraf.username = kmonitor_cfg.username;
-    kuutamo.telegraf.password = kmonitor_cfg.password;
   };
 }

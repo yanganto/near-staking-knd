@@ -280,6 +280,17 @@ impl Host {
                     .context("failed to convert validator node to json")?,
             ));
         }
+        if let Some(KmonitorConfig {
+            url,
+            username,
+            password,
+        }) = &self.kmonitor_config
+        {
+            secret_files.push((
+                PathBuf::from("/var/lib/secrets/telegraf"),
+                format!("MONITORING_URL={}\nMONITORING_USERNAME={username}\nMONITORING_PASSWORD={password}", url.as_ref().map(|u|u.to_string()).unwrap_or("https://mimir.monitoring-00-cluster.kuutamo.computer/api/v1/push".to_string()))
+            ));
+        }
 
         Secrets::new(secret_files.iter()).context("failed to prepare uploading secrets")
     }

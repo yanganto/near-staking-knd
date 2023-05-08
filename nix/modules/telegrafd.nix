@@ -3,6 +3,7 @@
 
   services.telegraf = {
     enable = true;
+    environmentFiles = [ /var/lib/secrets/telegraf ];
     extraConfig = {
       agent.interval = "60s";
       inputs = {
@@ -55,12 +56,12 @@
       };
       outputs =
         let
-          kmonitor = if config.kuutamo.telegraf.username == "" then { } else {
+          kmonitor = if "$MONITORING_USERNAME" == "" then { } else {
             http = {
-              inherit (config.kuutamo.telegraf) url;
+              url = "$MONITORING_URL";
               data_format = "prometheusremotewrite";
-              username = config.kuutamo.telegraf.username or "";
-              password = config.kuutamo.telegraf.password or "";
+              username = "$MONITORING_USERNAME";
+              password = "$MONITORING_PASSWORD";
             };
           };
         in
