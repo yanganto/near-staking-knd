@@ -34,14 +34,12 @@
 
       disko-partitioning-script = ./disko-partitioning-script.nix;
       networkd = ./networkd.nix;
-      telegrafd = ./telegrafd.nix;
 
       single-node-validator = {
         imports = [
           self.nixosModules.kneard
           self.nixosModules.disko-partitioning-script
           self.nixosModules.networkd
-          self.nixosModules.telegrafd
           self.nixosModules.kuutamo-binary-cache
           inputs.srvos.nixosModules.server
           inputs.disko.nixosModules.disko
