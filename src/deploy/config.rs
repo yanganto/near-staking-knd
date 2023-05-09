@@ -16,6 +16,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::TempDir;
 use toml;
+use toml_example::TomlExample;
 use url::Url;
 
 use super::command::status_to_pretty_err;
@@ -120,56 +121,95 @@ pub struct NearKeyFile {
     pub secret_key: String,
 }
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, TomlExample)]
 struct HostConfig {
+    /// Ipv4 address of the node
     #[serde(default)]
+    #[toml_example(default = "111.11.11.11")]
     ipv4_address: Option<IpAddr>,
+    /// Ipv4 gateway of the node
     #[serde(default)]
+    #[toml_example(default = "111.11.11.254")]
     ipv4_gateway: Option<IpAddr>,
     #[serde(default)]
+    /// Ipv4 CIDR of the node
+    #[toml_example(default = 24)]
     ipv4_cidr: Option<u8>,
+    /// Nixos module will deploy to the node
     #[serde(default)]
+    #[toml_example(default = "single-node-validator-testnet")]
     nixos_module: Option<String>,
+    /// Extra nixos module will deploy to the node
     #[serde(default)]
+    #[toml_example(default = [ ])]
     extra_nixos_modules: Vec<String>,
 
+    /// Mac address of the node
     #[serde(default)]
     pub mac_address: Option<String>,
+    /// Network interface of the node
     #[serde(default)]
     pub interface: Option<String>,
+    /// Ipv6 address of the node
     #[serde(default)]
     ipv6_address: Option<IpV6String>,
+    /// Ipv6 gateway of the node
     #[serde(default)]
     ipv6_gateway: Option<IpAddr>,
+    /// Ipv6 cidr of the node
     #[serde(default)]
     ipv6_cidr: Option<u8>,
 
+    /// The ssh public keys of the user
+    /// After installation the user could login as root with the corresponding ssh private key
     #[serde(default)]
+    #[toml_example(default = [ "ssh-ed25519 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/xxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxx", ])]
     public_ssh_keys: Vec<String>,
 
+    /// Admin user for install,
+    /// Please use `ubuntu` when you use OVH to install at first time,
+    /// Ubuntu did not allow `root` login
     #[serde(default)]
+    #[toml_example(default = "ubuntu")]
     install_ssh_user: Option<String>,
 
+    /// Setup ssh host name
     #[serde(default)]
     ssh_hostname: Option<String>,
 
+    /// Validator key will use in the validator node
     #[serde(default)]
+    #[toml_example(default = "validator_key.json")]
     validator_key_file: Option<PathBuf>,
+    /// Validator node key will use in the node
     #[serde(default)]
+    #[toml_example(default = "node_key.json")]
     validator_node_key_file: Option<PathBuf>,
 
+    /// Disk configure on the node
     #[serde(default)]
+    #[toml_example(default = [ "/dev/vdb", ])]
     pub disks: Option<Vec<PathBuf>>,
 
+    /// load configure from encrypt app file
     #[serde(default)]
+    #[toml_example(default = "hello.pool.devnet.zip")]
     encrypted_kuutamo_app_file: Option<PathBuf>,
 
+    /// Token file for monitoring, default is "kuutamo-monitoring.token"
+    /// Provide this if you have a different file
     #[serde(default)]
+    #[toml_example(default = "kuutamo-monitoring.token")]
     kuutamo_monitoring_token_file: Option<PathBuf>,
+    /// Self monitoring server
+    /// The url should implements [Prometheus's Remote Write API] (https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write).
     #[serde(default)]
+    #[toml_example(default = "https://my.monitoring.server/api/v1/push")]
     self_monitoring_url: Option<Url>,
+    /// The http basic auth username to access self monitoring server
     #[serde(default)]
     self_monitoring_username: Option<String>,
+    /// The http basic auth password to access self monitoring server
     #[serde(default)]
     self_monitoring_password: Option<String>,
 }
@@ -206,9 +246,11 @@ pub struct KmonitorConfig {
 }
 
 /// Global configuration affecting all hosts
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, TomlExample)]
 pub struct GlobalConfig {
+    /// Flake url to use as a blue print to build up
     #[serde(default)]
+    #[toml_example(default = "github:kuutamolabs/near-staking-knd")]
     flake: Option<String>,
 }
 
@@ -821,6 +863,15 @@ fn decode_token(s: String) -> Result<(String, String)> {
         .split_once(':')
         .map(|(u, p)| (u.trim().to_string(), p.trim().to_string()))
         .ok_or(anyhow!("token should be `username: password` pair"))
+}
+
+/// Generate kneard.toml example
+pub fn generate_example() -> Result<String> {
+    let global_example = GlobalConfig::toml_example();
+    let host_example = HostConfig::toml_example();
+    Ok(format!(
+        "[global]\n{global_example}\n[hosts]\n[hosts.example]\n{host_example}"
+    ))
 }
 
 #[tokio::test]

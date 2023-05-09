@@ -10,6 +10,7 @@ use kneard::proxy;
 use kneard::utils;
 use semver::{Version, VersionReq};
 use std::collections::HashMap;
+use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::process::Output;
@@ -40,6 +41,12 @@ struct InstallArgs {
 struct GenerateConfigArgs {
     /// Directory where to copy the configuration to.
     directory: PathBuf,
+}
+
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+struct GenerateExampleArgs {
+    /// File where to put the example to.
+    file: Option<PathBuf>,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -142,6 +149,8 @@ struct RestartArgs {
 enum Command {
     /// Generate NixOS configuration
     GenerateConfig(GenerateConfigArgs),
+    /// Generate kneard.toml example
+    GenerateExample(GenerateExampleArgs),
     /// Install Validator on a given machine. This will remove all data of the current system!
     Install(InstallArgs),
     /// Upload update to host and show which actions would be performed on an update
@@ -230,6 +239,17 @@ fn generate_config(
     flake: &NixosFlake,
 ) -> Result<()> {
     deploy::generate_config(&config_args.directory, flake)
+}
+
+fn generate_example(file: &Option<PathBuf>) -> Result<()> {
+    let content = deploy::generate_example()?;
+    if let Some(file) = file {
+        let mut file = File::create(file)?;
+        file.write_all(content.as_bytes())?;
+    } else {
+        println!("{content}");
+    }
+    Ok(())
 }
 
 fn dry_update(
@@ -444,7 +464,7 @@ pub async fn main() -> Result<()> {
                 _ => unreachable!(),
             }
         }
-        Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) => {
+        Command::GenerateExample(_) | Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) => {
             let config = deploy::load_configuration(&args.config, false)
                 .await
                 .with_context(|| {
@@ -454,6 +474,9 @@ pub async fn main() -> Result<()> {
                     )
                 })?;
             match args.action {
+                Command::GenerateExample(ref generate_example_args) => {
+                    generate_example(&generate_example_args.file)
+                }
                 Command::Proxy(ref proxy_args) => proxy(proxy_args, &config).await,
                 Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
                 Command::Restart(ref args) => restart(args, &config),
