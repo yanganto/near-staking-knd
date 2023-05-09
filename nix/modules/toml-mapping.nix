@@ -35,5 +35,6 @@ in
 
     kuutamo.telegraf.hasMonitoring = cfg.telegraf_has_monitoring or false;
     kuutamo.telegraf.configHash = cfg.telegraf_config_hash or "";
+    kuutamo.exporter.accountId = cfg.validator_account_id or "";
   };
 }

@@ -4,6 +4,7 @@
     ../hardware.nix
     ../near-staking-analytics
     ../telegraf.nix
+    ../near-prometheus-exporter.nix
   ];
 
   system.stateVersion = "22.05";
