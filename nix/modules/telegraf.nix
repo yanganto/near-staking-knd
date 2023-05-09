@@ -1,22 +1,16 @@
 { config, pkgs, lib, ... }:
 {
   options = {
-    kuutamo.telegraf.url = lib.mkOption {
+    kuutamo.telegraf.configHash = lib.mkOption {
       type = lib.types.str;
       default = "";
-      description = "url to remote monitor";
+      description = "telegraf config hash";
     };
 
-    kuutamo.telegraf.username = lib.mkOption {
-      type = lib.types.str;
-      default = "";
-      description = "username to remote monitor";
-    };
-
-    kuutamo.telegraf.password = lib.mkOption {
-      type = lib.types.str;
-      default = "";
-      description = "password to remote monitor";
+    kuutamo.telegraf.hasMonitoring = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "has monitoring setting or not";
     };
   };
   config = {
@@ -24,7 +18,13 @@
 
     services.telegraf = {
       enable = true;
-      environmentFiles = [ /var/lib/secrets/telegraf ];
+      environmentFiles = [
+        /var/lib/secrets/telegraf
+        (pkgs.writeTextFile {
+          name = "monitoring-passwordhash";
+          text = config.kuutamo.telegraf.configHash;
+        })
+      ];
       extraConfig = {
         agent.interval = "60s";
         inputs = {
@@ -77,14 +77,15 @@
         };
         outputs =
           let
-            kmonitor = if "$MONITORING_USERNAME" == "" then { } else {
-              http = {
-                url = "$MONITORING_URL";
-                data_format = "prometheusremotewrite";
-                username = "$MONITORING_USERNAME";
-                password = "$MONITORING_PASSWORD";
-              };
-            };
+            kmonitor =
+              if config.kuutamo.telegraf.hasMonitoring then {
+                http = {
+                  url = "$MONITORING_URL";
+                  data_format = "prometheusremotewrite";
+                  username = "$MONITORING_USERNAME";
+                  password = "$MONITORING_PASSWORD";
+                };
+              } else { };
           in
           {
             prometheus_client = {

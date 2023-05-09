@@ -8,8 +8,10 @@ use regex::Regex;
 use reqwest::Client;
 use serde::Serialize;
 use serde_derive::Deserialize;
+use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fs;
+use std::hash::{Hash, Hasher};
 use std::io::{self, BufRead, Read};
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
@@ -235,7 +237,7 @@ pub struct TelegrafOutputConfig {
 }
 
 /// Kuutamo monitor
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Hash)]
 pub struct KmonitorConfig {
     /// self host url for monitoring, None for kuutamo monitoring
     pub url: Option<Url>,
@@ -243,6 +245,12 @@ pub struct KmonitorConfig {
     pub username: String,
     /// password for kuutamo monitor
     pub password: String,
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }
 
 /// Global configuration affecting all hosts
@@ -304,6 +312,12 @@ pub struct Host {
     /// Setup telegraf output auth for kuutamo monitor server
     #[serde(skip_serializing)]
     pub kmonitor_config: Option<KmonitorConfig>,
+
+    /// Has monitoring server or not
+    pub telegraf_has_monitoring: bool,
+
+    /// Hash for monitoring config
+    pub telegraf_config_hash: String,
 }
 
 impl Host {
@@ -631,6 +645,9 @@ async fn validate_host(
         }
     };
 
+    let telegraf_has_monitoring = kmonitor_config.is_some();
+    let telegraf_config_hash = calculate_hash(&kmonitor_config).to_string();
+
     Ok(Host {
         name,
         nixos_module,
@@ -649,6 +666,8 @@ async fn validate_host(
         public_ssh_keys,
         disks,
         kmonitor_config,
+        telegraf_has_monitoring,
+        telegraf_config_hash,
     })
 }
 
@@ -1018,6 +1037,8 @@ async fn test_validate_host() {
             disks: vec!["/dev/nvme0n1".into(), "/dev/nvme1n1".into()],
             validator_keys: None,
             kmonitor_config: None,
+            telegraf_has_monitoring: false,
+            telegraf_config_hash: "13646096770106105413".to_string(),
         }
     );
 
