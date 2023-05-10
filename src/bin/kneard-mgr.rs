@@ -421,9 +421,9 @@ fn system_info(args: &SystemInfoArgs, config: &Config) -> Result<()> {
         } else {
             vec!["kuutamoctl", "-V"]
         };
+        println!("[{}]", host.name);
         if let Ok(output) = ssh_with_timeout(&host, &args, true, false) {
             if output.status.success() {
-                println!("[{}]", host.name);
                 io::stdout().write_all(&output.stdout)?;
             } else {
                 println!(
@@ -435,6 +435,7 @@ fn system_info(args: &SystemInfoArgs, config: &Config) -> Result<()> {
         } else {
             println!("Fail to fetch system info from {}", host.name);
         }
+        println!("\n");
     }
     Ok(())
 }
