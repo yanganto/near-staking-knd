@@ -68,7 +68,6 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
                 .map(|m| format!("      near-staking-knd.nixosModules.\"{m}\""))
                 .collect::<Vec<_>>()
                 .join("\n");
-
             format!(
                 r#"  nixosConfigurations."{name}" = near-staking-knd.inputs.nixpkgs.lib.nixosSystem {{
     system = "x86_64-linux";
@@ -117,8 +116,8 @@ pub fn generate_nixos_flake(config: &Config) -> Result<NixosFlake> {
     Ok(NixosFlake { tmp_dir })
 }
 
-#[test]
-pub fn test_nixos_flake() -> Result<()> {
+#[tokio::test]
+async fn test_nixos_flake() -> Result<()> {
     use crate::deploy::config::parse_config;
     use std::process::Command;
 
@@ -149,8 +148,9 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#,
         None,
-        true,
-    )?;
+        false,
+    )
+    .await?;
     let flake = generate_nixos_flake(&config)?;
     let flake_path = flake.path();
     let flake_nix = flake_path.join("flake.nix");

@@ -19,6 +19,7 @@ nix = "0.26.2"
 serde = { version = "1.0.162", features = ["derive"] }
 serde_derive = "1.0.151"
 toml = "0.7.3"
+toml-example = { version = "0.7.2", default-features = false }
 serde_json = "1.0.96"
 near-primitives = "0.15.0"
 log = { version = "0.4.17", features = ["std"] }
@@ -29,6 +30,8 @@ zip = { version = "0.6.5", default-features = false, features = ["aes-crypto", "
 # FIXME use github version for toml support
 format_serde_error = { version = "0.3.0", features = [ "colored", "serde_json" ], default-features = false, git = "https://github.com/AlexanderThaller/format_serde_error" }
 semver = "1.0.17"
+url = { version = "2.0", features = ["serde"] }
+base64 = "0.21.0"
 
 [[bin]]
 name = "kneard-mgr"
