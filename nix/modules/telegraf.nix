@@ -20,10 +20,7 @@
       enable = true;
       environmentFiles = [
         /var/lib/secrets/telegraf
-        (pkgs.writeTextFile {
-          name = "monitoring-passwordhash";
-          text = config.kuutamo.telegraf.configHash;
-        })
+        (pkgs.writeText "monitoring-configHash" config.kuutamo.telegraf.configHash)
       ];
       extraConfig = {
         agent.interval = "60s";
@@ -75,24 +72,19 @@
           };
           diskio = { };
         };
-        outputs =
-          let
-            kmonitor =
-              if config.kuutamo.telegraf.hasMonitoring then {
-                http = {
-                  url = "$MONITORING_URL";
-                  data_format = "prometheusremotewrite";
-                  username = "$MONITORING_USERNAME";
-                  password = "$MONITORING_PASSWORD";
-                };
-              } else { };
-          in
-          {
-            prometheus_client = {
-              listen = ":9273";
-              metric_version = 2;
-            };
-          } // kmonitor;
+        outputs = {
+          prometheus_client = {
+            listen = ":9273";
+            metric_version = 2;
+          };
+        } // lib.optionalAttrs config.kuutamo.telegraf.hasMonitoring {
+          http = {
+            url = "$MONITORING_URL";
+            data_format = "prometheusremotewrite";
+            username = "$MONITORING_USERNAME";
+            password = "$MONITORING_PASSWORD";
+          };
+        };
       };
     };
     security.sudo.extraRules = [
