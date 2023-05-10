@@ -7,16 +7,16 @@ in
     accountId = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
-      description = ''validator account id'';
+      description = lib.mdDoc ''validator account id'';
     };
     externalRpc = lib.mkOption {
       type = lib.types.str;
-      description = ''public rpc source'';
+      description = lib.mdDoc ''public rpc source'';
     };
     package = lib.mkOption {
       type = lib.types.package;
-      defaultText = lib.literalExpression "pkgs.near-prometheus-exporter";
-      description = "The near prometheus exporter package to use in our service";
+      defaultText = lib.literalExpression ".#near-prometheus-exporter";
+      description = lib.mdDoc "The near prometheus exporter package to use in our service";
     };
   };
   config = lib.mkIf (cfg.accountId != null) {
