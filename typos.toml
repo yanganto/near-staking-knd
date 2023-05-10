@@ -4,4 +4,4 @@ substituters = "substituters"
 
 [files]
 # ignore files with secret keys
-extend-exclude = ["*validator_key.json", "config.rs"]
+extend-exclude = ["*validator_key.json", "config.rs", "*.patch"]
