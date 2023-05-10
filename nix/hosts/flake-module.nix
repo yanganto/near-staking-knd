@@ -23,10 +23,6 @@
               "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKbBp2dH2X3dcU1zh+xW3ZsdYROKpJd3n13ssOP092qE joerg@turingmachine"
             ];
 
-            kuutamo.exporter = {
-              accountId = lib.mkDefault "";
-              externalRpc = lib.mkDefault "";
-            };
           };
           validator = {
             kuutamo.kneard.validatorKeyFile = "/var/lib/secrets/validator_key.json";

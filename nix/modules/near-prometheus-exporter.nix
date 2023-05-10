@@ -5,7 +5,8 @@ in
 {
   options.kuutamo.exporter = {
     accountId = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.nullOr lib.types.str;
+      default = null;
       description = ''validator account id'';
     };
     externalRpc = lib.mkOption {
@@ -18,9 +19,12 @@ in
       description = "The near prometheus exporter package to use in our service";
     };
   };
-  config = {
+  config = lib.mkIf (cfg.accountId != null) {
+    services.telegraf.extraConfig.inputs.prometheus.urls = [
+      "http://localhost:9333"
+    ];
+
     systemd.services.near-prometheus-exporter = {
-      enable = if config.kuutamo.exporter.accountId == "" then false else true;
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Restart = "always";
