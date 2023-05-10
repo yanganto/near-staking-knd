@@ -1,19 +1,25 @@
 use anyhow::{anyhow, bail, Context, Result};
+use base64::{engine::general_purpose, Engine as _};
 use format_serde_error::SerdeError;
 use log::{info, warn};
 use nix::libc::STDIN_FILENO;
 use nix::sys::termios;
 use regex::Regex;
+use reqwest::Client;
 use serde::Serialize;
 use serde_derive::Deserialize;
+use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fs;
+use std::hash::{Hash, Hasher};
 use std::io::{self, BufRead, Read};
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::TempDir;
 use toml;
+use toml_example::TomlExample;
+use url::Url;
 
 use super::command::status_to_pretty_err;
 use super::secrets::Secrets;
@@ -102,74 +108,157 @@ struct ConfigFile {
     hosts: HashMap<String, HostConfig>,
 }
 
+/// Neard keys
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct NearKeyFile {
+    /// near account
     pub account_id: String,
+    /// near public key
     pub public_key: String,
     // Credential files generated which near cli works with have private_key
     // rather than secret_key field.  To make it possible to read those from
     // neard add private_key as an alias to this field so either will work.
     #[serde(alias = "private_key")]
+    /// near secret key
     pub secret_key: String,
 }
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, TomlExample)]
 struct HostConfig {
+    /// Ipv4 address of the node
     #[serde(default)]
+    #[toml_example(default = "111.11.11.11")]
     ipv4_address: Option<IpAddr>,
+    /// Ipv4 gateway of the node
     #[serde(default)]
+    #[toml_example(default = "111.11.11.254")]
     ipv4_gateway: Option<IpAddr>,
     #[serde(default)]
+    /// Ipv4 CIDR of the node
+    #[toml_example(default = 24)]
     ipv4_cidr: Option<u8>,
+    /// Nixos module will deploy to the node
     #[serde(default)]
+    #[toml_example(default = "single-node-validator-testnet")]
     nixos_module: Option<String>,
+    /// Extra nixos module will deploy to the node
     #[serde(default)]
+    #[toml_example(default = [ ])]
     extra_nixos_modules: Vec<String>,
 
+    /// Mac address of the node
     #[serde(default)]
     pub mac_address: Option<String>,
+    /// Network interface of the node
     #[serde(default)]
     pub interface: Option<String>,
+    /// Ipv6 address of the node
     #[serde(default)]
     ipv6_address: Option<IpV6String>,
+    /// Ipv6 gateway of the node
     #[serde(default)]
     ipv6_gateway: Option<IpAddr>,
+    /// Ipv6 cidr of the node
     #[serde(default)]
     ipv6_cidr: Option<u8>,
 
+    /// The ssh public keys of the user
+    /// After installation the user could login as root with the corresponding ssh private key
     #[serde(default)]
+    #[toml_example(default = [ "ssh-ed25519 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/xxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxx", ])]
     public_ssh_keys: Vec<String>,
 
+    /// Admin user for install,
+    /// Please use `ubuntu` when you use OVH to install at first time,
+    /// Ubuntu did not allow `root` login
     #[serde(default)]
+    #[toml_example(default = "ubuntu")]
     install_ssh_user: Option<String>,
 
+    /// Setup ssh host name
     #[serde(default)]
     ssh_hostname: Option<String>,
 
+    /// Validator key will use in the validator node
     #[serde(default)]
+    #[toml_example(default = "validator_key.json")]
     validator_key_file: Option<PathBuf>,
+    /// Validator node key will use in the node
     #[serde(default)]
+    #[toml_example(default = "node_key.json")]
     validator_node_key_file: Option<PathBuf>,
 
+    /// Disk configure on the node
     #[serde(default)]
+    #[toml_example(default = [ "/dev/vdb", ])]
     pub disks: Option<Vec<PathBuf>>,
 
+    /// load configure from encrypt app file
     #[serde(default)]
+    #[toml_example(default = "hello.pool.devnet.zip")]
     encrypted_kuutamo_app_file: Option<PathBuf>,
+
+    /// Token file for monitoring, default is "kuutamo-monitoring.token"
+    /// Provide this if you have a different file
+    #[serde(default)]
+    #[toml_example(default = "kuutamo-monitoring.token")]
+    kuutamo_monitoring_token_file: Option<PathBuf>,
+    /// Self monitoring server
+    /// The url should implements [Prometheus's Remote Write API] (https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write).
+    #[serde(default)]
+    #[toml_example(default = "https://my.monitoring.server/api/v1/push")]
+    self_monitoring_url: Option<Url>,
+    /// The http basic auth username to access self monitoring server
+    #[serde(default)]
+    self_monitoring_username: Option<String>,
+    /// The http basic auth password to access self monitoring server
+    #[serde(default)]
+    self_monitoring_password: Option<String>,
 }
 
+/// Near validator keys
 #[derive(Debug, PartialEq, Eq, Clone, Serialize)]
 pub struct ValidatorKeys {
-    // Near validator key
+    /// Near validator key
     pub validator_key: NearKeyFile,
-    // Near validator node key
+    /// Near validator node key
     pub validator_node_key: NearKeyFile,
 }
 
+/// Telegraf monitor
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+pub struct TelegrafOutputConfig {
+    /// url for monitor
+    pub url: Url,
+    /// username for monitor
+    pub username: String,
+    /// password for monitor
+    pub password: String,
+}
+
+/// Kuutamo monitor
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Hash)]
+pub struct KmonitorConfig {
+    /// self host url for monitoring, None for kuutamo monitoring
+    pub url: Option<Url>,
+    /// username for kuutamo monitor
+    pub username: String,
+    /// password for kuutamo monitor
+    pub password: String,
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
+}
+
 /// Global configuration affecting all hosts
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, TomlExample)]
 pub struct GlobalConfig {
+    /// Flake url to use as a blue print to build up
     #[serde(default)]
+    #[toml_example(default = "github:kuutamolabs/near-staking-knd")]
     flake: Option<String>,
 }
 
@@ -219,6 +308,16 @@ pub struct Host {
     /// Validator keys used by neard
     #[serde(skip_serializing)]
     pub validator_keys: Option<ValidatorKeys>,
+
+    /// Setup telegraf output auth for kuutamo monitor server
+    #[serde(skip_serializing)]
+    pub kmonitor_config: Option<KmonitorConfig>,
+
+    /// Has monitoring server or not
+    pub telegraf_has_monitoring: bool,
+
+    /// Hash for monitoring config
+    pub telegraf_config_hash: String,
 }
 
 impl Host {
@@ -235,6 +334,17 @@ impl Host {
                 PathBuf::from("/var/lib/secrets/node_key.json"),
                 serde_json::to_string_pretty(&keys.validator_node_key)
                     .context("failed to convert validator node to json")?,
+            ));
+        }
+        if let Some(KmonitorConfig {
+            url,
+            username,
+            password,
+        }) = &self.kmonitor_config
+        {
+            secret_files.push((
+                PathBuf::from("/var/lib/secrets/telegraf"),
+                format!("MONITORING_URL={}\nMONITORING_USERNAME={username}\nMONITORING_PASSWORD={password}", url.as_ref().map(|u|u.to_string()).unwrap_or("https://mimir.monitoring-00-cluster.kuutamo.computer/api/v1/push".to_string()))
             ));
         }
 
@@ -268,7 +378,7 @@ fn validate_global(global_config: &GlobalConfig) -> Result<Global> {
     Ok(Global { flake })
 }
 
-fn validate_host(
+async fn validate_host(
     name: &str,
     host: &HostConfig,
     default: &HostConfig,
@@ -492,6 +602,52 @@ fn validate_host(
         _ => None,
     };
 
+    let token_auth = if load_keys {
+        fs::read_to_string(
+            host.kuutamo_monitoring_token_file
+                .as_ref()
+                .unwrap_or(&PathBuf::from("kuutamo-monitoring.token")),
+        )
+        .ok()
+        .map(|s| s.trim().into())
+        .and_then(|t| decode_token(t).ok())
+    } else {
+        None
+    };
+
+    let kmonitor_config = match (
+        &host.self_monitoring_url,
+        &host.self_monitoring_username,
+        &host.self_monitoring_password,
+        token_auth,
+    ) {
+        (url, Some(username), Some(password), _) if url.is_some() => Some(KmonitorConfig {
+            url: url.clone(),
+            username: username.to_string(),
+            password: password.to_string(),
+        }),
+        (url, _, _, Some((user_id, password))) if url.is_some() => Some(KmonitorConfig {
+            url: url.clone(),
+            username: user_id,
+            password,
+        }),
+        (None, _, _, Some((user_id, password))) => {
+            try_verify_kuutamo_monitoring_config(
+                host.nixos_module.clone().or(default.nixos_module.clone()),
+                user_id,
+                password,
+            )
+            .await
+        }
+        _ => {
+            eprintln!("auth information for monitoring is insufficient, will not set up monitoring when deploying");
+            None
+        }
+    };
+
+    let telegraf_has_monitoring = kmonitor_config.is_some();
+    let telegraf_config_hash = calculate_hash(&kmonitor_config).to_string();
+
     Ok(Host {
         name,
         nixos_module,
@@ -509,7 +665,46 @@ fn validate_host(
         validator_keys,
         public_ssh_keys,
         disks,
+        kmonitor_config,
+        telegraf_has_monitoring,
+        telegraf_config_hash,
     })
+}
+
+/// Try to access kuutamo monitoring, if auth is invalid the config will drop
+async fn try_verify_kuutamo_monitoring_config(
+    nixos_module: Option<String>,
+    user_id: String,
+    password: String,
+) -> Option<KmonitorConfig> {
+    if let Some(nixos_module) = nixos_module {
+        let client = Client::new();
+        let username = if nixos_module.ends_with("mainnet") {
+            format!("near-mainnet-{}", user_id)
+        } else {
+            format!("near-testnet-{}", user_id)
+        };
+        if let Ok(r) = client
+            .get("https://mimir.monitoring-00-cluster.kuutamo.computer")
+            .basic_auth(&username, Some(&password))
+            .send()
+            .await
+        {
+            if r.status() == reqwest::StatusCode::UNAUTHORIZED {
+                eprintln!("token for kuutamo monitoring.token is invalid, please check, else the monitor will not work after deploy");
+                return None;
+            }
+        } else {
+            eprintln!("Could not validate kuutamo-monitoring.token (network issue)");
+        }
+        Some(KmonitorConfig {
+            url: None,
+            username,
+            password,
+        })
+    } else {
+        None
+    }
 }
 
 fn ask_password_for(file: &Path) -> Result<String> {
@@ -646,28 +841,26 @@ pub struct Config {
 }
 
 /// Parse toml configuration
-pub fn parse_config(
+pub async fn parse_config(
     content: &str,
     working_directory: Option<&Path>,
     load_keys: bool,
 ) -> Result<Config> {
     let mut config: ConfigFile = toml::from_str(content)?;
-    let hosts = config
-        .hosts
-        .iter_mut()
-        .map(|(name, host)| {
-            Ok((
-                name.clone(),
-                validate_host(
-                    name,
-                    host,
-                    &config.host_defaults,
-                    working_directory,
-                    load_keys,
-                )?,
-            ))
-        })
-        .collect::<Result<_>>()?;
+    let mut hosts = HashMap::new();
+    for (name, host) in config.hosts.iter_mut() {
+        hosts.insert(
+            name.clone(),
+            validate_host(
+                name,
+                host,
+                &config.host_defaults,
+                working_directory,
+                load_keys,
+            )
+            .await?,
+        );
+    }
 
     let global = validate_global(&config.global)?;
     Ok(Config { hosts, global })
@@ -675,14 +868,33 @@ pub fn parse_config(
 
 /// Load and validate configuration from path
 /// The key will not provide without load_keys flag
-pub fn load_configuration(path: &Path, load_keys: bool) -> Result<Config> {
-    let content = fs::read_to_string(path).context("Cannot read file")?;
-    let working_directory = path.parent();
-    parse_config(&content, working_directory, load_keys)
+pub async fn load_configuration(config: &Path, load_keys: bool) -> Result<Config> {
+    let content = fs::read_to_string(config).context("Cannot read file")?;
+    let working_directory = config.parent();
+    parse_config(&content, working_directory, load_keys).await
 }
 
-#[test]
-pub fn test_parse_config() -> Result<()> {
+fn decode_token(s: String) -> Result<(String, String)> {
+    let binding =
+        general_purpose::STANDARD_NO_PAD.decode(s.trim_matches(|c| c == '=' || c == '\n'))?;
+    let decode_str = std::str::from_utf8(&binding)?;
+    decode_str
+        .split_once(':')
+        .map(|(u, p)| (u.trim().to_string(), p.trim().to_string()))
+        .ok_or(anyhow!("token should be `username: password` pair"))
+}
+
+/// Generate kneard.toml example
+pub fn generate_example() -> Result<String> {
+    let global_example = GlobalConfig::toml_example();
+    let host_example = HostConfig::toml_example();
+    Ok(format!(
+        "[global]\n{global_example}\n[hosts]\n[hosts.example]\n{host_example}"
+    ))
+}
+
+#[tokio::test]
+pub async fn test_parse_config() -> Result<()> {
     use std::str::FromStr;
 
     let validator_key = include_str!("../../nix/modules/tests/validator_key.json");
@@ -717,7 +929,7 @@ ipv4_address = "199.127.64.3"
 ipv6_address = "2605:9880:400::3"
 "#;
 
-    let config = parse_config(config_str, None, true)?;
+    let config = parse_config(config_str, None, true).await?;
     assert_eq!(config.global.flake, "github:myfork/near-staking-knd");
 
     let hosts = &config.hosts;
@@ -757,7 +969,7 @@ ipv6_address = "2605:9880:400::3"
 
     // we delete the node_key.json, `parse-config` will generate it for us:
     fs::remove_file("node_key.json").unwrap();
-    let config = parse_config(config_str, None, true)?;
+    let config = parse_config(config_str, None, true).await?;
     let validator_node_key = &config.hosts["validator-00"]
         .validator_keys
         .as_ref()
@@ -791,8 +1003,8 @@ fn test_invalid_string_for_ipv6() {
     assert!(invalid_str.normalize().is_err());
 }
 
-#[test]
-fn test_validate_host() {
+#[tokio::test]
+async fn test_validate_host() {
     let mut config = HostConfig {
         ipv4_address: Some("192.168.0.1".parse::<IpAddr>().unwrap()),
         ipv4_cidr: Some(0),
@@ -804,7 +1016,9 @@ fn test_validate_host() {
         ..Default::default()
     };
     assert_eq!(
-        validate_host("ipv4-only", &config, &HostConfig::default(), None, true).unwrap(),
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .unwrap(),
         Host {
             name: "ipv4-only".to_string(),
             nixos_module: "single-node-validator-mainnet".to_string(),
@@ -822,24 +1036,39 @@ fn test_validate_host() {
             public_ssh_keys: vec!["".to_string()],
             disks: vec!["/dev/nvme0n1".into(), "/dev/nvme1n1".into()],
             validator_keys: None,
+            kmonitor_config: None,
+            telegraf_has_monitoring: false,
+            telegraf_config_hash: "13646096770106105413".to_string(),
         }
     );
 
     // If `ipv6_address` is provied, the `ipv6_gateway` and `ipv6_cidr` should be provided too,
     // else the error will raise
     config.ipv6_address = Some("2607:5300:203:6cdf::".into());
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_err());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_err()
+    );
 
     config.ipv6_gateway = Some(
         "2607:5300:0203:6cff:00ff:00ff:00ff:00ff"
             .parse::<IpAddr>()
             .unwrap(),
     );
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_err());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_err()
+    );
 
     // The `ipv6_cidr` could be provided by subnet in address field
     config.ipv6_address = Some("2607:5300:203:6cdf::/64".into());
-    assert!(validate_host("ipv4-only", &config, &HostConfig::default(), None, true).is_ok());
+    assert!(
+        validate_host("ipv4-only", &config, &HostConfig::default(), None, true)
+            .await
+            .is_ok()
+    );
 }
 
 #[test]
@@ -861,4 +1090,16 @@ pub fn test_decrypt_and_unzip_file() {
         public_key: String::from("ed25519:8Qn4z2ir1akQuS1nZB5RjyLt4fiw7rH626pk5Qv3pvtv"),
         secret_key: String::from("ed25519:4UzKpf3gP8FtvpED8BE3YWUhc5JVNnwptdBZHCe5ZKLm9jXtec2JQ3TNzFFPLUFshcr8yyDBTPN2tej3CgjNctEi"),
     });
+}
+
+#[test]
+fn test_token_decode() {
+    let token = "MjoyRE5HTWx6YWxoQVQzN0M1NVgwSG53WFFkZlpjZG5CZXhXVFJobEloRVFvVTluRW8=";
+    assert_eq!(
+        decode_token(token.to_string()).unwrap(),
+        (
+            "2".to_string(),
+            "2DNGMlzalhAT37C55X0HnwXQdfZcdnBexWTRhlIhEQoU9nEo".to_string()
+        )
+    )
 }
