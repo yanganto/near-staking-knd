@@ -3,7 +3,7 @@
 let
   generic = pkgs.callPackage ./generic.nix { };
   toolchainFile = ./unstable-rust-toolchain.toml;
-  toolchainChecksum = "sha256-JvgrOEGMM0N+6Vsws8nUq0W/PJPxkf5suZjgEtAzG6I=";
+  toolchainChecksum = "sha256-4vetmUhTUsew5FODnjlnQYInzyLNyDwocGa4IvMk3DM=";
 
   toolchain = fenix.packages.fromToolchainFile {
     file = ./unstable-rust-toolchain.toml;
@@ -11,8 +11,8 @@ let
   };
 in
 generic {
-  ver = "1.33.0-rc.1";
-  sha256 = "sha256-v7NBoTUufIxHTqC2E9X2lydRXi0nFYIT/IEdYjPUdCs=";
-  cargoSha256 = "sha256-Tdhn7Q3vuUbS7CU217YxEXclotUiXOnvw9A34zUuT58=";
+  ver = "1.34.0-rc.1";
+  sha256 = "sha256-pQDXhGjOppdmLSMEUQdTiV9Yr3MNdnBXmkLHzPiBtvE=";
+  cargoSha256 = "sha256-OX/hIjpZf5LJMH6FA2I6URcLSirFuRR2KommNeZWdN4=";
   inherit toolchainFile toolchainChecksum toolchain;
 }
