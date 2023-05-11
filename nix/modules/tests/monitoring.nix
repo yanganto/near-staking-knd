@@ -41,7 +41,7 @@
     server.wait_for_unit("telegraf.service")
 
     # exporter prometheus endpoint
-    server.wait_until_succeeds("curl --silent http://127.0.0.1:9333/metrics")
+    server.wait_until_succeeds("curl --silent http://[::1]:9333/metrics")
 
     # telegraf prometheus endpoint
     server.wait_until_succeeds("curl --silent http://127.0.0.1:9273/metrics")

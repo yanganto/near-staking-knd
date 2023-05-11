@@ -21,7 +21,7 @@ in
   };
   config = lib.mkIf (cfg.accountId != null) {
     services.telegraf.extraConfig.inputs.prometheus.urls = [
-      "http://localhost:9333"
+      "http://[::1]:9333"
     ];
 
     systemd.services.near-prometheus-exporter = {
