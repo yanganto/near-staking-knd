@@ -3,6 +3,7 @@
     ../network.nix
     ../hardware.nix
     ../near-staking-analytics
+    ../telegraf.nix
   ];
 
   system.stateVersion = "22.05";

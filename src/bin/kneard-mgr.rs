@@ -11,6 +11,7 @@ use kneard::proxy;
 use kneard::utils;
 use semver::{Version, VersionReq};
 use std::collections::HashMap;
+use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::process::Output;
@@ -41,6 +42,12 @@ struct InstallArgs {
 struct GenerateConfigArgs {
     /// Directory where to copy the configuration to.
     directory: PathBuf,
+}
+
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+struct GenerateExampleArgs {
+    /// File where to put the example to.
+    file: Option<PathBuf>,
 }
 
 #[derive(clap::Args, PartialEq, Debug, Clone)]
@@ -150,6 +157,8 @@ struct SystemInfoArgs {
 enum Command {
     /// Generate NixOS configuration
     GenerateConfig(GenerateConfigArgs),
+    /// Generate kneard.toml example
+    GenerateExample(GenerateExampleArgs),
     /// Install Validator on a given machine. This will remove all data of the current system!
     Install(InstallArgs),
     /// Upload update to host and show which actions would be performed on an update
@@ -240,6 +249,17 @@ fn generate_config(
     flake: &NixosFlake,
 ) -> Result<()> {
     deploy::generate_config(&config_args.directory, flake)
+}
+
+fn generate_example(file: &Option<PathBuf>) -> Result<()> {
+    let content = deploy::generate_example()?;
+    if let Some(file) = file {
+        let mut file = File::create(file)?;
+        file.write_all(content.as_bytes())?;
+    } else {
+        println!("{content}");
+    }
+    Ok(())
 }
 
 fn dry_update(
@@ -382,7 +402,7 @@ fn restart(args: &RestartArgs, config: &Config) -> Result<()> {
             Version::parse(version_str.ok_or(anyhow!("version is not prefix with binary name"))?)
                 .context("Failed to parse kuutamoctl version")?;
 
-        let output = if VersionReq::parse(">=0.2.1")?.matches(&version) {
+        let output = if VersionReq::parse(">=0.2.0")?.matches(&version) {
             schedule_restart(host, args.minimum_length, schedule_at)?
         } else {
             maintenance_shutdown(host, args.minimum_length, schedule_at)?
@@ -459,12 +479,14 @@ pub async fn main() -> Result<()> {
         | Command::DryUpdate(_)
         | Command::Update(_)
         | Command::Rollback(_) => {
-            let config = deploy::load_configuration(&args.config, true).with_context(|| {
-                format!(
-                    "failed to parse configuration file: {}",
-                    &args.config.display()
-                )
-            })?;
+            let config = deploy::load_configuration(&args.config, true)
+                .await
+                .with_context(|| {
+                    format!(
+                        "failed to parse configuration file: {}",
+                        &args.config.display()
+                    )
+                })?;
             let flake = generate_nixos_flake(&config).context("failed to generate flake")?;
             match args.action {
                 Command::GenerateConfig(ref config_args) => {
@@ -483,7 +505,7 @@ pub async fn main() -> Result<()> {
                 _ => unreachable!(),
             }
         }
-        Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) | Command::SystemInfo(_) => {
+        Command::GenerateExample(_) | Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) | Command::SystemInfo(_) => {
             let config = deploy::load_configuration(&args.config, false).with_context(|| {
                 format!(
                     "failed to load configuration file: {}",
@@ -491,6 +513,9 @@ pub async fn main() -> Result<()> {
                 )
             })?;
             match args.action {
+                Command::GenerateExample(ref generate_example_args) => {
+                    generate_example(&generate_example_args.file)
+                }
                 Command::Proxy(ref proxy_args) => proxy(proxy_args, &config).await,
                 Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
                 Command::Restart(ref args) => restart(args, &config),

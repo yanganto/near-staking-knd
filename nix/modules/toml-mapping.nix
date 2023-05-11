@@ -2,7 +2,6 @@
 
 let
   cfg = config.kuutamo.deployConfig;
-
   settingsFormat = pkgs.formats.toml { };
 in
 {
@@ -11,6 +10,7 @@ in
     description = lib.mdDoc "toml configuration from kneard-mgr cli";
     inherit (settingsFormat) type;
   };
+
   # deployConfig is optional
   config = lib.mkIf (cfg != { }) {
     networking.hostName = cfg.name;
@@ -32,5 +32,8 @@ in
     kuutamo.network.ipv6.address = cfg.ipv6_address or null;
     kuutamo.network.ipv6.gateway = cfg.ipv6_gateway or null;
     kuutamo.network.ipv6.cidr = cfg.ipv6_cidr or 128;
+
+    kuutamo.telegraf.hasMonitoring = cfg.telegraf_has_monitoring or false;
+    kuutamo.telegraf.configHash = cfg.telegraf_config_hash or "";
   };
 }

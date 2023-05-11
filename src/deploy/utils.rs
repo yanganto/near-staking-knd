@@ -33,7 +33,7 @@ pub async fn handle_maintenance_shutdown(host: &Host, required_time_in_blocks: u
         Version::parse(version_str.ok_or(anyhow!("version is not prefix with binary name"))?)
             .context("Failed to parse kuutamoctl version")?;
 
-    if VersionReq::parse(">=0.2.1")?.matches(&version) {
+    if VersionReq::parse(">=0.2.0")?.matches(&version) {
         tokio::select! {
             _ = watch_maintenance_status(host, &flag) => (),
             r = ssh_with_timeout_async(

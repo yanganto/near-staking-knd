@@ -3,6 +3,7 @@
     ../network.nix
     ../hardware.nix
     ../consul.nix
+    ../telegraf.nix
     ../toml-mapping.nix
   ];
 
