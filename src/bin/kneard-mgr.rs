@@ -505,13 +505,19 @@ pub async fn main() -> Result<()> {
                 _ => unreachable!(),
             }
         }
-        Command::GenerateExample(_) | Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) | Command::SystemInfo(_) => {
-            let config = deploy::load_configuration(&args.config, false).with_context(|| {
-                format!(
-                    "failed to load configuration file: {}",
-                    &args.config.display()
-                )
-            })?;
+        Command::GenerateExample(_)
+        | Command::Proxy(_)
+        | Command::Restart(_)
+        | Command::Ssh(_)
+        | Command::SystemInfo(_) => {
+            let config = deploy::load_configuration(&args.config, false)
+                .await
+                .with_context(|| {
+                    format!(
+                        "failed to load configuration file: {}",
+                        &args.config.display()
+                    )
+                })?;
             match args.action {
                 Command::GenerateExample(ref generate_example_args) => {
                     generate_example(&generate_example_args.file)
