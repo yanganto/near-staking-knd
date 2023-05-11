@@ -3,6 +3,7 @@
 #![deny(missing_docs)]
 
 use crate::utils::ssh::ssh_with_timeout;
+use crate::utils::version::require;
 use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
 use kneard::deploy::{self, generate_nixos_flake, Config, Host, NixosFlake};
@@ -143,6 +144,13 @@ struct RestartArgs {
     pub wait: bool,
 }
 
+#[derive(clap::Args, PartialEq, Debug, Clone)]
+struct SystemInfoArgs {
+    /// Comma-separated lists of hosts to perform the install
+    #[clap(long, default_value = "")]
+    hosts: String,
+}
+
 /// Subcommand to run
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(clap::Subcommand, PartialEq, Debug, Clone)]
@@ -165,6 +173,8 @@ enum Command {
     Restart(RestartArgs),
     /// SSH into a host
     Ssh(SshArgs),
+    /// Get system info from a host
+    SystemInfo(SystemInfoArgs),
 }
 
 #[derive(Parser)]
@@ -323,9 +333,10 @@ fn maintenance_shutdown(
                 &minimum_length.to_string(),
             ],
             true,
+            true,
         ),
         (None, None) => {
-            utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "maintenance-shutdown"], true)
+            utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "maintenance-shutdown"], true, true)
         }
         (None, Some(schedule_at)) => utils::ssh::ssh_with_timeout(
             host,
@@ -335,6 +346,7 @@ fn maintenance_shutdown(
                 "--shutdown-at",
                 &schedule_at.to_string(),
             ],
+            true,
             true,
         ),
     }
@@ -354,8 +366,9 @@ fn schedule_restart(
             host,
             &["kuutamoctl", "restart", &minimum_length.to_string()],
             true,
+            true,
         ),
-        (None, None) => utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "restart"], true),
+        (None, None) => utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "restart"], true, true),
         (None, Some(schedule_at)) => utils::ssh::ssh_with_timeout(
             host,
             &[
@@ -364,6 +377,7 @@ fn schedule_restart(
                 "--schedule-at",
                 &schedule_at.to_string(),
             ],
+            true,
             true,
         ),
     }
@@ -380,7 +394,7 @@ fn restart(args: &RestartArgs, config: &Config) -> Result<()> {
     let hosts = filter_hosts(&args.hosts, &config.hosts)?;
 
     for host in hosts.iter() {
-        let Output { stdout, .. } = ssh_with_timeout(host, &["kuutamoctl", "-V"], true)
+        let Output { stdout, .. } = ssh_with_timeout(host, &["kuutamoctl", "-V"], true, true)
             .context("Failed to fetch kuutamoctl version")?;
         let version_str =
             std::str::from_utf8(&stdout).map(|s| s.rsplit_once(' ').map(|(_, v)| v.trim()))?;
@@ -417,6 +431,33 @@ fn ssh(_args: &Args, ssh_args: &SshArgs, config: &Config) -> Result<()> {
         .map_or_else(|| [].as_slice(), |v| v.as_slice());
     let command = command.iter().map(|s| s.as_str()).collect::<Vec<_>>();
     kneard::utils::ssh::ssh(&hosts, command.as_slice())
+}
+
+fn system_info(args: &SystemInfoArgs, config: &Config) -> Result<()> {
+    let hosts = filter_hosts(&args.hosts, &config.hosts)?;
+    for host in hosts {
+        let args = if require(&host, ">=0.3")?.0 {
+            vec!["kneard-ctl", "system-info"]
+        } else {
+            vec!["kuutamoctl", "-V"]
+        };
+        println!("[{}]", host.name);
+        if let Ok(output) = ssh_with_timeout(&host, &args, true, false) {
+            if output.status.success() {
+                io::stdout().write_all(&output.stdout)?;
+            } else {
+                println!(
+                    "fetch system info of {} error: {}",
+                    host.name,
+                    std::str::from_utf8(&output.stderr).unwrap_or("fail to decode stderr")
+                );
+            }
+        } else {
+            println!("Fail to fetch system info from {}", host.name);
+        }
+        println!("\n");
+    }
+    Ok(())
 }
 
 /// The kuutamo program entry point
@@ -464,7 +505,11 @@ pub async fn main() -> Result<()> {
                 _ => unreachable!(),
             }
         }
-        Command::GenerateExample(_) | Command::Proxy(_) | Command::Restart(_) | Command::Ssh(_) => {
+        Command::GenerateExample(_)
+        | Command::Proxy(_)
+        | Command::Restart(_)
+        | Command::Ssh(_)
+        | Command::SystemInfo(_) => {
             let config = deploy::load_configuration(&args.config, false)
                 .await
                 .with_context(|| {
@@ -480,6 +525,7 @@ pub async fn main() -> Result<()> {
                 Command::Proxy(ref proxy_args) => proxy(proxy_args, &config).await,
                 Command::Ssh(ref ssh_args) => ssh(&args, ssh_args, &config),
                 Command::Restart(ref args) => restart(args, &config),
+                Command::SystemInfo(ref args) => system_info(args, &config),
                 _ => unreachable!(),
             }
         }

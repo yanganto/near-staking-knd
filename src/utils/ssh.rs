@@ -23,6 +23,7 @@ pub fn ssh_with_timeout(
     host: &Host,
     command: &[&str],
     learn_known_host_key: bool,
+    verbose: bool,
 ) -> Result<Output> {
     let target = host.deploy_ssh_target();
     let mut args = vec!["-o", "ConnectTimeout=10", "-o", "StrictHostKeyChecking=no"];
@@ -33,7 +34,9 @@ pub fn ssh_with_timeout(
     args.push(&target);
     args.push("--");
     args.extend(command);
-    println!("$ ssh {}", args.join(" "));
+    if verbose {
+        println!("$ ssh {}", args.join(" "));
+    }
     let output = Command::new("ssh")
         .args(args)
         .output()
@@ -46,6 +49,7 @@ pub async fn ssh_with_timeout_async(
     host: &Host,
     mut command: Vec<String>,
     learn_known_host_key: bool,
+    verbose: bool,
 ) -> Result<Output> {
     let target = host.deploy_ssh_target();
     let mut args = vec![
@@ -61,7 +65,9 @@ pub async fn ssh_with_timeout_async(
     args.push(target);
     args.push("--".to_string());
     args.append(&mut command);
-    println!("$ ssh {}", args.join(" "));
+    if verbose {
+        println!("$ ssh {}", args.join(" "));
+    }
     let output = tokio::process::Command::new("ssh")
         .args(args)
         .output()

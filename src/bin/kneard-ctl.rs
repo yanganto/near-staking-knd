@@ -4,8 +4,8 @@
 
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
-use kneard::commands::control_commands::{CheckRpcArgs, Command, RestartArgs};
-use kneard::commands::CommandClient;
+use kneard::commands::control_commands::{CheckRpcArgs, Command, RestartArgs, SystemInfoArgs};
+use kneard::commands::{system_info, CommandClient};
 use std::path::PathBuf;
 use std::time::Duration;
 use tokio::net::UnixStream;
@@ -100,6 +100,10 @@ pub async fn main() {
         }
         Command::MaintenanceStatus => show_maintenance_status(&kuutamo_client).await,
         Command::CheckRpc(CheckRpcArgs { watch }) => check_rpc_status(&kuutamo_client, watch).await,
+        Command::SystemInfo(SystemInfoArgs { inline }) => {
+            system_info::system_info(inline);
+            Ok(())
+        }
     };
     if let Err(e) = res {
         eprintln!("{e}");

@@ -39,6 +39,10 @@
         (modulesPath + "/testing/test-instrumentation.nix")
         (modulesPath + "/profiles/qemu-guest.nix")
       ];
+      environment.etc."system-info.toml".text = ''
+        git_sha = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        git_commit_date = "20230424000000"
+      '';
     };
   } // import ./test-flake/configurations.nix {
     near-staking-knd = self;
