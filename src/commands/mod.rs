@@ -4,6 +4,8 @@ mod active_validator;
 mod client;
 pub mod control_commands;
 mod server;
+/// Show system information
+pub mod system_info;
 
 use serde::{Deserialize, Serialize};
 

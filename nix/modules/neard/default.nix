@@ -140,9 +140,11 @@ in
 
             if [[ ! -f /var/lib/neard/.finished ]]; then
               ${lib.optionalString cfg.generateNodeKey ''
-                # If those keys already exist but no genesis than neard would just do nothing and fail...
-                rm -rf /var/lib/neard/{config.json,node_key.json}
-                runNeard ${cfg.package}/bin/neard --home /var/lib/neard init ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId} --download-genesis"}
+                until runNeard ${cfg.package}/bin/neard --home /var/lib/neard init ${lib.optionalString (cfg.chainId != null) "--chain-id=${cfg.chainId} --download-genesis"}; do
+                  # If those keys already exist but no genesis than neard would just do nothing and fail...
+                  rm -rf /var/lib/neard/{config.json,node_key.json}
+                  sleep 1
+                done
               ''}
               ${lib.optionalString (cfg.s3.dataBackupDirectory != null) ''
                 runNeard aws s3 sync \
