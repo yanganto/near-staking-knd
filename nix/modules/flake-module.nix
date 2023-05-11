@@ -24,6 +24,7 @@
           };
         imports = [ ./neard/mainnet ];
       };
+      telegraf = ./telegraf.nix;
       kuutamo-binary-cache = ./binary-cache;
       kneard = { pkgs, ... }: {
         imports = [
@@ -35,6 +36,9 @@
       disko-partitioning-script = ./disko-partitioning-script.nix;
       networkd = ./networkd.nix;
       near-prometheus-exporter = { pkgs, ... }: {
+        imports = [
+          ./near-prometheus-exporter.nix
+        ];
         kuutamo.exporter.package = self.packages.${pkgs.stdenv.hostPlatform.system}.near-prometheus-exporter;
       };
 
