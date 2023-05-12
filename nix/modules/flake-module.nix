@@ -24,7 +24,10 @@
           };
         imports = [ ./neard/mainnet ];
       };
-      telegraf = ./telegraf.nix;
+      telegraf.imports = [
+        inputs.srvos.nixosModules.mixins-telegraf
+        ./telegraf.nix
+      ];
       kuutamo-binary-cache = ./binary-cache;
       kneard = { pkgs, ... }: {
         imports = [
