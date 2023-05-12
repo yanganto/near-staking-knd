@@ -3,13 +3,13 @@
   flake = _: {
     nixosModules = {
       neard = { pkgs, lib, ... }: {
-        kuutamo.neard.package = lib.mkDefault self.packages.${pkgs.system}.neard;
+        kuutamo.neard.package = lib.mkDefault self.packages.${pkgs.stdenv.hostPlatform.system}.neard;
         imports = [
           ./neard
         ];
       };
       neard-testnet = { pkgs, lib, ... }: {
-        kuutamo.neard.package = lib.mkDefault self.packages.${pkgs.system}.neard-unstable;
+        kuutamo.neard.package = lib.mkDefault self.packages.${pkgs.stdenv.hostPlatform.system}.neard-unstable;
         imports = [
           ./neard/testnet
         ];
@@ -80,6 +80,7 @@
           self.nixosModules.networkd
           self.nixosModules.near-prometheus-exporter
           self.nixosModules.kuutamo-binary-cache
+          self.nixosModules.telegraf
           inputs.srvos.nixosModules.server
           inputs.disko.nixosModules.disko
         ];
