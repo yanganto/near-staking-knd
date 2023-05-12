@@ -70,7 +70,7 @@ in
     };
 
     configFile = lib.mkOption {
-      type = lib.types.path;
+      type = lib.types.nullOr lib.types.path;
       description = "Configuration for the node in json format";
     };
 
@@ -160,7 +160,9 @@ in
             fi
 
             # Update configuration
-            install -D -m755 -o neard -g neard ${cfg.configFile} /var/lib/neard/config.json
+            ${lib.optionalString (cfg.configFile != null) ''
+               install -D -m755 -o neard -g neard ${cfg.configFile} /var/lib/neard/config.json
+            ''}
             ${lib.optionalString (cfg.genesisFile != null) "ln -sf ${cfg.genesisFile} /var/lib/neard/genesis.json"}
           ''}"
         ];

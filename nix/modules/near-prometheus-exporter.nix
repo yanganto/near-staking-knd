@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, pkgs, lib, ... }:
 let
   cfg = config.kuutamo.exporter or { accountId = ""; externalRpc = ""; };
 in
@@ -52,6 +52,16 @@ in
         ProtectProc = "invisible";
         CapabilityBoundingSet = "CAP_NET_BIND_SERVICE";
       };
+    };
+
+    systemd.services.telegraf.serviceConfig = {
+      ExecStartPre = [
+        "+${pkgs.writeShellScript "pre-start" ''
+          cat > /var/log/telegraf/account-id <<EOF
+          near,account_id=${cfg.accountId} v=0i
+          EOF
+        ''}"
+      ];
     };
   };
 }
