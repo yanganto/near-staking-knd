@@ -18,10 +18,11 @@
 
     services.telegraf = {
       enable = true;
-      environmentFiles = [
-        /var/lib/secrets/telegraf
-        (pkgs.writeText "monitoring-configHash" config.kuutamo.telegraf.configHash)
-      ];
+      environmentFiles =
+        if config.kuutamo.telegraf.hasMonitoring then [
+          /var/lib/secrets/telegraf
+          (pkgs.writeText "monitoring-configHash" config.kuutamo.telegraf.configHash)
+        ] else [ ];
       extraConfig = {
         agent.interval = "60s";
         inputs = {

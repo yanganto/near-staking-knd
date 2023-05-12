@@ -18,6 +18,9 @@
         neard = import ./neard.nix {
           inherit self pkgs;
         };
+        monitoring = import ./monitoring.nix {
+          inherit self pkgs;
+        };
         kneard-mgr = pkgs.callPackage ./kneard-mgr.nix {
           inherit self pkgs;
         };

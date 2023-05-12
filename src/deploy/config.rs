@@ -305,6 +305,9 @@ pub struct Host {
     /// Block device paths to use for installing
     pub disks: Vec<PathBuf>,
 
+    /// validator account
+    pub validator_account_id: Option<String>,
+
     /// Validator keys used by neard
     #[serde(skip_serializing)]
     pub validator_keys: Option<ValidatorKeys>,
@@ -605,6 +608,10 @@ async fn validate_host(
         _ => None,
     };
 
+    let validator_account_id = validator_keys
+        .as_ref()
+        .map(|keys| keys.validator_key.account_id.clone());
+
     let token_auth = if load_keys {
         fs::read_to_string(
             host.kuutamo_monitoring_token_file
@@ -671,6 +678,7 @@ async fn validate_host(
         kmonitor_config,
         telegraf_has_monitoring,
         telegraf_config_hash,
+        validator_account_id,
     })
 }
 
@@ -1042,6 +1050,7 @@ async fn test_validate_host() {
             kmonitor_config: None,
             telegraf_has_monitoring: false,
             telegraf_config_hash: "13646096770106105413".to_string(),
+            validator_account_id: None,
         }
     );
 

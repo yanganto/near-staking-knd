@@ -4,6 +4,7 @@
     ../hardware.nix
     ../consul.nix
     ../telegraf.nix
+    ../near-prometheus-exporter.nix
     ../toml-mapping.nix
   ];
 

@@ -22,6 +22,7 @@
             users.extraUsers.root.openssh.authorizedKeys.keys = [
               "ssh-ed25519 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA snakeoil"
             ];
+
           };
           validator = {
             kuutamo.kneard.validatorKeyFile = "/var/lib/secrets/validator_key.json";

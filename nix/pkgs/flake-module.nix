@@ -51,6 +51,8 @@
         # passthru as convenience for the CI.
         inherit (pkgs) nix-update;
 
+        near-prometheus-exporter = pkgs.callPackage ./near-prometheus-exporter.nix { };
+
         default = self'.packages.kneard-mgr;
       }
       // (pkgs.lib.optionalAttrs (pkgs.system == "x86_64-linux") {
