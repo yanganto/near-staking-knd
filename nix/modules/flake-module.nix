@@ -80,6 +80,7 @@
           self.nixosModules.networkd
           self.nixosModules.near-prometheus-exporter
           self.nixosModules.kuutamo-binary-cache
+          self.nixosModules.telegraf
           inputs.srvos.nixosModules.server
           inputs.disko.nixosModules.disko
         ];
