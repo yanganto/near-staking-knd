@@ -3,7 +3,6 @@
     ../network.nix
     ../hardware.nix
     ../near-staking-analytics
-    ../telegraf.nix
     ../near-prometheus-exporter.nix
   ];
 
