@@ -702,11 +702,8 @@ async fn try_verify_kuutamo_monitoring_config(
             .await
         {
             if r.status() == reqwest::StatusCode::UNAUTHORIZED {
-                eprintln!("token for kuutamo monitoring.token is invalid, please check, else the monitor will not work after deploy");
-                return None;
+                eprintln!("This token is either wrong, or not valid yet. Provisioning can take up to 48 hours, if this time has passed please check your token is the same as the one downloaded from kuutamo.app");
             }
-        } else {
-            eprintln!("Could not validate kuutamo-monitoring.token (network issue)");
         }
         Some(KmonitorConfig {
             url: None,
