@@ -18,6 +18,7 @@
       enable = true;
       environmentFiles = lib.optionals config.kuutamo.telegraf.hasMonitoring [
         /var/lib/secrets/telegraf
+        # this triggers a restart of telegraf when the config changes
         (pkgs.writeText "monitoring-configHash" config.kuutamo.telegraf.configHash)
       ];
       extraConfig = {
