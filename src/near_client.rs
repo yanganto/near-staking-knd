@@ -31,7 +31,7 @@ pub struct BlockDetailJsonRpcStatusResponse {
     /// id, may take care in future
     pub id: String,
     /// the result we care
-    pub result: BlockHeight,
+    pub result: serde_json::Value,
 }
 
 /// A client implementing the neard status api
@@ -93,7 +93,10 @@ impl NeardClient {
             .context("Failed to get block details")?;
 
         let r: BlockDetailJsonRpcStatusResponse = res.json().await?;
-        Ok(r.result)
+        let block_height = r.result["header"]["height"]
+            .as_u64()
+            .ok_or(anyhow::anyhow!("unexpected block detail response"))?;
+        Ok(block_height)
     }
 
     /// Request maintenance windows
