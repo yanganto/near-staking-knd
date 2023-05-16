@@ -24,6 +24,7 @@
       extraConfig = {
         agent.interval = "60s";
         inputs = {
+          cpu = { };
           prometheus.urls = [
             "http://localhost:3030/metrics"
             "http://localhost:2233/metrics"
