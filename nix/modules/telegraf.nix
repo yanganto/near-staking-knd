@@ -17,7 +17,7 @@
     services.telegraf = {
       enable = true;
       environmentFiles = lib.optionals config.kuutamo.telegraf.hasMonitoring [
-        /var/lib/secrets/telegraf
+        "/var/lib/secrets/telegraf"
         # this triggers a restart of telegraf when the config changes
         (pkgs.writeText "monitoring-configHash" config.kuutamo.telegraf.configHash)
       ];
@@ -29,8 +29,12 @@
             "http://localhost:2233/metrics"
           ];
         };
-        outputs = lib.optionalAttrs config.kuutamo.telegraf.hasMonitoring {
-          http = {
+        outputs = {
+          prometheus_client = {
+            listen = ":9273";
+            metric_version = 2;
+          };
+          http = lib.mkIf config.kuutamo.telegraf.hasMonitoring {
             url = "$MONITORING_URL";
             data_format = "prometheusremotewrite";
             username = "$MONITORING_USERNAME";
