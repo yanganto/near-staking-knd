@@ -9,7 +9,7 @@ edition = "2021"
 tempfile = "3"
 reqwest = { version = "0.11.17", features = ["json"], default-features = false }
 anyhow = "1.0.71"
-tokio = { version = "1.28.0", features = ["full"] }
+tokio = { version = "1.28.1", features = ["full"] }
 hyperlocal = "0.8"
 futures-util = "0.3.28"
 hyper = { version = "0.14.26", features = [ "server" ] }
