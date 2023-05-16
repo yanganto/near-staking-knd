@@ -58,7 +58,7 @@ in
       ExecStartPre = [
         "+${pkgs.writeShellScript "pre-start" ''
           cat > /var/log/telegraf/account-id <<EOF
-          near,account_id=${cfg.accountId} v=0i
+          near,account_id=${cfg.accountId} meta=0i
           EOF
         ''}"
       ];
