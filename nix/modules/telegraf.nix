@@ -30,10 +30,6 @@
           ];
         };
         outputs = {
-          prometheus_client = {
-            listen = ":9273";
-            metric_version = 2;
-          };
           http = lib.mkIf config.kuutamo.telegraf.hasMonitoring {
             url = "$MONITORING_URL";
             data_format = "prometheusremotewrite";
