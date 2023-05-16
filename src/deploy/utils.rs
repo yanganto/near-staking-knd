@@ -17,6 +17,7 @@ async fn watch_maintenance_status(host: &Host, flag: &AtomicBool) {
             ssh_with_timeout(host, &["kuutamoctl", "maintenance-status"], true, true)
         {
             let _ = tokio::io::stdout().write_all(&output.stdout).await;
+            let _ = tokio::io::stdout().write_all(&output.stderr).await;
         }
     }
 }

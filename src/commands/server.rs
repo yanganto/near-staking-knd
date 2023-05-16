@@ -196,13 +196,13 @@ impl CommandServer {
                 "{{\"status\": 200, \"message\": \"maintenance restart in {} blocks,  current: {current:}, restart at: {expect}\"}}",
                 expect - current
             ))),
-            (Some(expect), Err(_), true) if expect > 0 => Response::new(Body::from(format!("{{\"status\": 200, \"message\": \"maintenance shutdown will be at {expect}\"}}"))),
-            (Some(expect), Err(_), false) if expect > 0 => Response::new(Body::from(format!("{{\"status\": 200, \"message\": \"maintenance restart will be at {expect}\"}}"))),
+            (Some(expect), Err(e), true) if expect > 0 => Response::new(Body::from(format!("{{\"status\": 200, \"message\": \"maintenance shutdown will be at {expect}, fail to fetch current block {e:}\"}}"))),
+            (Some(expect), Err(e), false) if expect > 0 => Response::new(Body::from(format!("{{\"status\": 200, \"message\": \"maintenance restart will be at {expect}, fail to fetch current block {e:}\"}}"))),
             (_, Ok(current), true) => Response::new(Body::from(format!(
                 "{{\"status\": 200, \"message\": \"maintenance shutdown set, current: {current:}\"}}",
             ))),
             (_, _, false) => Response::new(Body::from("{\"status\": 200, \"message\": \"no maintenance setting now\"}")),
-            (_, Err(_), _) => gateway_timeout("fail to fetch current block from neard"),
+            (_, Err(e), _) => gateway_timeout(format!("fail to fetch current block from neard, please try again later. error: {e:}")),
         };
 
         Ok(resp)
