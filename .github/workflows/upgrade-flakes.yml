@@ -20,4 +20,4 @@ jobs:
       - name: Update flake.lock
         uses: Mic92/update-flake-lock@main
         with:
-          base: dev
+          base: main
