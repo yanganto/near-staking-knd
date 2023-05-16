@@ -163,14 +163,21 @@ impl CommandServer {
         }
 
         match rx.recv().await {
-            Some(r) => match r.shutdown_at_blockheight {
-                Ok(Some(height)) => Ok(Response::new(Body::from(format!(
+            Some(r) => match (r.shutdown_at_blockheight, args.cancel) {
+                (Ok(Some(height)), false) => Ok(Response::new(Body::from(format!(
                     "{{\"status\": 200, \"message\": \"will shutdown at block height: {height}\"}}",
                 )))),
-                Ok(None) => Ok(Response::new(Body::from(
+                (Ok(None), true) => Ok(Response::new(Body::from(
+                    r#"{"status": 200, "message": "shutdown cancelled"}"#,
+                ))),
+                (Ok(None), false) => Ok(Response::new(Body::from(
                     r#"{"status": 200, "message": "is shutting down at current block"}"#,
                 ))),
-                Err(e) => Ok(server_error(format!("fail to schedule restart: {e:}"))),
+                (Err(e), false) => Ok(server_error(format!("fail to schedule restart: {e:}"))),
+                (Err(e), true) => Ok(server_error(format!("fail to cancel restart: {e:}"))),
+                (Ok(Some(_)), true) => Ok(server_error(
+                    "unexpedted response for cancel restart".to_string(),
+                )),
             },
             None => Ok(server_error("channel to supervisor was closed")),
         }

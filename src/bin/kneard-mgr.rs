@@ -320,12 +320,19 @@ fn maintenance_shutdown(
     host: &Host,
     minimum_length: Option<u64>,
     schedule_at: Option<u64>,
+    cancel: bool,
 ) -> Result<Output> {
-    match (minimum_length, schedule_at) {
-        (Some(_), Some(_)) => bail!(
+    match (cancel, minimum_length, schedule_at) {
+        (true, _, _) => utils::ssh::ssh_with_timeout(
+            host,
+            &["kuutamoctl", "maintenance-shutdown", "--cancel"],
+            true,
+            true,
+        ),
+        (false, Some(_), Some(_)) => bail!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
         ),
-        (Some(minimum_length), None) => utils::ssh::ssh_with_timeout(
+        (false, Some(minimum_length), None) => utils::ssh::ssh_with_timeout(
             host,
             &[
                 "kuutamoctl",
@@ -335,10 +342,10 @@ fn maintenance_shutdown(
             true,
             true,
         ),
-        (None, None) => {
+        (false, None, None) => {
             utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "maintenance-shutdown"], true, true)
         }
-        (None, Some(schedule_at)) => utils::ssh::ssh_with_timeout(
+        (false, None, Some(schedule_at)) => utils::ssh::ssh_with_timeout(
             host,
             &[
                 "kuutamoctl",
@@ -357,19 +364,25 @@ fn schedule_restart(
     host: &Host,
     minimum_length: Option<u64>,
     schedule_at: Option<u64>,
+    cancel: bool,
 ) -> Result<Output> {
-    match (minimum_length, schedule_at) {
-        (Some(_), Some(_)) => bail!(
+    match (cancel, minimum_length, schedule_at) {
+        (true, _, _) => {
+            utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "restart", "--cancel"], true, true)
+        }
+        (false, Some(_), Some(_)) => bail!(
             "We can not guarantee minimum maintenance window for a specified shutdown block height"
         ),
-        (Some(minimum_length), None) => utils::ssh::ssh_with_timeout(
+        (false, Some(minimum_length), None) => utils::ssh::ssh_with_timeout(
             host,
             &["kuutamoctl", "restart", &minimum_length.to_string()],
             true,
             true,
         ),
-        (None, None) => utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "restart"], true, true),
-        (None, Some(schedule_at)) => utils::ssh::ssh_with_timeout(
+        (false, None, None) => {
+            utils::ssh::ssh_with_timeout(host, &["kuutamoctl", "restart"], true, true)
+        }
+        (false, None, Some(schedule_at)) => utils::ssh::ssh_with_timeout(
             host,
             &[
                 "kuutamoctl",
@@ -403,9 +416,9 @@ fn restart(args: &RestartArgs, config: &Config) -> Result<()> {
                 .context("Failed to parse kuutamoctl version")?;
 
         let output = if VersionReq::parse(">=0.2.0")?.matches(&version) {
-            schedule_restart(host, args.minimum_length, schedule_at)?
+            schedule_restart(host, args.minimum_length, schedule_at, args.cancel)?
         } else {
-            maintenance_shutdown(host, args.minimum_length, schedule_at)?
+            maintenance_shutdown(host, args.minimum_length, schedule_at, args.cancel)?
         };
 
         io::stdout()
