@@ -29,6 +29,10 @@
       ];
       extraConfig = {
         agent.interval = "60s";
+        agent.round_interval = true;
+        agent.metric_batch_size = 10000;
+        agent.collection_offset = "5s";
+        agent.flush_interval = "60s";
         inputs = {
           cpu = {
             tags = {
