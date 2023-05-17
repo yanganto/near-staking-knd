@@ -33,6 +33,7 @@ in
     kuutamo.network.ipv6.gateway = cfg.ipv6_gateway or null;
     kuutamo.network.ipv6.cidr = cfg.ipv6_cidr or 128;
 
+    kuutamo.telegraf.hostname = cfg.ssh_hostname;
     kuutamo.telegraf.hasMonitoring = cfg.telegraf_has_monitoring or false;
     kuutamo.telegraf.configHash = cfg.telegraf_config_hash or "";
     kuutamo.exporter.accountId = cfg.validator_account_id or null;

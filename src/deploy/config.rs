@@ -175,7 +175,7 @@ struct HostConfig {
     #[toml_example(default = "ubuntu")]
     install_ssh_user: Option<String>,
 
-    /// Setup ssh host name
+    /// Setup ssh host name for connection and host label on monitoring dashboard
     #[serde(default)]
     ssh_hostname: Option<String>,
 

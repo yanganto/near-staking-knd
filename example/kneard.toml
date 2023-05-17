@@ -46,7 +46,7 @@ public_ssh_keys = ""
 # Ubuntu did not allow `root` login
 # install_ssh_user = "ubuntu"
 
-# Setup ssh host name
+# Setup ssh host name for connection and host label on monitoring dashboard
 # ssh_hostname = ""
 
 # Validator key will use in the validator node
@@ -74,4 +74,5 @@ public_ssh_keys = ""
 
 # The http basic auth password to access self monitoring server
 # self_monitoring_password = ""
+
 
