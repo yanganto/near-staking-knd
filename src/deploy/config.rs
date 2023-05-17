@@ -649,10 +649,11 @@ async fn validate_host(
             )
             .await
         }
-        _ => {
+        _ if load_keys => {
             eprintln!("auth information for monitoring is insufficient, will not set up monitoring when deploying");
             None
         }
+        _ => None,
     };
 
     let telegraf_has_monitoring = kmonitor_config.is_some();
