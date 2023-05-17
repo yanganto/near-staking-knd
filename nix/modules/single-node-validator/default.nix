@@ -1,4 +1,8 @@
-{ config, lib, self, ... }: {
+{ config, lib, self, pkgs, ... }:
+let
+  inherit (self.packages.${pkgs.hostPlatform.system}) kneard;
+in
+{
   imports = [
     ../network.nix
     ../hardware.nix
@@ -12,7 +16,7 @@
     git_commit_date = "${self.lastModifiedDate}"
   '';
   system.activationScripts.nixos-upgrade = ''
-    ${config.systemd.package}/bin/systemd-run --collect --unit nixos-upgrade echo level=info message="kneard node updated" $(kneard-ctl system-info --inline)
+    ${config.systemd.package}/bin/systemd-run --collect --unit nixos-upgrade echo level=info message="kneard node updated" $(${kneard}/bin/kneard-ctl system-info --inline)
   '';
 
   # we want `kuutamo update` to also restart `kuutamod.service`(for kneard)
