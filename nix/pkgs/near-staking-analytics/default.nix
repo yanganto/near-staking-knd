@@ -1,9 +1,10 @@
-{ near-staking-ui, stdenv, npmlock2nix, nodejs, python3 }:
+{ near-staking-ui, stdenv, npmlock2nix, nodejs, python3, nodejs-18_x }:
 stdenv.mkDerivation rec {
   name = "near-staking-analytics";
   src = near-staking-ui;
   node_modules = npmlock2nix.v2.node_modules {
     src = src + "/backend";
+    nodejs = nodejs-18_x;
     buildInputs = [ python3 ];
     sourceOverrides = {
       buildRequirePatchShebangs = true;
