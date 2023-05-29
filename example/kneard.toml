@@ -1,6 +1,5 @@
 [global]
 # Global configuration affecting all hosts
-
 # Flake url to use as a blue print to build up
 # flake = "github:kuutamolabs/near-staking-knd"
 
@@ -39,7 +38,7 @@ extra_nixos_modules = []
 
 # The ssh public keys of the user
 # After installation the user could login as root with the corresponding ssh private key
-public_ssh_keys = ""
+public_ssh_keys = ["ssh-ed25519 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/xxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxx",]
 
 # Admin user for install,
 # Please use `ubuntu` when you use OVH to install at first time,
