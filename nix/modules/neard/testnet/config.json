@@ -39,6 +39,18 @@
       "nanos": 0
     },
     "blacklist": [],
+    "experimental": {
+      "inbound_disabled": false,
+      "connect_only_to_boot_nodes": false,
+      "skip_sending_tombstones_seconds": 0,
+      "tier1_enable_inbound": true,
+      "tier1_enable_outbound": true,
+      "tier1_connect_interval": {
+        "secs": 60,
+        "nanos": 0
+      },
+      "tier1_new_connections_per_attempt": 50
+    },
     "tier1_enable_outbound": true
   },
   "consensus": {
