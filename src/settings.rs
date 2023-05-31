@@ -99,7 +99,7 @@ pub struct Settings {
     pub control_socket: PathBuf,
 }
 
-fn get_near_key(key: &str, val: &mut PathBuf, credential_filename: &str) -> Result<String> {
+fn get_near_key(val: &mut PathBuf, credential_filename: &str) -> Result<NearKey> {
     if val == Path::new("") {
         // Use systemd's LoadCredential environment variable, if it exits:
         // TODO: replace this with KUUTAMO_NEAR_VALIDATOR_FILE=%d/validator_key.json in systemd's Environment after the next systemd upgrade:
@@ -109,7 +109,7 @@ fn get_near_key(key: &str, val: &mut PathBuf, credential_filename: &str) -> Resu
                 *val = PathBuf::from(v).join(credential_filename);
             }
             None => {
-                bail!("{} option is not set but required", key);
+                bail!("{} option is not set but required", credential_filename);
             }
         }
     };
@@ -120,28 +120,22 @@ fn get_near_key(key: &str, val: &mut PathBuf, credential_filename: &str) -> Resu
 
     let key = NearKey::read_from_file(val).context("failed to read near key")?;
 
-    Ok(key.public_key)
+    Ok(key)
 }
 
 /// Read and returns settings from environment variables and the filesystem
 pub fn parse_settings() -> Result<Settings> {
     let mut settings = Settings::parse();
 
-    get_near_key(
-        "--validator-key",
-        &mut settings.validator_key,
-        "validator_key.json",
-    )?;
-    settings.validator_node_public_key = get_near_key(
-        "--validator-node-key",
-        &mut settings.validator_node_key,
-        "validator_node_key.json",
-    )?;
-    get_near_key(
-        "--voter-node-key",
-        &mut settings.voter_node_key,
-        "voter_node_key.json",
-    )?;
+    settings.account_id = AccountId::try_from(
+        get_near_key(&mut settings.validator_key, "validator_key.json")?.account_id,
+    )
+    .context("account_id of validator_key.json is incorrect")?;
+
+    settings.validator_node_public_key =
+        get_near_key(&mut settings.validator_node_key, "validator_node_key.json")?.public_key;
+
+    get_near_key(&mut settings.voter_node_key, "voter_node_key.json")?;
 
     settings.consul_token = match settings.consul_token_file {
         Some(ref file) => {
