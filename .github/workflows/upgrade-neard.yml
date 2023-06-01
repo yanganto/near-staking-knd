@@ -21,7 +21,7 @@ jobs:
             extra-substituters = https://cache.garnix.io
             extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
       - name: Update neard stable
-        run: nix run .#nix-update -- --override-filename nix/pkgs/neard/stable.nix --version-regex '^(\d+\.\d+\.\d+)$' --flake neard
+        run: nix run .#nix-update -- --override-filename nix/pkgs/neard/patch-stable.nix --version-regex '^(\d+\.\d+\.\d+)$' --flake neard
       - name: Update neard unstable
         run: nix run .#nix-update -- --override-filename nix/pkgs/neard/unstable.nix --version-regex '^(\d+\.\d+\.\d+-rc.\d+)$' --flake --version=unstable neard-unstable
       - name: Create Pull Request
