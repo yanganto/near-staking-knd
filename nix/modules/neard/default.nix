@@ -215,6 +215,11 @@ in
       } // lib.optionalAttrs cfg.enableSolanaKernelTuning {
         LimitNOFILE = "1000000";
       };
+
+      unitConfig = {
+        # try restarting the unit forever
+        StartLimitIntervalSec = 0;
+      };
     };
   };
 }

@@ -141,6 +141,7 @@ in
 
       inherit (config.systemd.services.neard) path;
 
+      inherit (config.systemd.services.neard) unitConfig;
       serviceConfig =
         config.systemd.services.neard.serviceConfig
         // {
