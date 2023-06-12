@@ -30,7 +30,7 @@ zip = { version = "0.6.6", default-features = false, features = ["aes-crypto", "
 # FIXME use github version for toml support
 format_serde_error = { version = "0.3.0", features = [ "colored", "serde_json" ], default-features = false, git = "https://github.com/AlexanderThaller/format_serde_error" }
 semver = "1.0.17"
-url = { version = "2.0", features = ["serde"] }
+url = { version = "2.4", features = ["serde"] }
 base64 = "0.21.2"
 
 [[bin]]
