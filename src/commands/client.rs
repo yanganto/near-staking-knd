@@ -52,7 +52,7 @@ impl CommandClient {
         parse_response(res).await.context("cannot parse validator")
     }
 
-    /// Initiatiate or cancel the schedule of restart
+    /// Initiate or cancel the schedule of restart
     pub async fn schedule_restart(
         &self,
         minimum_length: Option<u64>,

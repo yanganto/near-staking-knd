@@ -1,6 +1,7 @@
 [default.extend-words]
 arbitor = "arbitor"
 substituters = "substituters"
+inh = "inh"
 
 [files]
 # ignore files with secret keys
