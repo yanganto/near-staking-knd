@@ -25,7 +25,7 @@ impl<'a> ScopedConsulSession<'a> {
     /// Consumes and deletes consul session,
     /// We used to have this in `Drop` but we cannot do async stuff in their easily
     pub async fn destroy(self) {
-        let mut wait = 1;
+        let mut wait = 1000;
         let total_wait = Instant::now();
         // 1 + 2 + 4 + 5 + 5 + 5 + 5 == ~27s
         for _ in 0..7 {
@@ -43,7 +43,7 @@ impl<'a> ScopedConsulSession<'a> {
             );
             tokio::time::sleep(Duration::from_millis(wait)).await;
             // expontential backoff, capped at 5s
-            wait = std::cmp::max(wait * 2, 5000);
+            wait = std::cmp::min(wait * 2, 5000);
         }
     }
 }
