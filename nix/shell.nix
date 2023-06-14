@@ -48,6 +48,7 @@
             pkgs.cargo-watch
             pkgs.clippy
             pkgs.mold
+            pkgs.rust-analyzer
 
             # kneard deps
             self'.packages.neard
