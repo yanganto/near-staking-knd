@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v21
+      - uses: cachix/install-nix-action@v22
       # We cannot build this in garnix since garnix has a sandbox enabled.
       - name: Nix build
         run: nix build .#near-cli
