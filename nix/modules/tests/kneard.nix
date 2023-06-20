@@ -20,7 +20,7 @@ import ./lib.nix ({ self, ... }: {
 
     kuutamo.kneard.validatorKeyFile = ./validator_key.json;
 
-    virtualisation.memorySize = 1024;
+    virtualisation.memorySize = 1536;
     kuutamo.kneard.validatorNodeKeyFile = ./node_key.json;
   };
 
