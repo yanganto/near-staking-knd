@@ -22,7 +22,7 @@
       ];
     };
     services.consul.extraConfig.bootstrap_expect = 1;
-    virtualisation.memorySize = 1024;
+    virtualisation.memorySize = 1536;
 
     kuutamo.kneard.validatorKeyFile = ./validator_key.json;
     kuutamo.kneard.validatorNodeKeyFile = ./node_key.json;
