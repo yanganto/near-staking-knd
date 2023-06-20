@@ -1,6 +1,6 @@
+//! utils for execution via ssh
 use crate::deploy::command::status_to_pretty_err;
 use crate::deploy::Host;
-///! utils for execution via ssh
 use anyhow::{Context, Result};
 use std::process::{Command, Output};
 

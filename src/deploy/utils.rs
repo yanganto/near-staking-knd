@@ -1,5 +1,5 @@
+//! utils for deploy and control remote machines
 use crate::utils::ssh::{ssh_with_timeout, ssh_with_timeout_async};
-///! utils for deploy and control remote machines
 use anyhow::{anyhow, Context, Result};
 use semver::{Version, VersionReq};
 use std::process::Output;
