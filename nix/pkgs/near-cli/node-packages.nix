@@ -2011,13 +2011,13 @@ let
         sha512 = "b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==";
       };
     };
-    "semver-7.5.2" = {
+    "semver-7.5.3" = {
       name = "semver";
       packageName = "semver";
-      version = "7.5.2";
+      version = "7.5.3";
       src = fetchurl {
-        url = "https://registry.npmjs.org/semver/-/semver-7.5.2.tgz";
-        sha512 = "SoftuTROv/cRjCze/scjGyiDtcUyxw1rgYQSZY7XTmtR5hX+dm76iDbTH8TkLPHCQmlbQVSSbNZCPM2hb0knnQ==";
+        url = "https://registry.npmjs.org/semver/-/semver-7.5.3.tgz";
+        sha512 = "QBlUtyVk/5EeHbi7X0fw6liDZc7BBmEaSYn01fMU1OUYbf6GPsbTtd8WmnqbI20SeycoHSeiybkE/q1Q+qlThQ==";
       };
     };
     "semver-diff-3.1.1" = {
@@ -2753,7 +2753,7 @@ in
       sources."rxjs-6.6.7"
       sources."safe-buffer-5.2.1"
       sources."safer-buffer-2.1.2"
-      sources."semver-7.5.2"
+      sources."semver-7.5.3"
       (sources."semver-diff-3.1.1" // {
         dependencies = [
           sources."semver-6.3.0"
