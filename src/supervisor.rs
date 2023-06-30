@@ -371,7 +371,7 @@ async fn handle_request(
                         );
                     };
                 }
-                SHUTDOWN_WITH_NEARD.store(false, Ordering::Release);
+                SHUTDOWN_WITH_NEARD.store(false, Ordering::SeqCst);
                 None
             } else if let Some(pid) = validator_pid {
                 let res = schedule_maintenance_shutdown(
@@ -390,7 +390,7 @@ async fn handle_request(
                 {
                     warn!("Failed to respond to ipc request for setting up maintenance restart on active node: {}", e);
                 };
-                SHUTDOWN_WITH_NEARD.store(true, Ordering::Release);
+                SHUTDOWN_WITH_NEARD.store(true, Ordering::SeqCst);
                 None
             } else {
                 if let Err(e) = resp_chan
@@ -628,7 +628,7 @@ impl StateMachine {
             tokio::select! {
                 res = validator.process().wait() => {
                     let state = match res {
-                        Ok(_) if SHUTDOWN_WITH_NEARD.load(Ordering::Acquire) => { // maintenance shutdown
+                        Ok(_) if SHUTDOWN_WITH_NEARD.load(Ordering::SeqCst) => { // maintenance shutdown
                             StateType::Shutdown
                         },
                         Ok(res) => { // maintenance restart

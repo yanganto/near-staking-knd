@@ -193,7 +193,7 @@ impl CommandServer {
                     .and_then(|s| s.parse::<u64>().ok())
             }),
             final_block,
-            SHUTDOWN_WITH_NEARD.load(Ordering::Acquire),
+            SHUTDOWN_WITH_NEARD.load(Ordering::SeqCst),
         ) {
             (Some(expect), Ok(current), true) if expect > 0 => Response::new(Body::from(format!(
                 "{{\"status\": 200, \"message\": \"maintenance shutdown in {} blocks, current: {current:}, shutdown at: {expect}\"}}",
