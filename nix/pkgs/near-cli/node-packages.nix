@@ -1705,13 +1705,13 @@ let
         sha512 = "73sE9+3UaLYYFmDsFZnqCInzPyh3MqIwZO9cw58yIqAZhONrrabrYyYe3TuIqtIiOuTXVhsGau8hcrhhwSsDIQ==";
       };
     };
-    "node-fetch-2.6.11" = {
+    "node-fetch-2.6.12" = {
       name = "node-fetch";
       packageName = "node-fetch";
-      version = "2.6.11";
+      version = "2.6.12";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.11.tgz";
-        sha512 = "4I6pdBY1EthSqDmJkiNk3JIT8cswwR9nfeW/cPdUagJYEQG7R95WRH74wpz7ma8Gh/9dI9FP+OU+0E4FvtA55w==";
+        url = "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.12.tgz";
+        sha512 = "C/fGU2E8ToujUivIO0H+tpQ6HWo4eEmchoPIoXtxCrVghxdKq+QOHqEZW7tuP3KlV3bC8FRMO5nMCC7Zm1VP6g==";
       };
     };
     "node-gyp-build-4.6.0" = {
@@ -2708,7 +2708,7 @@ in
       sources."near-seed-phrase-0.2.0"
       sources."node-abi-3.45.0"
       sources."node-addon-api-3.2.1"
-      sources."node-fetch-2.6.11"
+      sources."node-fetch-2.6.12"
       sources."node-gyp-build-4.6.0"
       sources."node-hid-2.1.2"
       sources."normalize-url-4.5.1"
