@@ -33,6 +33,9 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [
+      pkgs.mongodb-tools
+    ];
     systemd.services.near-staking-analytics = {
       wantedBy = [ "multi-user.target" ];
       environment = {
