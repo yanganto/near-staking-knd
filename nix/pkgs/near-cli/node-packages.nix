@@ -112,13 +112,13 @@ let
         sha512 = "xmw5RhYbqExBBqTvOnOjN/RYNIGMBxFJ+zcYNfkfw/E+uEY3L7xq8Z7sC/n7URTT6xtEctElqduBJnBQE4OQtw==";
       };
     };
-    "@ledgerhq/hw-transport-node-hid-6.27.16" = {
+    "@ledgerhq/hw-transport-node-hid-6.27.17" = {
       name = "_at_ledgerhq_slash_hw-transport-node-hid";
       packageName = "@ledgerhq/hw-transport-node-hid";
-      version = "6.27.16";
+      version = "6.27.17";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-6.27.16.tgz";
-        sha512 = "V/SA8G5qH+Lbl/bO11GAZKIWCgTfLRWe18gibLXFAdqFeQn8FxRoJTATJaYhWEWsU1T9NPvCfje3EWDUoXnmKg==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-6.27.17.tgz";
+        sha512 = "yoK3NDuk6uqIrxEgClKUGi9rcYcybwpZMo1n91FGAK8s8veDS/AfQRjeQG8sFjOEaHMijFluMvaCikvQP1NbsQ==";
       };
     };
     "@ledgerhq/hw-transport-node-hid-noevents-6.27.16" = {
@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-20.3.3" = {
+    "@types/node-20.4.0" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "20.3.3";
+      version = "20.4.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-20.3.3.tgz";
-        sha512 = "wheIYdr4NYML61AjC8MKj/2jrR/kDQri/CIpVoZwldwhnIrD/j9jIU5bJ8yBKuB2VhpFV7Ab6G2XkBjv9r9Zzw==";
+        url = "https://registry.npmjs.org/@types/node/-/node-20.4.0.tgz";
+        sha512 = "jfT7iTf/4kOQ9S7CHV9BIyRaQqHu67mOjsIQBC3BKZvzvUB6zLxEwJ6sBE3ozcvP8kF6Uk5PXN0Q+c0dfhGX0g==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -272,6 +272,15 @@ let
       src = fetchurl {
         url = "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.1.tgz";
         sha512 = "Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==";
+      };
+    };
+    "@types/w3c-web-usb-1.0.6" = {
+      name = "_at_types_slash_w3c-web-usb";
+      packageName = "@types/w3c-web-usb";
+      version = "1.0.6";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@types/w3c-web-usb/-/w3c-web-usb-1.0.6.tgz";
+        sha512 = "cSjhgrr8g4KbPnnijAr/KJDNKa/bBa+ixYkywFRvrhvi9n1WEl7yYbtRyzE6jqNQiSxxJxoAW3STaOQwJHndaw==";
       };
     };
     "@types/yargs-16.0.5" = {
@@ -1696,13 +1705,13 @@ let
         sha512 = "mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==";
       };
     };
-    "node-addon-api-4.3.0" = {
+    "node-addon-api-6.1.0" = {
       name = "node-addon-api";
       packageName = "node-addon-api";
-      version = "4.3.0";
+      version = "6.1.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-addon-api/-/node-addon-api-4.3.0.tgz";
-        sha512 = "73sE9+3UaLYYFmDsFZnqCInzPyh3MqIwZO9cw58yIqAZhONrrabrYyYe3TuIqtIiOuTXVhsGau8hcrhhwSsDIQ==";
+        url = "https://registry.npmjs.org/node-addon-api/-/node-addon-api-6.1.0.tgz";
+        sha512 = "+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA==";
       };
     };
     "node-fetch-2.6.12" = {
@@ -2335,13 +2344,13 @@ let
         sha512 = "NjFKA0DidqPa5ciFcSrXnAltTtzz84ogy+NebPvfEgAck0+TNg4UJ4IN+fB7zRZfbgUf0syOo9MDxFkDSMuFaQ==";
       };
     };
-    "usb-1.9.2" = {
+    "usb-2.9.0" = {
       name = "usb";
       packageName = "usb";
-      version = "1.9.2";
+      version = "2.9.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/usb/-/usb-1.9.2.tgz";
-        sha512 = "dryNz030LWBPAf6gj8vyq0Iev3vPbCLHCT8dBw3gQRXRzVNsIdeuU+VjPp3ksmSPkeMAl1k+kQ14Ij0QHyeiAg==";
+        url = "https://registry.npmjs.org/usb/-/usb-2.9.0.tgz";
+        sha512 = "G0I/fPgfHUzWH8xo2KkDxTTFruUWfppgSFJ+bQxz/kVY2x15EQ/XDB7dqD1G432G4gBG4jYQuF3U7j/orSs5nw==";
       };
     };
     "util-deprecate-1.0.2" = {
@@ -2500,7 +2509,7 @@ in
       sources."@ledgerhq/devices-8.0.4"
       sources."@ledgerhq/errors-6.12.7"
       sources."@ledgerhq/hw-transport-6.28.5"
-      sources."@ledgerhq/hw-transport-node-hid-6.27.16"
+      sources."@ledgerhq/hw-transport-node-hid-6.27.17"
       sources."@ledgerhq/hw-transport-node-hid-noevents-6.27.16"
       (sources."@ledgerhq/hw-transport-u2f-5.36.0-deprecated" // {
         dependencies = [
@@ -2535,8 +2544,9 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-20.3.3"
+      sources."@types/node-20.4.0"
       sources."@types/stack-utils-2.0.1"
+      sources."@types/w3c-web-usb-1.0.6"
       sources."@types/yargs-16.0.5"
       sources."@types/yargs-parser-21.0.0"
       sources."analytics-node-6.2.0"
@@ -2801,9 +2811,9 @@ in
       sources."unique-string-2.0.0"
       sources."update-notifier-5.1.0"
       sources."url-parse-lax-3.0.0"
-      (sources."usb-1.9.2" // {
+      (sources."usb-2.9.0" // {
         dependencies = [
-          sources."node-addon-api-4.3.0"
+          sources."node-addon-api-6.1.0"
         ];
       })
       sources."util-deprecate-1.0.2"
