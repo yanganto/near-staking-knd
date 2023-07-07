@@ -10,6 +10,9 @@
   kuutamo.disko.disks = lib.mkDefault [ "/dev/nvme0n1" "/dev/nvme1n1" "/dev/nvme2n1" "/dev/nvme0n1" ];
 
   services.mongodb.enable = true;
-  kuutamo.near-staking-analytics.enable = true;
+  kuutamo.near-staking-analytics = {
+    enable = true;
+    backupLocation = "/root/backup";
+  };
   networking.firewall.allowedTCPPorts = [ 8080 ];
 }

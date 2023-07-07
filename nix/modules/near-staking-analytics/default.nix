@@ -30,6 +30,11 @@ in
       type = lib.types.nullOr lib.types.str;
       default = null;
     };
+
+    backupLocation = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -63,6 +68,17 @@ in
         StateDirectory = "near-staking-analytics";
       };
     };
+
+    systemd.services.backup-mongodb = lib.mkIf (cfg.backupLocation != null) {
+      startAt = "daily";
+      serviceConfig = {
+        ExecStart = pkgs.writeShellScript "backup-mongodb" ''
+          mkdir -p ${cfg.backupLocation}
+          ${pkgs.mongodb-tools}/bin/mongodump --uri ${cfg.mongodb} --archive | gzip > ${cfg.backupLocation}/$(date +%Y-%m-%d).gz
+        '';
+      };
+    };
+
     services.nginx = lib.mkIf (cfg.domain != null) {
       enable = true;
       virtualHosts.${cfg.domain} = {
