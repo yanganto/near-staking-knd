@@ -86,7 +86,6 @@
           inputs.disko.nixosModules.disko
         ];
         kuutamo.near-staking-analytics.package = self.packages.${pkgs.stdenv.hostPlatform.system}.near-staking-analytics;
-        nixpkgs.config.allowUnfree = true;
       };
 
       single-node-archiver-mainnet = {
