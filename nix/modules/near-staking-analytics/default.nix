@@ -72,10 +72,12 @@ in
     systemd.services.backup-mongodb = lib.mkIf (cfg.backupLocation != null) {
       startAt = "daily";
       serviceConfig = {
-        ExecStart = pkgs.writeShellScript "backup-mongodb" ''
+        ExecStart = pkgs.writeShellScript "backup-mongodb" (if (lib.hasPrefix "s3://" cfg.backupLocation) then ''
+          ${pkgs.mongodb-tools}/bin/mongodump --uri ${cfg.mongodb} --archive | ${pkgs.awscli2}/bin/aws s3 cp - ${cfg.backupLocation}
+        '' else ''
           mkdir -p ${cfg.backupLocation}
           ${pkgs.mongodb-tools}/bin/mongodump --uri ${cfg.mongodb} --archive | gzip > ${cfg.backupLocation}/$(date +%Y-%m-%d).gz
-        '';
+        '');
       };
     };
 
