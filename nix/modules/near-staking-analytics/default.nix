@@ -73,6 +73,9 @@ in
       startAt = "daily";
       serviceConfig = {
         ExecStart = pkgs.writeShellScript "backup-mongodb" (if (lib.hasPrefix "s3://" cfg.backupLocation) then ''
+          # to restore the s3 backup run:
+          #  aws s3 cp ${cfg.backupLocation} /tmp/mongo.bson
+          #  ${pkgs.mongodb-tools}/bin/mongorestore ${cfg.mongodb} /tmp/mongo.bson
           ${pkgs.mongodb-tools}/bin/mongodump --uri ${cfg.mongodb} --archive | ${pkgs.awscli2}/bin/aws s3 cp - ${cfg.backupLocation}
         '' else ''
           mkdir -p ${cfg.backupLocation}
