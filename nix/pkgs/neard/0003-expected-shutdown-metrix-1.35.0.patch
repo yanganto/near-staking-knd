@@ -1,5 +1,5 @@
 diff --git a/nearcore/src/dyn_config.rs b/nearcore/src/dyn_config.rs
-index c4016db71..2758dd7a5 100644
+index 4a9814231..f44cfda58 100644
 --- a/nearcore/src/dyn_config.rs
 +++ b/nearcore/src/dyn_config.rs
 @@ -45,6 +45,7 @@ pub fn read_updateable_configs(
@@ -11,16 +11,16 @@ index c4016db71..2758dd7a5 100644
  }
  
 diff --git a/nearcore/src/metrics.rs b/nearcore/src/metrics.rs
-index 105397d11..8bd68d09a 100644
+index bfadbe9c6..e0db5ad14 100644
 --- a/nearcore/src/metrics.rs
 +++ b/nearcore/src/metrics.rs
-@@ -44,3 +44,9 @@ pub(crate) static COLD_STORE_COPY_RESULT: Lazy<IntCounterVec> = Lazy::new(|| {
-     )
-     .unwrap()
- });
+@@ -99,3 +99,9 @@ pub(crate) static STATE_SYNC_OBTAIN_PART_DELAY: Lazy<near_o11y::metrics::Histogr
+         )
+         .unwrap()
+     });
 +
-+/// An indicate for expected shutdown
 +pub(crate) static EXPECTED_SHUTDOWN_BLOCK: Lazy<IntGauge> = Lazy::new(|| {
 +    try_create_int_gauge("near_block_expected_shutdown", "The block height expected shutdown")
 +    .unwrap()
 +});
++

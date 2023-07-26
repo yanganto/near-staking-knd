@@ -2,7 +2,7 @@
 let
   generic = pkgs.callPackage ./generic.nix { };
   toolchainFile = ./stable-rust-toolchain.toml;
-  toolchainChecksum = "sha256-4vetmUhTUsew5FODnjlnQYInzyLNyDwocGa4IvMk3DM=";
+  toolchainChecksum = "sha256-eMJethw5ZLrJHmoN2/l0bIyQjoTX1NsvalWSscTixpI=";
 
   toolchain = fromToolchainFile {
     file = ./stable-rust-toolchain.toml;
@@ -10,8 +10,10 @@ let
   };
 in
 generic {
-  ver = "1.34.0";
-  sha256 = "sha256-9o6WjqmqDKl9VPpmVeANRo9U78xp71NuEs7Lp4c51KY=";
-  cargoSha256 = "sha256-MwSg8CNrcQ3I0DBCQbiUjYDYFMKjR7Ssd3kJ7kan4/w=";
+  ver = "1.35.0";
+  sha256 = "sha256-uYyaj/VjBJjt+svQG8tkTPeBtBz5vO9ZgOryHrVI/40=";
+  cargoSha256 = "sha256-sp6NI9nkrZzHOiuPpuhTp19/CDL/+oSPLSEYbJZc7xI=";
+  owner = "kuutamolabs";
+  rev = "cb16ee2";
   inherit toolchainFile toolchainChecksum toolchain neardPatches revisionNumber;
 }

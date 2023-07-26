@@ -10,7 +10,7 @@
 , darwin
 , makeRustPlatform
 }:
-{ ver, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile, toolchainChecksum, neardPatches ? [ ], revisionNumber ? null }:
+{ ver, rev ? null, sha256, cargoSha256, cargoBuildFlags ? [ ], toolchain, toolchainFile, toolchainChecksum, neardPatches ? [ ], revisionNumber ? null, owner ? "near" }:
 let
   rustPlatform = makeRustPlatform {
     cargo = toolchain;
@@ -29,10 +29,10 @@ rustPlatform.buildRustPackage rec {
 
   # https://github.com/near/nearcore/tags
   src = fetchFromGitHub {
-    owner = "near";
+    inherit owner;
     repo = "nearcore";
     # there is also a branch for this version number, so we need to be explicit
-    rev = "refs/tags/${version}";
+    rev = if rev == null then "refs/tags/${version}" else rev;
     inherit sha256;
   };
 
@@ -44,24 +44,18 @@ rustPlatform.buildRustPackage rec {
     # Remove test dependency on contract
     # Since we are not building tests, we can skip those.
     (
-      lib.optional (lib.versionOlder version "1.35.0") (
-        ./0001-rm-near-test-contracts-1.34.patch
+      lib.optional (version == "1.35.0-rc.1") (
+        ./0001-rm-near-test-contracts-1.35.0-rc.1.patch
       )
     )
     (
-      lib.optional (lib.versionAtLeast version "1.35.0") (
-        ./0001-rm-near-test-contracts-1.35.patch
-      )
-    )
-    ./0002-rocksdb-max-open.patch
-    (
-      lib.optional (lib.versionOlder version "1.34.0") (
-        ./0003-expected-shutdown-metrix.patch
+      lib.optional (version == "1.35.0-rc.1") (
+        ./0002-rocksdb-max-open.patch
       )
     )
     (
-      lib.optional (lib.versionAtLeast version "1.34.0") (
-        ./0003-expected-shutdown-metrix-1.34.patch
+      lib.optional (version == "1.35.0-rc.1") (
+        ./0003-expected-shutdown-metrix-1.35.0-rc.1.patch
       )
     )
   ];
