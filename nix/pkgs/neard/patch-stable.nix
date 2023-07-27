@@ -11,9 +11,9 @@ let
 in
 generic {
   ver = "1.35.0";
-  sha256 = "sha256-uYyaj/VjBJjt+svQG8tkTPeBtBz5vO9ZgOryHrVI/40=";
-  cargoSha256 = "sha256-sp6NI9nkrZzHOiuPpuhTp19/CDL/+oSPLSEYbJZc7xI=";
+  sha256 = "sha256-0pRgqtm4a3FW7ww2wFZa6rAQj26JF/YsNHIvwgg4LZU=";
+  cargoSha256 = "sha256-EW52V5TZR4qi/6Q0ML16kTG1qecWQTV0CHyhPIgQiho=";
   owner = "kuutamolabs";
-  rev = "cb16ee2";
+  rev = "0544fd1";
   inherit toolchainFile toolchainChecksum toolchain neardPatches revisionNumber;
 }
