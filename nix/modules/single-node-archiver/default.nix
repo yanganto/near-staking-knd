@@ -13,6 +13,7 @@
     enable = true;
     package = pkgs.mongodb.overrideAttrs (_: {
       meta = { };
+      hardeningDisable = [ "fortify3" ];
     });
   };
   kuutamo.near-staking-analytics = {
