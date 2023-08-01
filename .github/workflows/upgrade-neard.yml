@@ -23,11 +23,11 @@ jobs:
       - name: Update neard stable
         run: |
           # somehow github's atom feed returns garbage now for this repository
-          version=$(curl --header "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/near/nearcore/releases/latest | jq -r .tag_name)
+          version=$(curl --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/near/nearcore/releases/latest | jq -r .tag_name)
           nix run .#nix-update -- --override-filename nix/pkgs/neard/patch-stable.nix --version "$version" --flake neard
       - name: Update neard unstable
         run: |
-          version=$(curl --header "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/near/nearcore/releases | jq -r '[.[] | select(.prerelease)][0].tag_name')
+          version=$(curl --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/near/nearcore/releases | jq -r '[.[] | select(.prerelease)][0].tag_name')
           nix run .#nix-update -- --override-filename nix/pkgs/neard/unstable.nix --version "$version" --flake --version=unstable neard-unstable
       - name: Create Pull Request
         id: cpr
