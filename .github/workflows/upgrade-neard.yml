@@ -28,7 +28,7 @@ jobs:
       - name: Update neard unstable
         run: |
           version=$(curl --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/near/nearcore/releases | jq -r '[.[] | select(.prerelease)][0].tag_name')
-          nix run .#nix-update -- --override-filename nix/pkgs/neard/unstable.nix --version "$version" --flake --version=unstable neard-unstable
+          nix run .#nix-update -- --override-filename nix/pkgs/neard/unstable.nix --version "$version" --flake neard-unstable
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v5
