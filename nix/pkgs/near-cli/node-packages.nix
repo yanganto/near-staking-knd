@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-20.4.5" = {
+    "@types/node-20.4.6" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "20.4.5";
+      version = "20.4.6";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-20.4.5.tgz";
-        sha512 = "rt40Nk13II9JwQBdeYqmbn2Q6IVTA5uPhvSO+JVqdXw/6/4glI6oR9ezty/A9Hg5u7JH4OmYmuQ+XvjKm0Datg==";
+        url = "https://registry.npmjs.org/@types/node/-/node-20.4.6.tgz";
+        sha512 = "q0RkvNgMweWWIvSMDiXhflGUKMdIxBo2M2tYM/0kEGDueQByFzK4KZAgu5YHGFNxziTlppNpTIBcqHQAxlfHdA==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -2544,7 +2544,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-20.4.5"
+      sources."@types/node-20.4.6"
       sources."@types/stack-utils-2.0.1"
       sources."@types/w3c-web-usb-1.0.6"
       sources."@types/yargs-16.0.5"
