@@ -67,13 +67,13 @@ let
         sha512 = "4w+P0VkbjzEXC7kv8T1GJ/9AVaP9I6uasMZ/JcdwZBS3qwvKo5A5z9uGhP5c7TvItzcmPb44b5Mw2kT+WjUuAA==";
       };
     };
-    "@ledgerhq/devices-8.0.6" = {
+    "@ledgerhq/devices-8.0.7" = {
       name = "_at_ledgerhq_slash_devices";
       packageName = "@ledgerhq/devices";
-      version = "8.0.6";
+      version = "8.0.7";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/devices/-/devices-8.0.6.tgz";
-        sha512 = "KWA68krUD9pFp6bJAhTe2nurhku4HnS5LwtHnCXg8PB0DbzWt27PTKgVOCKO7TEdJ3wu4eVcgP5RQrap22pQHQ==";
+        url = "https://registry.npmjs.org/@ledgerhq/devices/-/devices-8.0.7.tgz";
+        sha512 = "BbPyET52lXnVs7CxJWrGYqmtGdbGzj+XnfCqLsDnA7QYr1CZREysxmie+Rr6BKpNDBRVesAovXjtaVaZOn+upw==";
       };
     };
     "@ledgerhq/errors-5.50.0" = {
@@ -85,13 +85,13 @@ let
         sha512 = "gu6aJ/BHuRlpU7kgVpy2vcYk6atjB4iauP2ymF7Gk0ez0Y/6VSMVSJvubeEQN+IV60+OBK0JgeIZG7OiHaw8ow==";
       };
     };
-    "@ledgerhq/errors-6.13.1" = {
+    "@ledgerhq/errors-6.14.0" = {
       name = "_at_ledgerhq_slash_errors";
       packageName = "@ledgerhq/errors";
-      version = "6.13.1";
+      version = "6.14.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/errors/-/errors-6.13.1.tgz";
-        sha512 = "y5qOFiX7ILACF7GvCAB67S5nCABEP5rm8lxK66qKIBRApcLlTplbjUACDRfKQbAIwf0SJPuR31rtTKB92ykwKQ==";
+        url = "https://registry.npmjs.org/@ledgerhq/errors/-/errors-6.14.0.tgz";
+        sha512 = "ZWJw2Ti6Dq1Ott/+qYqJdDWeZm16qI3VNG5rFlb0TQ3UcAyLIQZbnnzzdcVVwVeZiEp66WIpINd/pBdqsHVyOA==";
       };
     };
     "@ledgerhq/hw-transport-5.51.1" = {
@@ -103,31 +103,31 @@ let
         sha512 = "6wDYdbWrw9VwHIcoDnqWBaDFyviyjZWv6H9vz9Vyhe4Qd7TIFmbTl/eWs6hZvtZBza9K8y7zD8ChHwRI4s9tSw==";
       };
     };
-    "@ledgerhq/hw-transport-6.28.7" = {
+    "@ledgerhq/hw-transport-6.28.8" = {
       name = "_at_ledgerhq_slash_hw-transport";
       packageName = "@ledgerhq/hw-transport";
-      version = "6.28.7";
+      version = "6.28.8";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.28.7.tgz";
-        sha512 = "P6XWv/Blb3AvzNH/33ouqFvsUwjCsQN5iMTLuVJqxVKwj91QmdYZfYR9U9FB0gBKrIQ7BONUgTX/ko9EnDV6/g==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.28.8.tgz";
+        sha512 = "XxQVl4htd018u/M66r0iu5nlHi+J6QfdPsORzDF6N39jaz+tMqItb7tUlXM/isggcuS5lc7GJo7NOuJ8rvHZaQ==";
       };
     };
-    "@ledgerhq/hw-transport-node-hid-6.27.20" = {
+    "@ledgerhq/hw-transport-node-hid-6.27.21" = {
       name = "_at_ledgerhq_slash_hw-transport-node-hid";
       packageName = "@ledgerhq/hw-transport-node-hid";
-      version = "6.27.20";
+      version = "6.27.21";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-6.27.20.tgz";
-        sha512 = "0uwngV37xxfkAcvXTrcJ2u6Rz/iswcDempY8LWVYJ8Vyh0nlNFmMenVAxeErBF+BPE9GqSxE9lQFsuBuDgfCOQ==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-6.27.21.tgz";
+        sha512 = "8G3Owpa2ex+TkGQSMkKoAbMEGZ7a23g0wZUvVzalQphMqbayebMhuXxue8iPp7F9pulm7uyLxgMYptYyw5i4yQ==";
       };
     };
-    "@ledgerhq/hw-transport-node-hid-noevents-6.27.18" = {
+    "@ledgerhq/hw-transport-node-hid-noevents-6.27.19" = {
       name = "_at_ledgerhq_slash_hw-transport-node-hid-noevents";
       packageName = "@ledgerhq/hw-transport-node-hid-noevents";
-      version = "6.27.18";
+      version = "6.27.19";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.27.18.tgz";
-        sha512 = "duVDQUzjdZ+BmKnp68XHxd3/osB7OeYVIMc/uYmk7InPsHUexpEPuyGBQMGPZlvJ/N6YpArEWJHzcxbcXoCZ2A==";
+        url = "https://registry.npmjs.org/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.27.19.tgz";
+        sha512 = "zOIB1fBiQH9ZYFzoEpNY4n1lE7bGPgRT+k85fKuLM7cxxm5Sy+TgrdxImvBz0IQUS8EvrtZCm+dVWkb2sH/6OA==";
       };
     };
     "@ledgerhq/hw-transport-u2f-5.36.0-deprecated" = {
@@ -1687,13 +1687,13 @@ let
         sha512 = "NpmrnejpY1AdlRpDZ0schJQJtfBaoUheRfiYtQpcq9TkwPgqKZCRULV5L3hHmLc0ep7KRtikbPQ9R2ztN/3cyQ==";
       };
     };
-    "node-abi-3.46.0" = {
+    "node-abi-3.47.0" = {
       name = "node-abi";
       packageName = "node-abi";
-      version = "3.46.0";
+      version = "3.47.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.46.0.tgz";
-        sha512 = "LXvP3AqTIrtvH/jllXjkNVbYifpRbt9ThTtymSMSuHmhugQLAWr99QQFTm+ZRht9ziUvdGOgB+esme1C6iE6Lg==";
+        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.47.0.tgz";
+        sha512 = "2s6B2CWZM//kPgwnuI0KrYwNjfdByE25zvAaEpq9IH4zcNsarH8Ihu/UuX6XMPEogDAxkuUFeZn60pXNHAqn3A==";
       };
     };
     "node-addon-api-3.2.1" = {
@@ -2515,11 +2515,11 @@ in
       sources."@jest/environment-27.5.1"
       sources."@jest/fake-timers-27.5.1"
       sources."@jest/types-27.5.1"
-      sources."@ledgerhq/devices-8.0.6"
-      sources."@ledgerhq/errors-6.13.1"
-      sources."@ledgerhq/hw-transport-6.28.7"
-      sources."@ledgerhq/hw-transport-node-hid-6.27.20"
-      sources."@ledgerhq/hw-transport-node-hid-noevents-6.27.18"
+      sources."@ledgerhq/devices-8.0.7"
+      sources."@ledgerhq/errors-6.14.0"
+      sources."@ledgerhq/hw-transport-6.28.8"
+      sources."@ledgerhq/hw-transport-node-hid-6.27.21"
+      sources."@ledgerhq/hw-transport-node-hid-noevents-6.27.19"
       (sources."@ledgerhq/hw-transport-u2f-5.36.0-deprecated" // {
         dependencies = [
           sources."@ledgerhq/devices-5.51.1"
@@ -2725,7 +2725,7 @@ in
       sources."near-hd-key-1.2.1"
       sources."near-ledger-js-0.2.1"
       sources."near-seed-phrase-0.2.0"
-      sources."node-abi-3.46.0"
+      sources."node-abi-3.47.0"
       sources."node-addon-api-3.2.1"
       sources."node-fetch-2.6.12"
       sources."node-gyp-build-4.6.0"
