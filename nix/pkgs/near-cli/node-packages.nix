@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-20.5.0" = {
+    "@types/node-20.5.1" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "20.5.0";
+      version = "20.5.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-20.5.0.tgz";
-        sha512 = "Mgq7eCtoTjT89FqNoTzzXg2XvCi5VMhRV6+I2aYanc6kQCBImeNaAYRs/DyoVqk1YEUJK5gN9VO7HRIdz4Wo3Q==";
+        url = "https://registry.npmjs.org/@types/node/-/node-20.5.1.tgz";
+        sha512 = "4tT2UrL5LBqDwoed9wZ6N3umC4Yhz3W3FloMmiiG4JwmUJWpie0c7lcnUNd4gtMKuDEO4wRVS8B6Xa0uMRsMKg==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -1714,13 +1714,13 @@ let
         sha512 = "+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA==";
       };
     };
-    "node-fetch-2.6.12" = {
+    "node-fetch-2.6.13" = {
       name = "node-fetch";
       packageName = "node-fetch";
-      version = "2.6.12";
+      version = "2.6.13";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.12.tgz";
-        sha512 = "C/fGU2E8ToujUivIO0H+tpQ6HWo4eEmchoPIoXtxCrVghxdKq+QOHqEZW7tuP3KlV3bC8FRMO5nMCC7Zm1VP6g==";
+        url = "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.13.tgz";
+        sha512 = "StxNAxh15zr77QvvkmveSQ8uCQ4+v5FkvNTj0OESmiHu+VRi/gXArXtkWMElOsOUNLtUEvI4yS+rdtOHZTwlQA==";
       };
     };
     "node-gyp-build-4.6.0" = {
@@ -2553,7 +2553,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-20.5.0"
+      sources."@types/node-20.5.1"
       sources."@types/stack-utils-2.0.1"
       sources."@types/w3c-web-usb-1.0.6"
       sources."@types/yargs-16.0.5"
@@ -2727,7 +2727,7 @@ in
       sources."near-seed-phrase-0.2.0"
       sources."node-abi-3.47.0"
       sources."node-addon-api-3.2.1"
-      sources."node-fetch-2.6.12"
+      sources."node-fetch-2.6.13"
       sources."node-gyp-build-4.6.0"
       sources."node-hid-2.1.2"
       sources."normalize-url-4.5.1"
