@@ -4,13 +4,13 @@
 
 let
   sources = {
-    "@babel/code-frame-7.22.10" = {
+    "@babel/code-frame-7.22.13" = {
       name = "_at_babel_slash_code-frame";
       packageName = "@babel/code-frame";
-      version = "7.22.10";
+      version = "7.22.13";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.22.10.tgz";
-        sha512 = "/KKIMG4UEL35WmI9OlvMhurwtytjvXoFcGNrOvyG9zIzA8YmPjVtIZUf7b05+TPO7G7/GEmLHDaoCgACHl9hhA==";
+        url = "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.22.13.tgz";
+        sha512 = "XktuhWlJ5g+3TJXc5upd9Ks1HutSArik6jf2eAjYFyIOf4ej3RN+184cZbzDvbPnuTJIUhPKKJE3cIsYTiAT3w==";
       };
     };
     "@babel/helper-validator-identifier-7.22.5" = {
@@ -22,13 +22,13 @@ let
         sha512 = "aJXu+6lErq8ltp+JhkJUfk1MTGyuA4v7f3pA+BJ5HLfNC6nAQ0Cpi9uOquUj8Hehg0aUiHzWQbOVJGao6ztBAQ==";
       };
     };
-    "@babel/highlight-7.22.10" = {
+    "@babel/highlight-7.22.13" = {
       name = "_at_babel_slash_highlight";
       packageName = "@babel/highlight";
-      version = "7.22.10";
+      version = "7.22.13";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@babel/highlight/-/highlight-7.22.10.tgz";
-        sha512 = "78aUtVcT7MUscr0K5mIEnkwxPE0MaxkR5RxRwuHaQ+JuU5AmTPhY+do2mdzVTnIJJpyBglql2pehuBIWHug+WQ==";
+        url = "https://registry.npmjs.org/@babel/highlight/-/highlight-7.22.13.tgz";
+        sha512 = "C/BaXcnnvBCmHTpz/VGZ8jgtE2aYlW4hxDhseJAWZb7gqGM/qtCK6iZUb0TyKFf7BOUsBH7Q7fkRsDRhg1XklQ==";
       };
     };
     "@jest/environment-27.5.1" = {
@@ -2491,7 +2491,7 @@ in
       sha512 = "0EaNAw5SKSIIJrJajG32CNMGfBtZTgIrOVKSXBTWpvo+F0OozsbvuO4UG3ZSRNThXHijxybp58SqPiU3JuzXGA==";
     };
     dependencies = [
-      (sources."@babel/code-frame-7.22.10" // {
+      (sources."@babel/code-frame-7.22.13" // {
         dependencies = [
           sources."ansi-styles-3.2.1"
           sources."chalk-2.4.2"
@@ -2502,7 +2502,7 @@ in
         ];
       })
       sources."@babel/helper-validator-identifier-7.22.5"
-      (sources."@babel/highlight-7.22.10" // {
+      (sources."@babel/highlight-7.22.13" // {
         dependencies = [
           sources."ansi-styles-3.2.1"
           sources."chalk-2.4.2"
