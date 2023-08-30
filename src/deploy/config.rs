@@ -2,7 +2,6 @@ use anyhow::{anyhow, bail, Context, Result};
 use base64::{engine::general_purpose, Engine as _};
 use format_serde_error::SerdeError;
 use log::{info, warn};
-use nix::libc::STDIN_FILENO;
 use nix::sys::termios;
 use regex::Regex;
 use reqwest::Client;
@@ -31,7 +30,7 @@ struct DisableTerminalEcho {
 
 impl DisableTerminalEcho {
     fn new() -> Self {
-        let old_flags = match termios::tcgetattr(STDIN_FILENO) {
+        let old_flags = match termios::tcgetattr(io::stdin()) {
             Ok(flags) => flags,
             Err(_) => {
                 // Not a terminal, just make this a NOOP
@@ -40,7 +39,7 @@ impl DisableTerminalEcho {
         };
         let mut new_flags = old_flags.clone();
         new_flags.local_flags &= !termios::LocalFlags::ECHO;
-        match termios::tcsetattr(STDIN_FILENO, termios::SetArg::TCSANOW, &new_flags) {
+        match termios::tcsetattr(io::stdin(), termios::SetArg::TCSANOW, &new_flags) {
             Ok(_) => DisableTerminalEcho {
                 flags: Some(old_flags),
             },
@@ -52,7 +51,7 @@ impl DisableTerminalEcho {
 impl Drop for DisableTerminalEcho {
     fn drop(&mut self) {
         if let Some(ref flags) = self.flags {
-            let _ = termios::tcsetattr(STDIN_FILENO, termios::SetArg::TCSANOW, flags);
+            let _ = termios::tcsetattr(io::stdin(), termios::SetArg::TCSANOW, flags);
         }
     }
 }

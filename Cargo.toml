@@ -15,7 +15,7 @@ futures-util = "0.3.28"
 hyper = { version = "0.14.27", features = [ "server" ] }
 prometheus = "0.13.3"
 lazy_static = "1.4.0"
-nix = "0.27.1"
+nix = { version = "0.27.1", features = ["process", "signal", "term", "hostname"] }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_derive = "1.0.151"
 toml = "0.7.6"
