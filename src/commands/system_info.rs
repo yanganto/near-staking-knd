@@ -14,7 +14,7 @@ fn parse_neard_version(raw_version: &str) -> Result<(String, String, String)> {
     let mut version = String::new();
     let mut protocol_version = String::new();
     let mut db_version = String::new();
-    for cap in Regex::new(r#"\((?P<para>\S*)\s(?P<value>\S*)\)"#)?.captures_iter(raw_version) {
+    for cap in Regex::new(r"((?P<para>\S*)\s(?P<value>\S*))")?.captures_iter(raw_version) {
         if cap["para"] == *"release" && cap["value"] == *"trunk" {
             develop_version = true;
         }
