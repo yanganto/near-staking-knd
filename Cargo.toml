@@ -18,7 +18,7 @@ lazy_static = "1.4.0"
 nix = { version = "0.27.1", features = ["process", "signal", "term", "hostname"] }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_derive = "1.0.151"
-toml = "0.7.6"
+toml = "0.7.8"
 toml-example = { version = "0.10.0", default-features = false }
 serde_json = "1.0.106"
 near-primitives = "0.17.0"
