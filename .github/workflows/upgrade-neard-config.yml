@@ -14,7 +14,7 @@ jobs:
         network: [mainnet, testnet]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: 'main'
       - name: Upgrade neard-configuration
@@ -41,7 +41,7 @@ jobs:
         network: [mainnet]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Upgrade neard configuration
         run: |
           curl https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/${{matrix.network}}/genesis.json > nix/modules/neard/${{matrix.network}}/genesis.json
