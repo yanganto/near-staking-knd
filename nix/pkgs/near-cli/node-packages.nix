@@ -985,13 +985,13 @@ let
         sha512 = "lNaHNVymajmk0OJMBn8fVUAU1BtDeKIqKoVhk4xAALB57aALg6b4W0MfJ/cUE0g9YBXy5XhSlPIpYIJ7HaY/3Q==";
       };
     };
-    "follow-redirects-1.15.2" = {
+    "follow-redirects-1.15.3" = {
       name = "follow-redirects";
       packageName = "follow-redirects";
-      version = "1.15.2";
+      version = "1.15.3";
       src = fetchurl {
-        url = "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.2.tgz";
-        sha512 = "VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==";
+        url = "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.3.tgz";
+        sha512 = "1VzOtuEM8pC9SFU1E+8KfTjZyMztRsgEfwQl44z8A25uy13jSzTj6dyK2Df52iV0vgHCfBwLhDWevLn95w5v6Q==";
       };
     };
     "form-data-4.0.0" = {
@@ -2637,7 +2637,7 @@ in
       sources."file-uri-to-path-1.0.0"
       sources."fill-range-7.0.1"
       sources."flagged-respawn-1.0.1"
-      sources."follow-redirects-1.15.2"
+      sources."follow-redirects-1.15.3"
       sources."form-data-4.0.0"
       sources."fs-constants-1.0.0"
       sources."fs.realpath-1.0.0"
