@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-20.6.5" = {
+    "@types/node-20.7.0" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "20.6.5";
+      version = "20.7.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-20.6.5.tgz";
-        sha512 = "2qGq5LAOTh9izcc0+F+dToFigBWiK1phKPt7rNhOqJSr35y8rlIBjDwGtFSgAI6MGIhjwOVNSQZVdJsZJ2uR1w==";
+        url = "https://registry.npmjs.org/@types/node/-/node-20.7.0.tgz";
+        sha512 = "zI22/pJW2wUZOVyguFaUL1HABdmSVxpXrzIqkjsHmyUjNhPoWM1CKfvVuXfetHhIok4RY573cqS0mZ1SJEnoTg==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -274,31 +274,31 @@ let
         sha512 = "Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==";
       };
     };
-    "@types/w3c-web-usb-1.0.6" = {
+    "@types/w3c-web-usb-1.0.7" = {
       name = "_at_types_slash_w3c-web-usb";
       packageName = "@types/w3c-web-usb";
-      version = "1.0.6";
+      version = "1.0.7";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/w3c-web-usb/-/w3c-web-usb-1.0.6.tgz";
-        sha512 = "cSjhgrr8g4KbPnnijAr/KJDNKa/bBa+ixYkywFRvrhvi9n1WEl7yYbtRyzE6jqNQiSxxJxoAW3STaOQwJHndaw==";
+        url = "https://registry.npmjs.org/@types/w3c-web-usb/-/w3c-web-usb-1.0.7.tgz";
+        sha512 = "PCKxgvnJ8wo2gCW8o96CmxDqG2okgsNDfa2xBCbHKvdmPRBTBLz6ClyRXtU+ylwvsqTYaLtJoxnGRG8nkcjd9A==";
       };
     };
-    "@types/yargs-16.0.5" = {
+    "@types/yargs-16.0.6" = {
       name = "_at_types_slash_yargs";
       packageName = "@types/yargs";
-      version = "16.0.5";
+      version = "16.0.6";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/yargs/-/yargs-16.0.5.tgz";
-        sha512 = "AxO/ADJOBFJScHbWhq2xAhlWP24rY4aCEG/NFaMvbT3X2MgRsLjhjQwsn0Zi5zn0LG9jUhCCZMeX9Dkuw6k+vQ==";
+        url = "https://registry.npmjs.org/@types/yargs/-/yargs-16.0.6.tgz";
+        sha512 = "oTP7/Q13GSPrgcwEwdlnkoZSQ1Hg9THe644qq8PG6hhJzjZ3qj1JjEFPIwWV/IXVs5XGIVqtkNOS9kh63WIJ+A==";
       };
     };
-    "@types/yargs-parser-21.0.0" = {
+    "@types/yargs-parser-21.0.1" = {
       name = "_at_types_slash_yargs-parser";
       packageName = "@types/yargs-parser";
-      version = "21.0.0";
+      version = "21.0.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/yargs-parser/-/yargs-parser-21.0.0.tgz";
-        sha512 = "iO9ZQHkZxHn4mSakYV0vFHAVDyEOIJQrV2uZ06HxEPcx+mt8swXoZHIbaaJ2crJYFfErySgktuTZ3BeLz+XmFA==";
+        url = "https://registry.npmjs.org/@types/yargs-parser/-/yargs-parser-21.0.1.tgz";
+        sha512 = "axdPBuLuEJt0c4yI5OZssC19K2Mq1uKdrfZBzuxLvaztgqUtFYZUNw7lETExPYJR9jdEoIg4mb7RQKRQzOkeGQ==";
       };
     };
     "analytics-node-6.2.0" = {
@@ -2553,11 +2553,11 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.0"
       sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-20.6.5"
+      sources."@types/node-20.7.0"
       sources."@types/stack-utils-2.0.1"
-      sources."@types/w3c-web-usb-1.0.6"
-      sources."@types/yargs-16.0.5"
-      sources."@types/yargs-parser-21.0.0"
+      sources."@types/w3c-web-usb-1.0.7"
+      sources."@types/yargs-16.0.6"
+      sources."@types/yargs-parser-21.0.1"
       sources."analytics-node-6.2.0"
       sources."ansi-align-3.0.1"
       sources."ansi-regex-5.0.1"
