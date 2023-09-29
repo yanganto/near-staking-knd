@@ -229,22 +229,22 @@ let
         sha512 = "z/QT1XN4K4KYuslS23k62yDIDLwLFkzxOuMplDtObz0+y7VqJCaO2o+SPwHCvLFZh7xazvvoor2tA/hPz9ee7g==";
       };
     };
-    "@types/istanbul-lib-report-3.0.0" = {
+    "@types/istanbul-lib-report-3.0.1" = {
       name = "_at_types_slash_istanbul-lib-report";
       packageName = "@types/istanbul-lib-report";
-      version = "3.0.0";
-      src = fetchurl {
-        url = "https://registry.npmjs.org/@types/istanbul-lib-report/-/istanbul-lib-report-3.0.0.tgz";
-        sha512 = "plGgXAPfVKFoYfa9NpYDAkseG+g6Jr294RqeqcqDixSbU34MZVJRi/P+7Y8GDpzkEwLaGZZOpKIEmeVZNtKsrg==";
-      };
-    };
-    "@types/istanbul-reports-3.0.1" = {
-      name = "_at_types_slash_istanbul-reports";
-      packageName = "@types/istanbul-reports";
       version = "3.0.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/istanbul-reports/-/istanbul-reports-3.0.1.tgz";
-        sha512 = "c3mAZEuK0lvBp8tmuL74XRKn1+y2dcwOUpH7x4WrF6gk1GIgiluDRgMYQtw2OFcBvAJWlt6ASU3tSqxp0Uu0Aw==";
+        url = "https://registry.npmjs.org/@types/istanbul-lib-report/-/istanbul-lib-report-3.0.1.tgz";
+        sha512 = "gPQuzaPR5h/djlAv2apEG1HVOyj1IUs7GpfMZixU0/0KXT3pm64ylHuMUI1/Akh+sq/iikxg6Z2j+fcMDXaaTQ==";
+      };
+    };
+    "@types/istanbul-reports-3.0.2" = {
+      name = "_at_types_slash_istanbul-reports";
+      packageName = "@types/istanbul-reports";
+      version = "3.0.2";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@types/istanbul-reports/-/istanbul-reports-3.0.2.tgz";
+        sha512 = "kv43F9eb3Lhj+lr/Hn6OcLCs/sSM8bt+fIaP11rCYngfV6NVjzWXJ17owQtDQTL9tQ8WSLUrGsSJ6rJz0F1w1A==";
       };
     };
     "@types/node-11.11.6" = {
@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-20.7.0" = {
+    "@types/node-20.7.1" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "20.7.0";
+      version = "20.7.1";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-20.7.0.tgz";
-        sha512 = "zI22/pJW2wUZOVyguFaUL1HABdmSVxpXrzIqkjsHmyUjNhPoWM1CKfvVuXfetHhIok4RY573cqS0mZ1SJEnoTg==";
+        url = "https://registry.npmjs.org/@types/node/-/node-20.7.1.tgz";
+        sha512 = "LT+OIXpp2kj4E2S/p91BMe+VgGX2+lfO+XTpfXhh+bCk2LkQtHZSub8ewFBMGP5ClysPjTDFa4sMI8Q3n4T0wg==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -2551,9 +2551,9 @@ in
       sources."@sinonjs/fake-timers-8.1.0"
       sources."@szmarczak/http-timer-1.1.2"
       sources."@types/istanbul-lib-coverage-2.0.4"
-      sources."@types/istanbul-lib-report-3.0.0"
-      sources."@types/istanbul-reports-3.0.1"
-      sources."@types/node-20.7.0"
+      sources."@types/istanbul-lib-report-3.0.1"
+      sources."@types/istanbul-reports-3.0.2"
+      sources."@types/node-20.7.1"
       sources."@types/stack-utils-2.0.1"
       sources."@types/w3c-web-usb-1.0.7"
       sources."@types/yargs-16.0.6"
