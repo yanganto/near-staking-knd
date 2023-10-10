@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-20.8.3" = {
+    "@types/node-20.8.4" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "20.8.3";
+      version = "20.8.4";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-20.8.3.tgz";
-        sha512 = "jxiZQFpb+NlH5kjW49vXxvxTjeeqlbsnTAdBTKpzEdPs9itay7MscYXz3Fo9VYFEsfQ6LJFitHad3faerLAjCw==";
+        url = "https://registry.npmjs.org/@types/node/-/node-20.8.4.tgz";
+        sha512 = "ZVPnqU58giiCjSxjVUESDtdPk4QR5WQhhINbc9UBrKLU68MX5BF6kbQzTrkwbolyr0X8ChBpXfavr5mZFKZQ5A==";
       };
     };
     "@types/stack-utils-2.0.1" = {
@@ -274,13 +274,13 @@ let
         sha512 = "Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==";
       };
     };
-    "@types/w3c-web-usb-1.0.7" = {
+    "@types/w3c-web-usb-1.0.8" = {
       name = "_at_types_slash_w3c-web-usb";
       packageName = "@types/w3c-web-usb";
-      version = "1.0.7";
+      version = "1.0.8";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/w3c-web-usb/-/w3c-web-usb-1.0.7.tgz";
-        sha512 = "PCKxgvnJ8wo2gCW8o96CmxDqG2okgsNDfa2xBCbHKvdmPRBTBLz6ClyRXtU+ylwvsqTYaLtJoxnGRG8nkcjd9A==";
+        url = "https://registry.npmjs.org/@types/w3c-web-usb/-/w3c-web-usb-1.0.8.tgz";
+        sha512 = "ouEoUTyB27wFXUUyl0uKIE6VkeCczDtazWTiZGD1M4onceJnp8KnHDf7CzLbpwzek2ZFWXTC5KrNDRc9q/Jf6Q==";
       };
     };
     "@types/yargs-16.0.6" = {
@@ -2317,6 +2317,15 @@ let
         sha512 = "+J5D5ir763y+Am/QY6hXNRlwljIeRMZMGs0cT6qqZVVzzT3X3nFPXVyPOFRMOR4kupB0T8JnCdpWdp6Q/iXn3w==";
       };
     };
+    "undici-types-5.25.3" = {
+      name = "undici-types";
+      packageName = "undici-types";
+      version = "5.25.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/undici-types/-/undici-types-5.25.3.tgz";
+        sha512 = "Ga1jfYwRn7+cP9v8auvEXN1rX3sWqlayd4HP7OKk4mZWylEmu3KzXDUGrQUN6Ol7qo1gPvB2e5gX6udnyEPgdA==";
+      };
+    };
     "unique-string-2.0.0" = {
       name = "unique-string";
       packageName = "unique-string";
@@ -2553,9 +2562,9 @@ in
       sources."@types/istanbul-lib-coverage-2.0.4"
       sources."@types/istanbul-lib-report-3.0.1"
       sources."@types/istanbul-reports-3.0.2"
-      sources."@types/node-20.8.3"
+      sources."@types/node-20.8.4"
       sources."@types/stack-utils-2.0.1"
-      sources."@types/w3c-web-usb-1.0.7"
+      sources."@types/w3c-web-usb-1.0.8"
       sources."@types/yargs-16.0.6"
       sources."@types/yargs-parser-21.0.1"
       sources."analytics-node-6.2.0"
@@ -2817,6 +2826,7 @@ in
       sources."typedarray-to-buffer-3.1.5"
       sources."u2f-api-0.2.7"
       sources."u3-0.1.1"
+      sources."undici-types-5.25.3"
       sources."unique-string-2.0.0"
       sources."update-notifier-5.1.0"
       sources."url-parse-lax-3.0.0"
