@@ -220,31 +220,31 @@ let
         sha512 = "XIB2XbzHTN6ieIjfIMV9hlVcfPU26s2vafYWQcZHWXHOxiaRZYEDKEwdl129Zyg50+foYV2jCgtrqSA6qNuNSA==";
       };
     };
-    "@types/istanbul-lib-coverage-2.0.4" = {
+    "@types/istanbul-lib-coverage-2.0.5" = {
       name = "_at_types_slash_istanbul-lib-coverage";
       packageName = "@types/istanbul-lib-coverage";
-      version = "2.0.4";
+      version = "2.0.5";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.4.tgz";
-        sha512 = "z/QT1XN4K4KYuslS23k62yDIDLwLFkzxOuMplDtObz0+y7VqJCaO2o+SPwHCvLFZh7xazvvoor2tA/hPz9ee7g==";
+        url = "https://registry.npmjs.org/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.5.tgz";
+        sha512 = "zONci81DZYCZjiLe0r6equvZut0b+dBRPBN5kBDjsONnutYNtJMoWQ9uR2RkL1gLG9NMTzvf+29e5RFfPbeKhQ==";
       };
     };
-    "@types/istanbul-lib-report-3.0.1" = {
+    "@types/istanbul-lib-report-3.0.2" = {
       name = "_at_types_slash_istanbul-lib-report";
       packageName = "@types/istanbul-lib-report";
-      version = "3.0.1";
-      src = fetchurl {
-        url = "https://registry.npmjs.org/@types/istanbul-lib-report/-/istanbul-lib-report-3.0.1.tgz";
-        sha512 = "gPQuzaPR5h/djlAv2apEG1HVOyj1IUs7GpfMZixU0/0KXT3pm64ylHuMUI1/Akh+sq/iikxg6Z2j+fcMDXaaTQ==";
-      };
-    };
-    "@types/istanbul-reports-3.0.2" = {
-      name = "_at_types_slash_istanbul-reports";
-      packageName = "@types/istanbul-reports";
       version = "3.0.2";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/istanbul-reports/-/istanbul-reports-3.0.2.tgz";
-        sha512 = "kv43F9eb3Lhj+lr/Hn6OcLCs/sSM8bt+fIaP11rCYngfV6NVjzWXJ17owQtDQTL9tQ8WSLUrGsSJ6rJz0F1w1A==";
+        url = "https://registry.npmjs.org/@types/istanbul-lib-report/-/istanbul-lib-report-3.0.2.tgz";
+        sha512 = "8toY6FgdltSdONav1XtUHl4LN1yTmLza+EuDazb/fEmRNCwjyqNVIQWs2IfC74IqjHkREs/nQ2FWq5kZU9IC0w==";
+      };
+    };
+    "@types/istanbul-reports-3.0.3" = {
+      name = "_at_types_slash_istanbul-reports";
+      packageName = "@types/istanbul-reports";
+      version = "3.0.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@types/istanbul-reports/-/istanbul-reports-3.0.3.tgz";
+        sha512 = "1nESsePMBlf0RPRffLZi5ujYh7IH1BWL4y9pr+Bn3cJBdxz+RTP8bUFljLz9HvzhhOSWKdyBZ4DIivdL6rvgZg==";
       };
     };
     "@types/node-11.11.6" = {
@@ -256,49 +256,49 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-20.8.6" = {
+    "@types/node-20.8.7" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "20.8.6";
+      version = "20.8.7";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-20.8.6.tgz";
-        sha512 = "eWO4K2Ji70QzKUqRy6oyJWUeB7+g2cRagT3T/nxYibYcT4y2BDL8lqolRXjTHmkZCdJfIPaY73KbJAZmcryxTQ==";
+        url = "https://registry.npmjs.org/@types/node/-/node-20.8.7.tgz";
+        sha512 = "21TKHHh3eUHIi2MloeptJWALuCu5H7HQTdTrWIFReA8ad+aggoX+lRes3ex7/FtpC+sVUpFMQ+QTfYr74mruiQ==";
       };
     };
-    "@types/stack-utils-2.0.1" = {
+    "@types/stack-utils-2.0.2" = {
       name = "_at_types_slash_stack-utils";
       packageName = "@types/stack-utils";
-      version = "2.0.1";
+      version = "2.0.2";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.1.tgz";
-        sha512 = "Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==";
+        url = "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.2.tgz";
+        sha512 = "g7CK9nHdwjK2n0ymT2CW698FuWJRIx+RP6embAzZ2Qi8/ilIrA1Imt2LVSeHUzKvpoi7BhmmQcXz95eS0f2JXw==";
       };
     };
-    "@types/w3c-web-usb-1.0.8" = {
+    "@types/w3c-web-usb-1.0.9" = {
       name = "_at_types_slash_w3c-web-usb";
       packageName = "@types/w3c-web-usb";
-      version = "1.0.8";
+      version = "1.0.9";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/w3c-web-usb/-/w3c-web-usb-1.0.8.tgz";
-        sha512 = "ouEoUTyB27wFXUUyl0uKIE6VkeCczDtazWTiZGD1M4onceJnp8KnHDf7CzLbpwzek2ZFWXTC5KrNDRc9q/Jf6Q==";
+        url = "https://registry.npmjs.org/@types/w3c-web-usb/-/w3c-web-usb-1.0.9.tgz";
+        sha512 = "6EIpb9g9k/SGu59mQ6RW3tedmabtE+N3iGRa98+1CCFuhGt565wLEYKXoEVKTuNrCr2SrgfvBMN5db6hggkzKQ==";
       };
     };
-    "@types/yargs-16.0.6" = {
+    "@types/yargs-16.0.7" = {
       name = "_at_types_slash_yargs";
       packageName = "@types/yargs";
-      version = "16.0.6";
+      version = "16.0.7";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/yargs/-/yargs-16.0.6.tgz";
-        sha512 = "oTP7/Q13GSPrgcwEwdlnkoZSQ1Hg9THe644qq8PG6hhJzjZ3qj1JjEFPIwWV/IXVs5XGIVqtkNOS9kh63WIJ+A==";
+        url = "https://registry.npmjs.org/@types/yargs/-/yargs-16.0.7.tgz";
+        sha512 = "lQcYmxWuOfJq4IncK88/nwud9rwr1F04CFc5xzk0k4oKVyz/AI35TfsXmhjf6t8zp8mpCOi17BfvuNWx+zrYkg==";
       };
     };
-    "@types/yargs-parser-21.0.1" = {
+    "@types/yargs-parser-21.0.2" = {
       name = "_at_types_slash_yargs-parser";
       packageName = "@types/yargs-parser";
-      version = "21.0.1";
+      version = "21.0.2";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/yargs-parser/-/yargs-parser-21.0.1.tgz";
-        sha512 = "axdPBuLuEJt0c4yI5OZssC19K2Mq1uKdrfZBzuxLvaztgqUtFYZUNw7lETExPYJR9jdEoIg4mb7RQKRQzOkeGQ==";
+        url = "https://registry.npmjs.org/@types/yargs-parser/-/yargs-parser-21.0.2.tgz";
+        sha512 = "5qcvofLPbfjmBfKaLfj/+f+Sbd6pN4zl7w7VSVI5uz7m9QZTuB2aZAa2uo1wHFBNN2x6g/SoTkXmd8mQnQF2Cw==";
       };
     };
     "analytics-node-6.2.0" = {
@@ -1687,13 +1687,13 @@ let
         sha512 = "NpmrnejpY1AdlRpDZ0schJQJtfBaoUheRfiYtQpcq9TkwPgqKZCRULV5L3hHmLc0ep7KRtikbPQ9R2ztN/3cyQ==";
       };
     };
-    "node-abi-3.50.0" = {
+    "node-abi-3.51.0" = {
       name = "node-abi";
       packageName = "node-abi";
-      version = "3.50.0";
+      version = "3.51.0";
       src = fetchurl {
-        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.50.0.tgz";
-        sha512 = "2Gxu7Eq7vnBIRfYSmqPruEllMM14FjOQFJSoqdGWthVn+tmwEXzmdPpya6cvvwf0uZA3F5N1fMFr9mijZBplFA==";
+        url = "https://registry.npmjs.org/node-abi/-/node-abi-3.51.0.tgz";
+        sha512 = "SQkEP4hmNWjlniS5zdnfIXTk1x7Ome85RDzHlTbBtzE97Gfwz/Ipw4v/Ryk20DWIy3yCNVLVlGKApCnmvYoJbA==";
       };
     };
     "node-addon-api-3.2.1" = {
@@ -2559,14 +2559,14 @@ in
       sources."@sinonjs/commons-1.8.6"
       sources."@sinonjs/fake-timers-8.1.0"
       sources."@szmarczak/http-timer-1.1.2"
-      sources."@types/istanbul-lib-coverage-2.0.4"
-      sources."@types/istanbul-lib-report-3.0.1"
-      sources."@types/istanbul-reports-3.0.2"
-      sources."@types/node-20.8.6"
-      sources."@types/stack-utils-2.0.1"
-      sources."@types/w3c-web-usb-1.0.8"
-      sources."@types/yargs-16.0.6"
-      sources."@types/yargs-parser-21.0.1"
+      sources."@types/istanbul-lib-coverage-2.0.5"
+      sources."@types/istanbul-lib-report-3.0.2"
+      sources."@types/istanbul-reports-3.0.3"
+      sources."@types/node-20.8.7"
+      sources."@types/stack-utils-2.0.2"
+      sources."@types/w3c-web-usb-1.0.9"
+      sources."@types/yargs-16.0.7"
+      sources."@types/yargs-parser-21.0.2"
       sources."analytics-node-6.2.0"
       sources."ansi-align-3.0.1"
       sources."ansi-regex-5.0.1"
@@ -2734,7 +2734,7 @@ in
       sources."near-hd-key-1.2.1"
       sources."near-ledger-js-0.2.1"
       sources."near-seed-phrase-0.2.0"
-      sources."node-abi-3.50.0"
+      sources."node-abi-3.51.0"
       sources."node-addon-api-3.2.1"
       sources."node-fetch-2.7.0"
       sources."node-gyp-build-4.6.1"
