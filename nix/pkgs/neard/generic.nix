@@ -44,17 +44,17 @@ rustPlatform.buildRustPackage rec {
     # Remove test dependency on contract
     # Since we are not building tests, we can skip those.
     (
-      lib.optional (version == "1.36.0-rc.1") (
-        ./0001-rm-near-test-contracts-1.36.0-rc.1.patch
+      lib.optional (lib.versionAtLeast version "1.36.0-rc.2") (
+        ./0001-rm-near-test-contracts-1.36.0-rc.2.patch
       )
     )
     (
-      lib.optional (version == "1.36.0-rc.1") (
+      lib.optional (lib.versionAtLeast version "1.36.0-rc.1") (
         ./0002-rocksdb-max-open.patch
       )
     )
     (
-      lib.optional (version == "1.36.0-rc.1") (
+      lib.optional (lib.versionAtLeast version "1.36.0-rc.1") (
         ./0003-expected-shutdown-metrix-1.35.0-rc.1.patch
       )
     )

@@ -1,5 +1,5 @@
 diff --git a/Cargo.lock b/Cargo.lock
-index a0947434b..8923540fd 100644
+index 901c30ee9..0cc1ee878 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
 @@ -2382,7 +2382,6 @@ dependencies = [
@@ -32,7 +32,7 @@ index a0947434b..8923540fd 100644
  
 -[[package]]
 -name = "near-test-contracts"
--version = "1.36.0-rc.1"
+-version = "1.36.0-rc.2"
 -dependencies = [
 - "arbitrary",
 - "once_cell",
@@ -44,19 +44,16 @@ index a0947434b..8923540fd 100644
 -
  [[package]]
  name = "near-undo-block"
- version = "1.36.0-rc.1"
-@@ -4432,10 +4417,8 @@ dependencies = [
-  "memoffset 0.8.0",
-  "near-cache",
-  "near-crypto",
-- "near-primitives",
+ version = "1.36.0-rc.2"
+@@ -4435,7 +4420,6 @@ dependencies = [
+  "near-primitives",
   "near-primitives-core",
   "near-stdx",
 - "near-test-contracts",
   "near-vm-compiler",
   "near-vm-compiler-singlepass",
   "near-vm-engine",
-@@ -4480,7 +4463,6 @@ dependencies = [
+@@ -4480,7 +4464,6 @@ dependencies = [
   "arbitrary",
   "libfuzzer-sys",
   "near-primitives",
@@ -64,7 +61,7 @@ index a0947434b..8923540fd 100644
   "near-vm-runner",
   "wasm-smith",
   "wasmprinter",
-@@ -4718,7 +4700,6 @@ dependencies = [
+@@ -4718,7 +4701,6 @@ dependencies = [
   "near-o11y",
   "near-primitives",
   "near-store",
@@ -72,7 +69,7 @@ index a0947434b..8923540fd 100644
   "near-vm-runner",
   "num-bigint 0.3.3",
   "num-rational",
-@@ -5885,7 +5866,6 @@ dependencies = [
+@@ -5885,7 +5867,6 @@ dependencies = [
   "near-o11y",
   "near-primitives",
   "near-store",
@@ -80,7 +77,7 @@ index a0947434b..8923540fd 100644
   "near-vm-runner",
   "nearcore",
   "node-runtime",
-@@ -5917,7 +5897,6 @@ dependencies = [
+@@ -5917,7 +5898,6 @@ dependencies = [
   "near-o11y",
   "near-primitives",
   "near-store",
@@ -88,7 +85,7 @@ index a0947434b..8923540fd 100644
   "nearcore",
   "serde",
   "serde_json",
-@@ -6605,7 +6584,6 @@ dependencies = [
+@@ -6605,7 +6585,6 @@ dependencies = [
   "near-primitives",
   "near-primitives-core",
   "near-store",
@@ -96,7 +93,7 @@ index a0947434b..8923540fd 100644
   "nearcore",
   "node-runtime",
   "once_cell",
-@@ -6825,7 +6803,6 @@ dependencies = [
+@@ -6825,7 +6804,6 @@ dependencies = [
   "near-chain-configs",
   "near-crypto",
   "near-primitives",
@@ -105,144 +102,147 @@ index a0947434b..8923540fd 100644
   "once_cell",
  ]
 diff --git a/Cargo.toml b/Cargo.toml
-index 45f7ba4cb..7b4e5a427 100644
+index 372350cab..f15cdf65d 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -217,7 +217,7 @@ near-state-parts = { path = "tools/state-parts" }
+@@ -217,7 +217,6 @@ near-state-parts = { path = "tools/state-parts" }
  near-state-viewer = { path = "tools/state-viewer", package = "state-viewer" }
  near-store = { path = "core/store" }
  near-telemetry = { path = "chain/telemetry" }
 -near-test-contracts = { path = "runtime/near-test-contracts" }
-+# near-test-contracts = { path = "runtime/near-test-contracts" }
  near-undo-block = { path = "tools/undo-block" }
  near-vm-test-api = { path = "runtime/near-vm/test-api" }
  near-vm-compiler = { path = "runtime/near-vm/compiler" }
 diff --git a/genesis-tools/genesis-populate/Cargo.toml b/genesis-tools/genesis-populate/Cargo.toml
-index c42163181..08d48f9f6 100644
+index c42163181..24e52bce6 100644
 --- a/genesis-tools/genesis-populate/Cargo.toml
 +++ b/genesis-tools/genesis-populate/Cargo.toml
-@@ -21,7 +21,7 @@ near-epoch-manager.workspace = true
+@@ -21,7 +21,6 @@ near-epoch-manager.workspace = true
  near-primitives.workspace = true
  near-store.workspace = true
  near-chain.workspace = true
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  
  [features]
  nightly_protocol = [
 diff --git a/integration-tests/Cargo.toml b/integration-tests/Cargo.toml
-index 040e19acd..a67e12914 100644
+index 040e19acd..3763e3589 100644
 --- a/integration-tests/Cargo.toml
 +++ b/integration-tests/Cargo.toml
-@@ -50,7 +50,7 @@ near-primitives-core.workspace = true
+@@ -50,7 +50,6 @@ near-primitives-core.workspace = true
  near-store.workspace = true
  near-o11y.workspace = true
  near-telemetry.workspace = true
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  near-performance-metrics.workspace = true
  near-undo-block.workspace = true
  near-vm-runner.workspace = true
+diff --git a/runtime/near-test-contracts/test-contract-rs/Cargo.lock b/runtime/near-test-contracts/test-contract-rs/Cargo.lock
+index d3cfc2436..c366b219f 100644
+--- a/runtime/near-test-contracts/test-contract-rs/Cargo.lock
++++ b/runtime/near-test-contracts/test-contract-rs/Cargo.lock
+@@ -36,11 +36,3 @@ dependencies = [
+  "ryu",
+  "serde",
+ ]
+-
+-[[package]]
+-name = "test-contract-rs"
+-version = "0.1.0"
+-dependencies = [
+- "base64",
+- "serde_json",
+-]
 diff --git a/runtime/near-vm-runner/Cargo.toml b/runtime/near-vm-runner/Cargo.toml
-index d61eac7d4..e4994c4b9 100644
+index d61eac7d4..a82d0b829 100644
 --- a/runtime/near-vm-runner/Cargo.toml
 +++ b/runtime/near-vm-runner/Cargo.toml
-@@ -66,8 +66,8 @@ assert_matches.workspace = true
- bolero.workspace = true
+@@ -67,7 +67,6 @@ bolero.workspace = true
  expect-test.workspace = true
  hex.workspace = true
--near-primitives.workspace = true
+ near-primitives.workspace = true
 -near-test-contracts.workspace = true
-+near-primitives-core.workspace = true
-+# near-test-contracts.workspace = true
  rand.workspace = true
  serde_json = { workspace = true, features = ["preserve_order"] }
  wasm-smith.workspace = true
 diff --git a/runtime/near-vm-runner/fuzz/Cargo.toml b/runtime/near-vm-runner/fuzz/Cargo.toml
-index 9127527c5..4702533ea 100644
+index 9127527c5..b9722ed19 100644
 --- a/runtime/near-vm-runner/fuzz/Cargo.toml
 +++ b/runtime/near-vm-runner/fuzz/Cargo.toml
-@@ -18,7 +18,7 @@ wasm-smith.workspace = true
+@@ -18,7 +18,6 @@ wasm-smith.workspace = true
  wasmprinter.workspace = true
  
  near-primitives.workspace = true
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  near-vm-runner.workspace = true
  
  [[bin]]
 diff --git a/runtime/runtime-params-estimator/Cargo.toml b/runtime/runtime-params-estimator/Cargo.toml
-index 3055c9f38..e747420b5 100644
+index 3055c9f38..be585513e 100644
 --- a/runtime/runtime-params-estimator/Cargo.toml
 +++ b/runtime/runtime-params-estimator/Cargo.toml
-@@ -43,7 +43,7 @@ near-fmt.workspace = true
+@@ -43,7 +43,6 @@ near-fmt.workspace = true
  near-o11y.workspace = true
  near-primitives.workspace = true
  near-store.workspace = true
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  near-vm-runner = { workspace = true, features = ["clap"] }
  nearcore.workspace = true
  node-runtime.workspace = true
 diff --git a/runtime/runtime/Cargo.toml b/runtime/runtime/Cargo.toml
-index 9321c338d..ed628c525 100644
+index 9321c338d..0279e9b48 100644
 --- a/runtime/runtime/Cargo.toml
 +++ b/runtime/runtime/Cargo.toml
-@@ -66,5 +66,5 @@ tempfile.workspace = true
+@@ -66,5 +66,4 @@ tempfile.workspace = true
  
  near-chain-configs.workspace = true
  near-store = { workspace = true, features = ["test_features"] }
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  testlib.workspace = true
 diff --git a/test-utils/runtime-tester/Cargo.toml b/test-utils/runtime-tester/Cargo.toml
-index 20a9614e6..c57cc1ef9 100644
+index 20a9614e6..6aa9a87e5 100644
 --- a/test-utils/runtime-tester/Cargo.toml
 +++ b/test-utils/runtime-tester/Cargo.toml
-@@ -26,7 +26,7 @@ nearcore.workspace = true
+@@ -26,7 +26,6 @@ nearcore.workspace = true
  near-primitives.workspace = true
  near-store.workspace = true
  near-o11y.workspace = true
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  
  [dev-dependencies]
  testlib.workspace = true
 diff --git a/test-utils/testlib/Cargo.toml b/test-utils/testlib/Cargo.toml
-index 1ba085379..64dffb875 100644
+index 1ba085379..0465c6c5e 100644
 --- a/test-utils/testlib/Cargo.toml
 +++ b/test-utils/testlib/Cargo.toml
-@@ -15,7 +15,7 @@ near-chain-configs.workspace = true
+@@ -15,7 +15,6 @@ near-chain-configs.workspace = true
  near-chain.workspace = true
  near-crypto.workspace = true
  near-primitives.workspace = true
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  node-runtime.workspace = true
  
  [features]
 diff --git a/tools/amend-genesis/Cargo.toml b/tools/amend-genesis/Cargo.toml
-index aaddc473d..e67a080e3 100644
+index aaddc473d..1eb3da196 100644
 --- a/tools/amend-genesis/Cargo.toml
 +++ b/tools/amend-genesis/Cargo.toml
-@@ -26,6 +26,6 @@ near-network.workspace = true
+@@ -26,6 +26,5 @@ near-network.workspace = true
  near-primitives.workspace = true
  near-primitives-core.workspace = true
  near-store.workspace = true
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  nearcore.workspace = true
  node-runtime.workspace = true
 diff --git a/tools/state-viewer/Cargo.toml b/tools/state-viewer/Cargo.toml
-index d376fb2da..4036a65a0 100644
+index d376fb2da..6c23cee9e 100644
 --- a/tools/state-viewer/Cargo.toml
 +++ b/tools/state-viewer/Cargo.toml
-@@ -41,7 +41,7 @@ near-o11y.workspace = true
+@@ -41,7 +41,6 @@ near-o11y.workspace = true
  near-primitives-core.workspace = true
  near-primitives.workspace = true
  near-store.workspace = true
 -near-test-contracts.workspace = true
-+# near-test-contracts.workspace = true
  nearcore.workspace = true
  node-runtime.workspace = true
  

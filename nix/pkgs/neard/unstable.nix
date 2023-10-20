@@ -13,6 +13,6 @@ in
 generic {
   ver = "1.36.0-rc.2";
   sha256 = "sha256-tDtSz1w+v5ux02hyAV/CETY1OJEFJYIDGGiut3MonMo=";
-  cargoSha256 = "sha256-eFfDWRGqRZzrui5fR9lpqgfQnVE+WF/IHw1twyt+UlI=";
+  cargoSha256 = "sha256-9eRACStaKwPeFbXRCNxx7EMyS/A9iR5N6aU1Fcs+lgE=";
   inherit toolchainFile toolchainChecksum toolchain;
 }
