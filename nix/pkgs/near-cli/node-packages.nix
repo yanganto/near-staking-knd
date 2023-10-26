@@ -256,13 +256,13 @@ let
         sha512 = "Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==";
       };
     };
-    "@types/node-20.8.7" = {
+    "@types/node-20.8.9" = {
       name = "_at_types_slash_node";
       packageName = "@types/node";
-      version = "20.8.7";
+      version = "20.8.9";
       src = fetchurl {
-        url = "https://registry.npmjs.org/@types/node/-/node-20.8.7.tgz";
-        sha512 = "21TKHHh3eUHIi2MloeptJWALuCu5H7HQTdTrWIFReA8ad+aggoX+lRes3ex7/FtpC+sVUpFMQ+QTfYr74mruiQ==";
+        url = "https://registry.npmjs.org/@types/node/-/node-20.8.9.tgz";
+        sha512 = "UzykFsT3FhHb1h7yD4CA4YhBHq545JC0YnEz41xkipN88eKQtL6rSgocL5tbAP6Ola9Izm/Aw4Ora8He4x0BHg==";
       };
     };
     "@types/stack-utils-2.0.2" = {
@@ -2317,13 +2317,13 @@ let
         sha512 = "+J5D5ir763y+Am/QY6hXNRlwljIeRMZMGs0cT6qqZVVzzT3X3nFPXVyPOFRMOR4kupB0T8JnCdpWdp6Q/iXn3w==";
       };
     };
-    "undici-types-5.25.3" = {
+    "undici-types-5.26.5" = {
       name = "undici-types";
       packageName = "undici-types";
-      version = "5.25.3";
+      version = "5.26.5";
       src = fetchurl {
-        url = "https://registry.npmjs.org/undici-types/-/undici-types-5.25.3.tgz";
-        sha512 = "Ga1jfYwRn7+cP9v8auvEXN1rX3sWqlayd4HP7OKk4mZWylEmu3KzXDUGrQUN6Ol7qo1gPvB2e5gX6udnyEPgdA==";
+        url = "https://registry.npmjs.org/undici-types/-/undici-types-5.26.5.tgz";
+        sha512 = "JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==";
       };
     };
     "unique-string-2.0.0" = {
@@ -2562,7 +2562,7 @@ in
       sources."@types/istanbul-lib-coverage-2.0.5"
       sources."@types/istanbul-lib-report-3.0.2"
       sources."@types/istanbul-reports-3.0.3"
-      sources."@types/node-20.8.7"
+      sources."@types/node-20.8.9"
       sources."@types/stack-utils-2.0.2"
       sources."@types/w3c-web-usb-1.0.9"
       sources."@types/yargs-16.0.7"
@@ -2826,7 +2826,7 @@ in
       sources."typedarray-to-buffer-3.1.5"
       sources."u2f-api-0.2.7"
       sources."u3-0.1.1"
-      sources."undici-types-5.25.3"
+      sources."undici-types-5.26.5"
       sources."unique-string-2.0.0"
       sources."update-notifier-5.1.0"
       sources."url-parse-lax-3.0.0"
